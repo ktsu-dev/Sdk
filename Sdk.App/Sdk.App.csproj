@@ -104,8 +104,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="ktsu.Sdk.App.props" Pack="true" PackagePath="\build" />
-    <None Include="ktsu.Sdk.App.targets" Pack="true" PackagePath="\build" />
+    <None Include="Sdk.props" Pack="true" PackagePath="\Sdk" />
+    <None Include="Sdk.targets" Pack="true" PackagePath="\Sdk" />
 
     <!-- Build related files -->
     <None Include="$(GitHubWorkflowFilePath)" Condition="Exists('$(GitHubWorkflowFilePath)')" Link="_Build\$(GitHubWorkflowFileName)" />
