@@ -1,6 +1,6 @@
 <Project>
-	<Sdk Name="ktsu.Sdk/$(Version)" />
-	<Sdk Name="MSTest.Sdk/3.8.3" />
+	<Sdk Name="ktsu.Sdk" />
+	<Sdk Name="MSTest.Sdk" />
 
 	<ItemGroup>
 		<Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
