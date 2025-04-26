@@ -1,3 +1,9 @@
+## v1.3.0 (minor)
+
+Changes since v1.2.0:
+
+- Update project files to use new SDK references ([@matt-edmondson](https://github.com/matt-edmondson))
+
 ## v1.2.0 (minor)
 
 Changes since v1.1.0:
