@@ -230,7 +230,7 @@
     <TestingPlatformCaptureOutput>true</TestingPlatformCaptureOutput> 
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> 
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure> 
-    <TestingPlatformCommandLineArguments>-m:1</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments>--report-trx</TestingPlatformCommandLineArguments>
     <TestingExtensionsProfile>AllMicrosoft</TestingExtensionsProfile>
     <UseVSTest>false</UseVSTest>
 
