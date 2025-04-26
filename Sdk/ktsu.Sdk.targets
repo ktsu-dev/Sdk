@@ -1,0 +1,52 @@
+<Project>
+  <PropertyGroup>
+    <IsPrerelease>false</IsPrerelease>
+    <IsPrerelease Condition="$(Version.Contains('-'))">true</IsPrerelease>
+
+    <IsExecutable>false</IsExecutable>
+    <IsExecutable Condition="$(OutputType) == 'Exe' Or $(OutputType) == 'WinExe'">true</IsExecutable>
+
+    <IsLibrary>false</IsLibrary>
+    <IsLibrary Condition="$(OutputType) == 'Library' And !$(IsTestProject)">true</IsLibrary>
+
+    <IsPrimaryProject>false</IsPrimaryProject>
+    <IsPrimaryProject Condition="$(MSBuildProjectName) == $(PrimaryProjectName)">true</IsPrimaryProject>
+
+    <IsPublishable Condition="$(IsExecutable)">true</IsPublishable>
+    <IsPackable Condition="$(IsLibrary)">true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0" PrivateAssets="All"/>
+    <InternalsVisibleTo Condition="!$(IsTestProject)" Include="$(AssemblyName).Test" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(IsPrimaryProject)">
+    <!-- Build related files -->
+    <None Include="$(DirectoryBuildPropsFilePath)" Condition="Exists('$(DirectoryBuildPropsFilePath)')" Link="_Build\$(DirectoryBuildPropsFileName)" />
+    <None Include="$(DirectoryBuildTargetsFilePath)" Condition="Exists('$(DirectoryBuildTargetsFilePath)')" Link="_Build\$(DirectoryBuildTargetsFileName)" />
+    <None Include="$(GitHubWorkflowFilePath)" Condition="Exists('$(GitHubWorkflowFilePath)')" Link="_Build\$(GitHubWorkflowFileName)" />
+    <None Include="$(GitHubCopilotInstructionsFilePath)" Condition="Exists('$(GitHubCopilotInstructionsFilePath)')" Link="_Build\$(GitHubCopilotInstructionsFileName)" />
+    <None Include="$(EditorConfigFilePath)" Condition="Exists('$(EditorConfigFilePath)')" Link="_Build\$(EditorConfigFileName)" />
+    <None Include="$(RunSettingsFilePath)" Condition="Exists('$(RunSettingsFilePath)')" Link="_Build\$(RunSettingsFileName)" />
+
+    <!-- Git related files -->
+    <None Include="$(GitIgnoreFilePath)" Condition="Exists('$(GitIgnoreFilePath)')" Link="_Git\$(GitIgnoreFileName)" />
+    <None Include="$(GitAttributesFilePath)" Condition="Exists('$(GitAttributesFilePath)')" Link="_Git\$(GitAttributesFileName)" />
+    <None Include="$(GitConfigFilePath)" Condition="Exists('$(GitConfigFilePath)')" Link="_Git\$(GitConfigFileName)" />
+    <None Include="$(GitModulesFilePath)" Condition="Exists('$(GitModulesFilePath)')" Link="_Git\$(GitModulesFileName)" />
+    <None Include="$(GitMailMapFilePath)" Condition="Exists('$(GitMailMapFilePath)')" Link="_Git\$(GitMailMapFileName)" />
+
+    <!-- Package data files -->
+    <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" />
+    <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" />
+    <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" />
+    <None Include="$(DescriptionFilePath)" Condition="Exists('$(DescriptionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(DescriptionFileName)" />
+    <None Include="$(LicenseFilePath)" Condition="Exists('$(LicenseFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(LicenseFileName)" />
+    <None Include="$(ChangelogFilePath)" Condition="Exists('$(ChangelogFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ChangelogFileName)" />
+    <None Include="$(ReadmeFilePath)" Condition="Exists('$(ReadmeFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ReadmeFileName)" />
+    <None Include="$(VersionFilePath)" Condition="Exists('$(VersionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(VersionFileName)" />
+    <None Include="$(IconFilePath)" Condition="Exists('$(IconFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(IconFileName)" />
+  </ItemGroup>
+</Project>

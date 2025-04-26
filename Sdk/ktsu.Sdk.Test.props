@@ -1,0 +1,11 @@
+<Project>
+	<Sdk Name="ktsu.Sdk" />
+	<Sdk Name="MSTest.Sdk" />
+
+	<ItemGroup>
+		<Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+		<Using Include="ktsu.$(SolutionName)" />
+		<ProjectReference Include="$(SolutionDir)\$(SolutionName)\$(SolutionName).csproj" />
+	</ItemGroup>
+</Project>
+
