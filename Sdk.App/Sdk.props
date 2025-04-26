@@ -1,5 +1,5 @@
 <Project>
-  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk/$(Version)" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
