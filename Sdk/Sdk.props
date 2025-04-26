@@ -1,6 +1,4 @@
 <Project>
-  <Sdk Name="Microsoft.NET.Sdk" />
-
   <PropertyGroup>
     <!-- These seem to only be populated when building via the IDE -->
     <SolutionExt Condition="'$(SolutionExt)' == ''">.sln</SolutionExt>
