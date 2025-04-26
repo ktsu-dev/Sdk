@@ -1,8 +1,9 @@
-## v1.6.0 (minor)
+## v1.5.1 (patch)
 
 Changes since v1.5.0:
 
 - Add Sdk.Lib project and update SDK configurations ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update AssemblyName to use dynamic MSBuildProjectName ([@matt-edmondson](https://github.com/matt-edmondson))
 
 ## v1.5.0 (minor)
 
