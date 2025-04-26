@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
-    <AssemblyName>ktsu.Sdk</AssemblyName>
+    <AssemblyName>ktsu.Sdk.App</AssemblyName>
     <OutputType>Library</OutputType>
 
     <!-- GitHub related properties -->
@@ -104,8 +104,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="ktsu.Sdk.props" Pack="true" PackagePath="\build" />
-    <None Include="ktsu.Sdk.targets" Pack="true" PackagePath="\build" />
+    <None Include="ktsu.Sdk.App.props" Pack="true" PackagePath="\build" />
+    <None Include="ktsu.Sdk.App.targets" Pack="true" PackagePath="\build" />
 
     <!-- Build related files -->
     <None Include="$(GitHubWorkflowFilePath)" Condition="Exists('$(GitHubWorkflowFilePath)')" Link="_Build\$(GitHubWorkflowFileName)" />
