@@ -221,17 +221,18 @@
 
     <!-- Test project–related properties -->
     <IsTestProject>false</IsTestProject>
-    <!-- <IsTestingPlatformApplication>false</IsTestingPlatformApplication> -->
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication> 
     <!-- <EnableAspireTesting>false</EnableAspireTesting> -->
     <!-- <EnablePlaywright>false</EnablePlaywright> -->
     <EnableMSTestRunner>true</EnableMSTestRunner>
     <EnableNUnitRunner>false</EnableNUnitRunner>
-    <!-- <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint> -->
-    <!-- <TestingPlatformCaptureOutput>false</TestingPlatformCaptureOutput> -->
-    <!-- <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> -->
-    <!-- <TestingPlatformShowTestsFailure>false</TestingPlatformShowTestsFailure> -->
-    <TestingExtensionsProfile>Default</TestingExtensionsProfile>
-    <UseVSTest>true</UseVSTest>
+    <GenerateTestingPlatformEntryPoint>true</GenerateTestingPlatformEntryPoint> 
+    <TestingPlatformCaptureOutput>true</TestingPlatformCaptureOutput> 
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> 
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure> 
+    <TestingPlatformCommandLineArguments>-m:1</TestingPlatformCommandLineArguments>
+    <TestingExtensionsProfile>AllMicrosoft</TestingExtensionsProfile>
+    <UseVSTest>false</UseVSTest>
 
     <!-- Hosting-related properties -->
     <!-- <AppHostDotNetSearch>Global</AppHostDotNetSearch> -->
