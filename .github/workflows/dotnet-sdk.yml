@@ -1,4 +1,4 @@
-name: .NET Workflow
+name: .NET SDK Workflow
 
 on:
   push:
@@ -110,9 +110,23 @@ jobs:
       shell: pwsh
       run: dotnet tool install -g dotnet-script
 
-    - name: Build
+    - name: Update Versions
       shell: pwsh
       run: ./update-versions.ps1
+
+    - name: Commit Version Updates
+      if: ${{ env.SHOULD_RELEASE == 'True' }}
+      shell: pwsh
+      run: |
+        git config --global user.name "Github Actions"
+        git config --global user.email "actions@users.noreply.github.com"
+        git add */Sdk.props */Sdk.targets
+        git commit -m "[bot][skip ci] Update Sdk Versions"
+        git push
+
+        $RELEASE_HASH = (git rev-parse HEAD)
+        Write-Host "RELEASE_HASH: $RELEASE_HASH"
+        "RELEASE_HASH=$RELEASE_HASH" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
     - name: Build
       shell: pwsh
