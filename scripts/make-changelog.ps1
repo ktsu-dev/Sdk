@@ -130,20 +130,44 @@ function MakeNotesForRange {
         $RANGE_TO = $TO_TAG
     }
 
-    $RANGE = $RANGE_TO
-    if ($RANGE_FROM -ne "") {
-        $RANGE = "$RANGE_FROM..$RANGE_TO"
-    }
-
-    # The above range doesn't include the newest changes since the latest tag
-    # For the newest version, we need to use a different approach
+    # Determine proper commit range
     $IS_NEWEST_VERSION = ($TO_TAG -eq "v$COMMIT_VERSION")
-    if ($IS_NEWEST_VERSION -and $TO_SHA -ne "") {
-        $LATEST_TAG_COMMIT = git rev-list -n 1 $SEARCH_TAG
-        $RANGE = "$LATEST_TAG_COMMIT..$TO_SHA"
+
+    # Use simpler approach for range determination - consistent across all versions
+    # For existing tags:
+    if ($RANGE_FROM -ne "") {
+        # Get the actual commit SHA for the from tag
+        $FROM_SHA = git rev-list -n 1 $RANGE_FROM
+
+        # For the newest version with SHA provided (not yet tagged):
+        if ($IS_NEWEST_VERSION -and $TO_SHA -ne "") {
+            $RANGE = "$FROM_SHA..$TO_SHA"
+        } else {
+            # For already tagged versions, get the SHA for the to tag
+            $TO_SHA_RESOLVED = git rev-list -n 1 $RANGE_TO
+            $RANGE = "$FROM_SHA..$TO_SHA_RESOLVED"
+        }
+    } else {
+        # Handle case with no FROM tag (first version)
+        $RANGE = $RANGE_TO
     }
 
-    $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" --perl-regexp --regexp-ignore-case --grep="$EXCLUDE_PRS" --invert-grep --committer="$EXCLUDE_BOTS" --author="$EXCLUDE_BOTS" $RANGE | Sort-Object | Get-Unique
+    # Debug command
+    $GIT_CMD = "git log --pretty=format:'%s ([@%aN](https://github.com/%aN))' --perl-regexp --regexp-ignore-case --grep='$EXCLUDE_PRS' --invert-grep --committer='$EXCLUDE_BOTS' --author='$EXCLUDE_BOTS' $RANGE"
+    Write-Host "Git command: $GIT_CMD"
+
+    # For the newest version, be more permissive with filters to ensure we get commits
+    if ($IS_NEWEST_VERSION) {
+        $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" $RANGE | Sort-Object | Get-Unique
+
+        # Fallback if nothing found
+        if (($COMMITS | Measure-Object).Count -eq 0) {
+            Write-Host "No commits found with standard filters, trying with relaxed filters..."
+            $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" $RANGE | Sort-Object | Get-Unique
+        }
+    } else {
+        $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" --perl-regexp --regexp-ignore-case --grep="$EXCLUDE_PRS" --invert-grep --committer="$EXCLUDE_BOTS" --author="$EXCLUDE_BOTS" $RANGE | Sort-Object | Get-Unique
+    }
 
     Write-Host "Processing range: $RANGE (From: $RANGE_FROM, To: $RANGE_TO)"
     Write-Host "Found $(($COMMITS | Measure-Object).Count) commits for $TO_TAG"
@@ -197,6 +221,8 @@ if ($null -eq $TAGS) {
 }
 
 $TAG = "v$COMMIT_VERSION"
+
+Write-Host "Generating changelog from $PREVIOUS_TAG to $TAG (commit: $COMMIT_SHA)"
 
 # Generate changelog for the new version
 $CHANGELOG += MakeNotesForRange $TAGS $PREVIOUS_TAG $TAG $COMMIT_SHA
