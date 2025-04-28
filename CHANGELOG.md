@@ -1,3 +1,8 @@
+## v1.8.1-pre.3 (prerelease)
+
+Changes since v1.8.1-pre.2:
+
+- Refactor changelog generation logic in PowerShell script to improve commit range determination. Enhanced handling for the newest version and added fallback for relaxed filters when no commits are found. Updated output messages for better clarity. ([@github-actions[bot]](https://github.com/github-actions[bot]))
 
 
 
