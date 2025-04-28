@@ -152,21 +152,31 @@ function MakeNotesForRange {
         $RANGE = $RANGE_TO
     }
 
-    # Debug command
+    # Debug command showing filtering that would be used
     $GIT_CMD = "git log --pretty=format:'%s ([@%aN](https://github.com/%aN))' --perl-regexp --regexp-ignore-case --grep='$EXCLUDE_PRS' --invert-grep --committer='$EXCLUDE_BOTS' --author='$EXCLUDE_BOTS' $RANGE"
     Write-Host "Git command: $GIT_CMD"
 
-    # For the newest version, be more permissive with filters to ensure we get commits
-    if ($IS_NEWEST_VERSION) {
+    # Try with progressively more relaxed filtering to ensure we show commits
+
+    # First try with standard filters
+    $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" --perl-regexp --regexp-ignore-case --grep="$EXCLUDE_PRS" --invert-grep --committer="$EXCLUDE_BOTS" --author="$EXCLUDE_BOTS" $RANGE | Sort-Object | Get-Unique
+
+    # If no commits found, try with just PR exclusion but no author filtering
+    if (($COMMITS | Measure-Object).Count -eq 0) {
+        Write-Host "No commits found with standard filters, trying with relaxed author/committer filters..."
+        $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" --perl-regexp --regexp-ignore-case --grep="$EXCLUDE_PRS" --invert-grep $RANGE | Sort-Object | Get-Unique
+    }
+
+    # If still no commits, try with no filtering at all - show everything in the range
+    if (($COMMITS | Measure-Object).Count -eq 0) {
+        Write-Host "Still no commits found, trying with no filters..."
         $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" $RANGE | Sort-Object | Get-Unique
 
-        # Fallback if nothing found
-        if (($COMMITS | Measure-Object).Count -eq 0) {
-            Write-Host "No commits found with standard filters, trying with relaxed filters..."
-            $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" $RANGE | Sort-Object | Get-Unique
+        # If it's a prerelease version, include also version update commits
+        if ($VERSION_TYPE -eq "prerelease" -and ($COMMITS | Measure-Object).Count -eq 0) {
+            Write-Host "Looking for version update commits for prerelease..."
+            $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" --grep="Update VERSION to" $RANGE | Sort-Object | Get-Unique
         }
-    } else {
-        $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" --perl-regexp --regexp-ignore-case --grep="$EXCLUDE_PRS" --invert-grep --committer="$EXCLUDE_BOTS" --author="$EXCLUDE_BOTS" $RANGE | Sort-Object | Get-Unique
     }
 
     Write-Host "Processing range: $RANGE (From: $RANGE_FROM, To: $RANGE_TO)"
@@ -187,12 +197,26 @@ function MakeNotesForRange {
             $VERSION_CHANGELOG += "`n"
         }
 
-        $COMMITS | Where-Object { -not $_.Contains("Update VERSION to") -and -not $_.Contains("[skip ci]") } | ForEach-Object {
+        # Only filter out version updates for non-prerelease versions
+        if ($VERSION_TYPE -ne "prerelease") {
+            $COMMITS = $COMMITS | Where-Object { -not $_.Contains("Update VERSION to") -and -not $_.Contains("[skip ci]") }
+        } else {
+            $COMMITS = $COMMITS | Where-Object { -not $_.Contains("[skip ci]") }
+        }
+
+        $COMMITS | ForEach-Object {
             $COMMIT = $_
             $VERSION_CHANGELOG += "- $COMMIT"
             $VERSION_CHANGELOG += "`n"
         }
         $VERSION_CHANGELOG += "`n"
+    } else {
+        # For versions with no detected commits, include a placeholder entry
+        # This is especially important for prerelease versions
+        if ($VERSION_TYPE -eq "prerelease") {
+            $VERSION_CHANGELOG = "## $TO_TAG (prerelease)`n`n"
+            $VERSION_CHANGELOG += "Incremental prerelease update.`n`n"
+        }
     }
 
     $VERSION_CHANGELOG = $VERSION_CHANGELOG.Trim() + "`n"
