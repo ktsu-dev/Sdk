@@ -1,13 +1,43 @@
+## v1.8.1-pre.4 (prerelease)
+
+Changes since v1.8.1-pre.3:
+
+- Refactor changelog generation logic in PowerShell script to implement more flexible commit filtering. Added progressive fallback mechanisms to ensure commits are captured for both regular and prerelease versions, improving the accuracy of the changelog output. ([@github-actions[bot]](https://github.com/github-actions[bot]))
 ## v1.8.1-pre.3 (prerelease)
 
 Changes since v1.8.1-pre.2:
 
 - Refactor changelog generation logic in PowerShell script to improve commit range determination. Enhanced handling for the newest version and added fallback for relaxed filters when no commits are found. Updated output messages for better clarity. ([@github-actions[bot]](https://github.com/github-actions[bot]))
+## v1.8.1-pre.2 (prerelease)
 
+Changes since v1.8.1-pre.1:
 
+- Refactor changelog generation and versioning logic in PowerShell scripts. Updated commit range handling to include the latest changes since the last tag, improved output formatting, and added fallback logic for versioning when no tags are found. ([@github-actions[bot]](https://github.com/github-actions[bot]))
+- Remove security analysis step from GitHub Actions workflow and update permissions accordingly. ([@github-actions[bot]](https://github.com/github-actions[bot]))
+## v1.8.1-pre.1 (prerelease)
 
+Changes since v1.8.0:
 
+- Enhance GitHub Actions workflow by adding security analysis and dependency detection steps. Updated permissions to include security-events and id-token for improved security scanning and dependency submission. ([@github-actions[bot]](https://github.com/github-actions[bot]))
+## v1.8.0 (minor)
 
+Changes since v1.7.0:
+
+- [minor] 1.8.0 ([@github-actions[bot]](https://github.com/github-actions[bot]))
+- [minor] Update workflow and add Demo project ([@github-actions[bot]](https://github.com/github-actions[bot]))
+- Remove Demo project and associated files ([@github-actions[bot]](https://github.com/github-actions[bot]))
+- Update project configuration and versioning scripts ([@github-actions[bot]](https://github.com/github-actions[bot]))
+## v1.7.1-pre.2 (prerelease)
+
+Changes since v1.7.1-pre.1:
+
+- [minor] Update workflow and add Demo project ([@github-actions[bot]](https://github.com/github-actions[bot]))
+- Remove Demo project and associated files ([@github-actions[bot]](https://github.com/github-actions[bot]))
+## v1.7.1-pre.1 (prerelease)
+
+Changes since v1.7.0:
+
+- Update project configuration and versioning scripts ([@github-actions[bot]](https://github.com/github-actions[bot]))
 ## v1.7.0 (minor)
 
 Changes since v1.6.0:
