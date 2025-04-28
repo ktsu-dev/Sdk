@@ -13,8 +13,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
-  packages: write
-  contents: write
+  packages: write # For publishing packages
+  contents: write # For committing metadata and dependency submission
+  security-events: write  # For security scanning
+  id-token: write # For dependency submission
 
 env:
   OUTPUT_PATH: 'output'
@@ -136,10 +138,6 @@ jobs:
       shell: pwsh
       run: dotnet test -m:1 --configuration Release --verbosity normal --no-build
 
-    - name: Detect Dependencies
-      if: ${{ env.SHOULD_RELEASE == 'True' }}
-      uses: advanced-security/component-detection-dependency-submission-action@v0.0.2
-
     - name: Package Libraries
       if: ${{ env.SHOULD_RELEASE == 'True' }}
       shell: pwsh
@@ -187,3 +185,13 @@ jobs:
         bodyFile: CHANGELOG.md
         replacesArtifacts: false
         makeLatest: true
+
+    - name: Run Security Analysis
+      if: ${{ env.SHOULD_RELEASE == 'True' }}
+      uses: microsoft/security-devops-action@v1
+      with:
+        tools: credscan,roslyn
+
+    - name: Detect Dependencies
+      if: ${{ env.SHOULD_RELEASE == 'True' }}
+      uses: advanced-security/component-detection-dependency-submission-action@v0.0.2
