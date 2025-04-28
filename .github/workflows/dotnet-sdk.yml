@@ -112,6 +112,10 @@ jobs:
 
     - name: Build
       shell: pwsh
+      run: ./update-versions.ps1
+
+    - name: Build
+      shell: pwsh
       run: dotnet build --configuration Release --verbosity normal --no-incremental ${{ env.BUILD_ARGS }}
 
     - name: Test

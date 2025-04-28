@@ -1,4 +1,4 @@
-<Project>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <IsPrerelease>false</IsPrerelease>
     <IsPrerelease Condition="$(Version.Contains('-'))">true</IsPrerelease>

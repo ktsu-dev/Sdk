@@ -1,11 +1,11 @@
-<Project>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <!-- These seem to only be populated when building via the IDE -->
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$([System.IO.Path]::Combine($(MSBuildProjectDirectory), `..`))</SolutionDir>
     <SolutionExt Condition="'$(SolutionExt)' == ''">.sln</SolutionExt>
-    <SolutionPath Condition="'$(SolutionPath)' == ''">$([MSBuild]::NormalizePath($([System.IO.Path]::GetFullPath($([System.IO.Directory]::GetFiles("$(MSBuildThisFileDirectory)", "*$(SolutionExt)")[0])))))</SolutionPath>
+    <SolutionPath Condition="'$(SolutionPath)' == ''">$([MSBuild]::NormalizePath($([System.IO.Path]::GetFullPath($([System.IO.Directory]::GetFiles("$(SolutionDir)", "*$(SolutionExt)")[0])))))</SolutionPath>
     <SolutionFileName Condition="'$(SolutionFileName)' == ''">$([System.IO.Path]::GetFileName($(SolutionPath)))</SolutionFileName>
     <SolutionName Condition="'$(SolutionName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(SolutionPath)))</SolutionName>
-    <SolutionDir Condition="'$(SolutionDir)' == ''">$([MSBuild]::NormalizePath($([System.IO.Path]::GetDirectoryName($(SolutionPath)))))</SolutionDir>
 
     <!-- GitHub related properties -->
     <GitHubWorkflowFileName>dotnet.yml</GitHubWorkflowFileName>
@@ -221,15 +221,15 @@
 
     <!-- Test project–related properties -->
     <IsTestProject>false</IsTestProject>
-    <IsTestingPlatformApplication>false</IsTestingPlatformApplication> 
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
     <!-- <EnableAspireTesting>false</EnableAspireTesting> -->
     <!-- <EnablePlaywright>false</EnablePlaywright> -->
     <EnableMSTestRunner>true</EnableMSTestRunner>
     <EnableNUnitRunner>false</EnableNUnitRunner>
-    <GenerateTestingPlatformEntryPoint>true</GenerateTestingPlatformEntryPoint> 
-    <TestingPlatformCaptureOutput>true</TestingPlatformCaptureOutput> 
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport> 
-    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure> 
+    <GenerateTestingPlatformEntryPoint>true</GenerateTestingPlatformEntryPoint>
+    <TestingPlatformCaptureOutput>true</TestingPlatformCaptureOutput>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
     <TestingPlatformCommandLineArguments>--report-trx</TestingPlatformCommandLineArguments>
     <TestingExtensionsProfile>AllMicrosoft</TestingExtensionsProfile>
     <UseVSTest>false</UseVSTest>

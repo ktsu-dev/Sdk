@@ -5,7 +5,7 @@
     <OutputType>Library</OutputType>
 
     <!-- GitHub related properties -->
-    <GitHubWorkflowFileName>dotnet.yml</GitHubWorkflowFileName>
+    <GitHubWorkflowFileName>dotnet-sdk.yml</GitHubWorkflowFileName>
     <GitHubCopilotInstructionsFileName>copilot-instructions.md</GitHubCopilotInstructionsFileName>
     <GitHubDir>$([MSBuild]::NormalizePath("$(SolutionDir)\.github"))</GitHubDir>
     <GitHubWorkflowDir>$([MSBuild]::NormalizePath("$(GitHubDir)\workflows"))</GitHubWorkflowDir>
