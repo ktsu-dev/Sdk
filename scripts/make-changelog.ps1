@@ -132,18 +132,36 @@ function MakeNotesForRange {
 
     $RANGE = $RANGE_TO
     if ($RANGE_FROM -ne "") {
-        $RANGE = "$RANGE_FROM...$RANGE_TO"
+        $RANGE = "$RANGE_FROM..$RANGE_TO"
+    }
+
+    # The above range doesn't include the newest changes since the latest tag
+    # For the newest version, we need to use a different approach
+    $IS_NEWEST_VERSION = ($TO_TAG -eq "v$COMMIT_VERSION")
+    if ($IS_NEWEST_VERSION -and $TO_SHA -ne "") {
+        $LATEST_TAG_COMMIT = git rev-list -n 1 $SEARCH_TAG
+        $RANGE = "$LATEST_TAG_COMMIT..$TO_SHA"
     }
 
     $COMMITS = git log --pretty=format:"%s ([@%aN](https://github.com/%aN))" --perl-regexp --regexp-ignore-case --grep="$EXCLUDE_PRS" --invert-grep --committer="$EXCLUDE_BOTS" --author="$EXCLUDE_BOTS" $RANGE | Sort-Object | Get-Unique
 
-    if ($VERSION_TYPE -ne "prerelease" -and $COMMITS.Length -gt 0) {
-        $VERSION_CHANGELOG = "## $TO_TAG ($VERSION_TYPE)"
+    Write-Host "Processing range: $RANGE (From: $RANGE_FROM, To: $RANGE_TO)"
+    Write-Host "Found $(($COMMITS | Measure-Object).Count) commits for $TO_TAG"
+
+    $VERSION_CHANGELOG = ""
+    if (($COMMITS | Measure-Object).Count -gt 0) {
+        $VERSION_CHANGELOG = "## $TO_TAG"
+        if ($VERSION_TYPE -ne "unknown") {
+            $VERSION_CHANGELOG += " ($VERSION_TYPE)"
+        }
         $VERSION_CHANGELOG += "`n"
         $VERSION_CHANGELOG += "`n"
-        $VERSION_CHANGELOG += "Changes since ${SEARCH_TAG}:"
-        $VERSION_CHANGELOG += "`n"
-        $VERSION_CHANGELOG += "`n"
+
+        if ($RANGE_FROM -ne "") {
+            $VERSION_CHANGELOG += "Changes since ${RANGE_FROM}:"
+            $VERSION_CHANGELOG += "`n"
+            $VERSION_CHANGELOG += "`n"
+        }
 
         $COMMITS | Where-Object { -not $_.Contains("Update VERSION to") -and -not $_.Contains("[skip ci]") } | ForEach-Object {
             $COMMIT = $_
@@ -153,7 +171,9 @@ function MakeNotesForRange {
         $VERSION_CHANGELOG += "`n"
     }
 
-    $VERSION_CHANGELOG
+    $VERSION_CHANGELOG = $VERSION_CHANGELOG.Trim() + "`n"
+	$VERSION_CHANGELOG = $VERSION_CHANGELOG.ReplaceLineEndings("`r`n")
+	$VERSION_CHANGELOG
 }
 
 $CHANGELOG = ""
@@ -178,8 +198,10 @@ if ($null -eq $TAGS) {
 
 $TAG = "v$COMMIT_VERSION"
 
+# Generate changelog for the new version
 $CHANGELOG += MakeNotesForRange $TAGS $PREVIOUS_TAG $TAG $COMMIT_SHA
 
+# Generate changelog for all existing tags
 $TAGS | ForEach-Object {
     $TAG = $_
     if ($TAG -like "v*") {
@@ -197,7 +219,7 @@ $TAGS | ForEach-Object {
     $TAG_INDEX += 1
 }
 
-Write-Host "CHANGELOG: $CHANGELOG"
+Write-Host "CHANGELOG generated successfully."
 $CHANGELOG | Out-File -FilePath CHANGELOG.md -Encoding utf8
 
 $global:LASTEXITCODE = 0
