@@ -1,3 +1,9 @@
+## v1.8.1-pre.5 (prerelease)
+
+Changes since v1.8.1-pre.4:
+
+- Sync .github\workflows\dependabot-merge.yml ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync .github\workflows\project.yml ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v1.8.1-pre.4 (prerelease)
 
 Changes since v1.8.1-pre.3:
