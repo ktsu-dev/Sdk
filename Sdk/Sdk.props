@@ -40,6 +40,24 @@
     <PrimaryProjectExists>false</PrimaryProjectExists>
     <PrimaryProjectExists Condition="Exists($(PrimaryProjectPath))">true</PrimaryProjectExists>
 
+    <!-- Fallback primary project properties-->
+    <PrimaryProjectName Condition="$(PrimaryProjectExists) == 'false'">$(SolutionName).Core</PrimaryProjectName>
+    <PrimaryProjectFileName Condition="$(PrimaryProjectExists) == 'false'">$(PrimaryProjectName).csproj</PrimaryProjectFileName>
+    <PrimaryProjectPath Condition="$(PrimaryProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(PrimaryProjectName)\$(PrimaryProjectFileName)"))</PrimaryProjectPath>
+    <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false'">true</PrimaryProjectExists>
+
+    <!-- Fallback primary project properties-->
+    <PrimaryProjectName Condition="$(PrimaryProjectExists) == 'false'">$(SolutionName).App</PrimaryProjectName>
+    <PrimaryProjectFileName Condition="$(PrimaryProjectExists) == 'false'">$(PrimaryProjectName).csproj</PrimaryProjectFileName>
+    <PrimaryProjectPath Condition="$(PrimaryProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(PrimaryProjectName)\$(PrimaryProjectFileName)"))</PrimaryProjectPath>
+    <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false'">true</PrimaryProjectExists>
+
+    <!-- Fallback primary project properties-->
+    <PrimaryProjectName Condition="$(PrimaryProjectExists) == 'false'">$(SolutionName).CLI</PrimaryProjectName>
+    <PrimaryProjectFileName Condition="$(PrimaryProjectExists) == 'false'">$(PrimaryProjectName).csproj</PrimaryProjectFileName>
+    <PrimaryProjectPath Condition="$(PrimaryProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(PrimaryProjectName)\$(PrimaryProjectFileName)"))</PrimaryProjectPath>
+    <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false'">true</PrimaryProjectExists>
+
     <!-- Descriptive properties -->
     <ContributorsFileName>CONTRIBUTORS.md</ContributorsFileName>
     <ContributorsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ContributorsFileName)"))</ContributorsFilePath>
