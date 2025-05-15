@@ -1,3 +1,8 @@
+## v1.9.0 (minor)
+
+Changes since v1.8.0:
+
+- [minor] Support primary project suffixes: Core, App, CLI ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.8.1-pre.5 (prerelease)
 
 Changes since v1.8.1-pre.4:
