@@ -1,3 +1,8 @@
+## v1.10.2-pre.1 (prerelease)
+
+Changes since v1.10.1:
+
+- Update dotnet-sdk.yml ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.10.1 (patch)
 
 Changes since v1.10.0:
