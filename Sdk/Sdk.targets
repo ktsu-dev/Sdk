@@ -43,6 +43,7 @@
     <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" />
     <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" />
     <None Include="$(DescriptionFilePath)" Condition="Exists('$(DescriptionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(DescriptionFileName)" />
+    <None Include="$(TagsFilePath)" Condition="Exists('$(TagsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(TagsFileName)" />
     <None Include="$(LicenseFilePath)" Condition="Exists('$(LicenseFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(LicenseFileName)" />
     <None Include="$(ChangelogFilePath)" Condition="Exists('$(ChangelogFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ChangelogFileName)" />
     <None Include="$(ReadmeFilePath)" Condition="Exists('$(ReadmeFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ReadmeFileName)" />
