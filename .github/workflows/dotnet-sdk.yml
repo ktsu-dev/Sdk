@@ -184,7 +184,3 @@ jobs:
         bodyFile: CHANGELOG.md
         replacesArtifacts: false
         makeLatest: true
-
-    - name: Detect Dependencies
-      if: ${{ env.SHOULD_RELEASE == 'True' }}
-      uses: advanced-security/component-detection-dependency-submission-action@v0.0.2
