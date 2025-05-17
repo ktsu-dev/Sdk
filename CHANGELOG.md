@@ -1,3 +1,11 @@
+## v1.10.0 (minor)
+
+Changes since v1.9.0:
+
+- [minor] Refactor project structure for centralized settings ([@matt-edmondson](https://github.com/matt-edmondson))
+- Add TAGS.md support and enhance project metadata ([@matt-edmondson](https://github.com/matt-edmondson))
+- Enhance SDK documentation and add Sdk.CLI project ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update Sdk.props for output type configuration ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.9.0 (minor)
 
 Changes since v1.8.0:
