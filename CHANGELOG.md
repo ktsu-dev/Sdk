@@ -1,3 +1,8 @@
+## v1.10.1 (patch)
+
+Changes since v1.10.0:
+
+- [patch] Fix tags file not being shown in the solution explorer ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.10.0 (minor)
 
 Changes since v1.9.0:
