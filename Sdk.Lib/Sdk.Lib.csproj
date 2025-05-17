@@ -78,6 +78,10 @@
     <DescriptionFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(DescriptionFileName)"))</DescriptionFilePath>
     <Description Condition="Exists($(DescriptionFilePath))">$([System.IO.File]::ReadAllText($(DescriptionFilePath)).Trim())</Description>
 
+    <TagsFileName>TAGS.md</TagsFileName>
+    <TagsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(TagsFileName)"))</TagsFilePath>
+    <Tags Condition="Exists($(TagsFilePath))">$([System.IO.File]::ReadAllText($(TagsFilePath)).Trim())</Tags>
+
     <IconFileName>icon.png</IconFileName>
     <IconFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(IconFileName)"))</IconFilePath>
 
@@ -125,6 +129,7 @@
     <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" />
     <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" />
     <None Include="$(DescriptionFilePath)" Condition="Exists('$(DescriptionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(DescriptionFileName)" />
+    <None Include="$(TagsFilePath)" Condition="Exists('$(TagsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(TagsFileName)" />
     <None Include="$(LicenseFilePath)" Condition="Exists('$(LicenseFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(LicenseFileName)" />
     <None Include="$(ChangelogFilePath)" Condition="Exists('$(ChangelogFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ChangelogFileName)" />
     <None Include="$(ReadmeFilePath)" Condition="Exists('$(ReadmeFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ReadmeFileName)" />

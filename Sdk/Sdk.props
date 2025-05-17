@@ -99,6 +99,10 @@
     <DescriptionFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(DescriptionFileName)"))</DescriptionFilePath>
     <Description Condition="Exists($(DescriptionFilePath))">$([System.IO.File]::ReadAllText($(DescriptionFilePath)).Trim())</Description>
 
+    <TagsFileName>TAGS.md</TagsFileName>
+    <TagsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(TagsFileName)"))</TagsFilePath>
+    <Tags Condition="Exists($(TagsFilePath))">$([System.IO.File]::ReadAllText($(TagsFilePath)).Trim())</Tags>
+
     <IconFileName>icon.png</IconFileName>
     <IconFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(IconFileName)"))</IconFilePath>
 
@@ -132,6 +136,7 @@
     <PackageLicenseFile>$(LicenseFileName)</PackageLicenseFile>
     <PackageReleaseNotes>$(Changelog)</PackageReleaseNotes>
     <PackageDescription>$(Description)</PackageDescription>
+    <PackageTags>$(Tags)</PackageTags>
     <PackageProjectUrl>$(ProjectUrl)</PackageProjectUrl>
     <IncludeSource>true</IncludeSource>
     <IncludeContentInPack>true</IncludeContentInPack>

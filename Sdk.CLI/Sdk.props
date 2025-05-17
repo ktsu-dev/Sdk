@@ -7,10 +7,4 @@
     <TargetFramework>net9.0</TargetFramework>
     <TargetFrameworks></TargetFrameworks>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="ktsu.ImGuiApp" Version="1.12.5" />
-    <PackageReference Include="ktsu.ImGuiPopups" Version="1.3.2" />
-    <PackageReference Include="ktsu.ImGuiWidgets" Version="1.6.4" />
-  </ItemGroup>
 </Project>
