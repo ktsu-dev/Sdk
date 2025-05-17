@@ -3,14 +3,19 @@
   <Sdk Name="Microsoft.NET.Sdk"/>
 
   <PropertyGroup>
+    <!-- Default OutputType, will be overridden for Windows -->
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <TargetFrameworks></TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="ktsu.ImGuiApp" Version="1.12.5" />
-    <PackageReference Include="ktsu.ImGuiPopups" Version="1.3.2" />
-    <PackageReference Include="ktsu.ImGuiWidgets" Version="1.6.4" />
-  </ItemGroup>
+  <!-- Set WinExe output type for Windows to prevent console windows for GUI apps -->
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(RuntimeIdentifier.StartsWith('win'))">
+    <OutputType>WinExe</OutputType>
+  </PropertyGroup>
+  
+  <!-- Fallback for Windows detection if no RID is specified -->
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows')) And '$(RuntimeIdentifier)' == ''">
+    <OutputType>WinExe</OutputType>
+  </PropertyGroup>
 </Project>
