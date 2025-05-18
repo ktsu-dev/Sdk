@@ -58,6 +58,9 @@
     <PrimaryProjectPath Condition="$(PrimaryProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(PrimaryProjectName)\$(PrimaryProjectFileName)"))</PrimaryProjectPath>
     <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false'">true</PrimaryProjectExists>
 
+    <IsPrimaryProject>false</IsPrimaryProject>
+    <IsPrimaryProject Condition="$(MSBuildProjectName) == $(PrimaryProjectName)">true</IsPrimaryProject>
+
     <!-- Descriptive properties -->
     <ContributorsFileName>CONTRIBUTORS.md</ContributorsFileName>
     <ContributorsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ContributorsFileName)"))</ContributorsFilePath>
@@ -279,8 +282,13 @@
 
     <!-- JsonSerializer properties -->
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
-
   </PropertyGroup>
+
+  <!-- automatically include the primary project in other projects-->
+  <ItemGroup Condition="!$(IsPrimaryProject)">
+    <Using Include="ktsu.$(PrimaryProjectName)" />
+    <ProjectReference Include="$(PrimaryProjectPath)" />
+  </ItemGroup>
 
 </Project>
 

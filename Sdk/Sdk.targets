@@ -9,9 +9,6 @@
     <IsLibrary>false</IsLibrary>
     <IsLibrary Condition="$(OutputType) == 'Library' And !$(IsTestProject)">true</IsLibrary>
 
-    <IsPrimaryProject>false</IsPrimaryProject>
-    <IsPrimaryProject Condition="$(MSBuildProjectName) == $(PrimaryProjectName)">true</IsPrimaryProject>
-
     <IsPublishable Condition="$(IsExecutable)">true</IsPublishable>
     <IsPackable Condition="$(IsLibrary)">true</IsPackable>
   </PropertyGroup>
