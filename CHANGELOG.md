@@ -1,3 +1,12 @@
+## v1.11.1-pre.2 (prerelease)
+
+Changes since v1.11.1-pre.1:
+
+- Sync .editorconfig ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync .gitattributes ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync .gitignore ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync .mailmap ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync .runsettings ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v1.11.1-pre.1 (prerelease)
 
 Changes since v1.11.0:
