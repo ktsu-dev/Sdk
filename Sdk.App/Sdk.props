@@ -5,8 +5,6 @@
   <PropertyGroup>
     <!-- Default OutputType, will be overridden for Windows -->
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <TargetFrameworks></TargetFrameworks>
   </PropertyGroup>
 
   <!-- Set WinExe output type for Windows to prevent console windows for GUI apps -->
