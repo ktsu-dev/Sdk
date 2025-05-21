@@ -1,3 +1,8 @@
+## v1.27.0 (minor)
+
+Changes since v1.26.0:
+
+- [minor] Fix typo in TestProjectNamespace ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.26.0 (minor)
 
 Changes since v1.25.0:
