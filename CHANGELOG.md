@@ -1,3 +1,9 @@
+## v1.15.0 (minor)
+
+Changes since v1.14.0:
+
+- Enhance SDK documentation and features for .NET 9.0 ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update Sdk.targets to reference ktsu.Semantics instead of ktsu.SemanticString ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.14.1 (patch)
 
 Changes since v1.14.0:
