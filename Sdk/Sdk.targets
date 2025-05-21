@@ -28,14 +28,14 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0" PrivateAssets="All"/>
-    <PackageReference Include="ktsu.AppDataStorage" Version="*" />
-    <PackageReference Include="ktsu.DeepClone" Version="*" />
-    <PackageReference Include="ktsu.Sorting" Version="*" />
-    <PackageReference Include="ktsu.SemanticString" Version="*" />
-    <Using Include="ktsu.AppDataStorage" />
-    <Using Include="ktsu.DeepClone" />
-    <Using Include="ktsu.Sorting" />
-    <Using Include="ktsu.Semantics" />
+    <PackageReference Include="ktsu.AppDataStorage" Version="*" Condition="$(SolutionName) != 'AppDataStorage'" />
+    <PackageReference Include="ktsu.DeepClone" Version="*" Condition="$(SolutionName) != 'DeepClone'" />
+    <PackageReference Include="ktsu.Sorting" Version="*" Condition="$(SolutionName) != 'Sorting'" />
+    <PackageReference Include="ktsu.SemanticString" Version="*" Condition="$(SolutionName) != 'SemanticString'" />
+    <Using Include="ktsu.AppDataStorage" Condition="$(SolutionName) != 'AppDataStorage'" />
+    <Using Include="ktsu.DeepClone" Condition="$(SolutionName) != 'DeepClone'" />
+    <Using Include="ktsu.Sorting" Condition="$(SolutionName) != 'Sorting'" />
+    <Using Include="ktsu.Semantics" Condition="$(SolutionName) != 'SemanticString'" />
   </ItemGroup>
 
   <!-- Executable project specific packages -->
