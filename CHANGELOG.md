@@ -1,3 +1,8 @@
+## v1.26.0 (minor)
+
+Changes since v1.25.0:
+
+- [minor] Fix InternalsVisibleTo for tests ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.25.0 (minor)
 
 Changes since v1.24.0:
