@@ -1,3 +1,8 @@
+## v1.22.0 (minor)
+
+Changes since v1.21.0:
+
+- [minor] Upgrade DeepCLone ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.21.0 (minor)
 
 Changes since v1.20.0:
