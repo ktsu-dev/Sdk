@@ -1,3 +1,8 @@
+## v1.23.0 (minor)
+
+Changes since v1.22.0:
+
+- [minor] Fix incorrect test package namespace ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.22.0 (minor)
 
 Changes since v1.21.0:
