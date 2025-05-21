@@ -1,3 +1,8 @@
+## v1.12.0 (minor)
+
+Changes since v1.11.0:
+
+- Remove TargetFramework properties from Sdk.props ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.11.1-pre.2 (prerelease)
 
 Changes since v1.11.1-pre.1:
