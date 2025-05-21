@@ -1,3 +1,8 @@
+## v1.29.0 (minor)
+
+Changes since v1.28.0:
+
+- Add WinApp adk ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.28.0 (minor)
 
 Changes since v1.27.0:
