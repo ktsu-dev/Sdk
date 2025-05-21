@@ -1,3 +1,9 @@
+## v1.13.0 (minor)
+
+Changes since v1.12.0:
+
+- Add MSBuildSdk packaging support to project files ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update projects to target .NET 9.0 ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.12.1 (patch)
 
 Changes since v1.12.0:
