@@ -178,6 +178,8 @@
     <Company>$(Authors)</Company>
     <Product>$(AssemblyName)</Product>
 
+    <TestProjectNamespace>>$(AuthorsNamespace).$(TestProjectName)</TestProjectNamespace>
+
     <!-- Assembly validation properties -->
     <ApiCompatStrictMode>true</ApiCompatStrictMode>
     <ApiCompatValidateAssemblies>true</ApiCompatValidateAssemblies>

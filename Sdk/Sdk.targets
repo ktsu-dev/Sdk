@@ -21,7 +21,7 @@
 
   <!-- Expose internals to test projects -->
   <ItemGroup Condition="$(IsTestProject) == 'false'">
-    <InternalsVisibleTo Include="$(TestProjectName)" />
+    <InternalsVisibleTo Include="$(TestProjectNamespace)" />
   </ItemGroup>
 
   <!-- Standard packages for all projects -->
