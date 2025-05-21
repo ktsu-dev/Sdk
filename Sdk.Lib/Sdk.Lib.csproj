@@ -1,2 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageType>MSBuildSdk</PackageType>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
 </Project>

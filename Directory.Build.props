@@ -91,6 +91,7 @@
     <Company>$(Authors)</Company>
     <Product>$(AssemblyName)</Product>
 
+    <PackageType>MSBuildSdk</PackageType>
     <PackageId>$(AssemblyName)</PackageId>
     <PackageVersion>$(Version)</PackageVersion>
     <PackageIcon>$(IconFileName)</PackageIcon>
