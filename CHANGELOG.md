@@ -1,3 +1,8 @@
+## v1.14.0 (minor)
+
+Changes since v1.13.0:
+
+- Update project structure and dependencies ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.13.0 (minor)
 
 Changes since v1.12.0:
