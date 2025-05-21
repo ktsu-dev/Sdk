@@ -128,8 +128,8 @@
     <!--<GeneratedAssemblyInfoFile>assemblyinfo.cs</GeneratedAssemblyInfoFile>-->
 
     <!-- Framework properties -->
-    <!--<TargetFramework>net9.0</TargetFramework>-->
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFramework>net9.0</TargetFramework>
+    <!--<TargetFrameworks>net8.0;net9.0</TargetFrameworks>-->
 
     <!-- Package properties -->
     <PackageId>$(AssemblyName)</PackageId>
