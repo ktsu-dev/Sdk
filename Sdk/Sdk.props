@@ -178,7 +178,7 @@
     <Company>$(Authors)</Company>
     <Product>$(AssemblyName)</Product>
 
-    <TestProjectNamespace>>$(AuthorsNamespace).$(TestProjectName)</TestProjectNamespace>
+    <TestProjectNamespace>$(AuthorsNamespace).$(TestProjectName)</TestProjectNamespace>
 
     <!-- Assembly validation properties -->
     <ApiCompatStrictMode>true</ApiCompatStrictMode>
