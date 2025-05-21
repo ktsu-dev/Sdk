@@ -35,7 +35,7 @@
     <Using Include="ktsu.AppDataStorage" />
     <Using Include="ktsu.DeepClone" />
     <Using Include="ktsu.Sorting" />
-    <Using Include="ktsu.SemanticString" />
+    <Using Include="ktsu.Semantics" />
   </ItemGroup>
 
   <!-- Executable project specific packages -->
