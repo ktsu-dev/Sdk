@@ -14,13 +14,13 @@
   </PropertyGroup>
 
   <!-- Reference to core project -->
-  <ItemGroup Condition="!$(IsPrimaryProject)">
+  <ItemGroup Condition="$(IsPrimaryProject) == 'false'">
     <ProjectReference Include="$(PrimaryProjectPath)" />
     <Using Include="ktsu.$(PrimaryProjectName)" />
   </ItemGroup>
 
   <!-- Expose internals to test projects -->
-  <ItemGroup Condition="!$(IsTestProject)">
+  <ItemGroup Condition="$(IsTestProject) == 'false'">
     <InternalsVisibleTo Include="$(TestProjectName)" />
   </ItemGroup>
 
