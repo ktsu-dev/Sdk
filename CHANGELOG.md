@@ -1,3 +1,9 @@
+## v1.18.0 (minor)
+
+Changes since v1.17.0:
+
+- [minor] Update TestableIO packages in Sdk.targets ([@matt-edmondson](https://github.com/matt-edmondson))
+- [patch] fix package version ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.17.1 (patch)
 
 Changes since v1.17.0:
@@ -5,7 +11,7 @@ Changes since v1.17.0:
 - [patch] fix package version ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.17.1-pre.1 (prerelease)
 
-Changes since v1.17.0:
+Incremental prerelease update.
 ## v1.17.0 (minor)
 
 Changes since v1.16.0:
