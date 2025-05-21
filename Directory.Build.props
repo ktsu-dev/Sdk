@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <!-- Common settings for all projects -->
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <AssemblyName>ktsu.$(MSBuildProjectName.Replace(" ", ""))</AssemblyName>
     <OutputType>Library</OutputType>
 
