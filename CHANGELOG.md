@@ -1,3 +1,8 @@
+## v1.17.1-pre.1 (prerelease)
+
+Changes since v1.17.0:
+
+- Update Spectre.Console.Analyzer to version 1.0.0 ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.17.0 (minor)
 
 Changes since v1.16.0:
