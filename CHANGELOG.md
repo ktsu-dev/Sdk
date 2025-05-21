@@ -1,3 +1,8 @@
+## v1.17.0 (minor)
+
+Changes since v1.16.0:
+
+- Refactor package references in Sdk.targets ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.16.0 (minor)
 
 Changes since v1.15.0:
