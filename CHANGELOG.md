@@ -1,3 +1,8 @@
+## v1.19.0 (minor)
+
+Changes since v1.18.0:
+
+- [minor] Downgrade TestableIO package versions ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.18.0 (minor)
 
 Changes since v1.17.0:
