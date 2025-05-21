@@ -1,3 +1,8 @@
+## v1.25.0 (minor)
+
+Changes since v1.24.0:
+
+- [minor] Fix conditionals for internals ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.24.0 (minor)
 
 Changes since v1.23.0:
