@@ -42,17 +42,17 @@
     <CliProjectName Condition="$(CliProjectExists) == 'false'">$(SolutionName).Cli</CliProjectName>
     <CliProjectFileName Condition="$(CliProjectExists) == 'false'">$(CliProjectName).csproj</CliProjectFileName>
     <CliProjectPath Condition="$(CliProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(CliProjectName)\$(CliProjectFileName)"))</CliProjectPath>
-    <CliProjectExists Condition="$(CliProjectExists) == 'false'">true</CliProjectExists>
+    <CliProjectExists Condition="$(CliProjectExists) == 'false' And Exists($(CliProjectPath))">true</CliProjectExists>
 
     <CliProjectName Condition="$(CliProjectExists) == 'false'">$(SolutionName)Cli</CliProjectName>
     <CliProjectFileName Condition="$(CliProjectExists) == 'false'">$(CliProjectName).csproj</CliProjectFileName>
     <CliProjectPath Condition="$(CliProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(CliProjectName)\$(CliProjectFileName)"))</CliProjectPath>
-    <CliProjectExists Condition="$(CliProjectExists) == 'false'">true</CliProjectExists>
+    <CliProjectExists Condition="$(CliProjectExists) == 'false' And Exists($(CliProjectPath))">true</CliProjectExists>
 
     <CliProjectName Condition="$(CliProjectExists) == 'false'">$(SolutionName)CLI</CliProjectName>
     <CliProjectFileName Condition="$(CliProjectExists) == 'false'">$(CliProjectName).csproj</CliProjectFileName>
     <CliProjectPath Condition="$(CliProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(CliProjectName)\$(CliProjectFileName)"))</CliProjectPath>
-    <CliProjectExists Condition="$(CliProjectExists) == 'false'">true</CliProjectExists>
+    <CliProjectExists Condition="$(CliProjectExists) == 'false' And Exists($(CliProjectPath))">true</CliProjectExists>
 
     <AppProjectName>$(SolutionName).App</AppProjectName>
     <AppProjectFileName>$(AppProjectName).csproj</AppProjectFileName>
@@ -63,7 +63,7 @@
     <AppProjectName Condition="$(AppProjectExists) == 'false'">$(SolutionName)App</AppProjectName>
     <AppProjectFileName Condition="$(AppProjectExists) == 'false'">$(AppProjectName).csproj</AppProjectFileName>
     <AppProjectPath Condition="$(AppProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(AppProjectName)\$(AppProjectFileName)"))</AppProjectPath>
-    <AppProjectExists Condition="$(AppProjectExists) == 'false'">true</AppProjectExists>
+    <AppProjectExists Condition="$(AppProjectExists) == 'false' And Exists($(AppProjectPath))">true</AppProjectExists>
 
     <TestProjectName>$(SolutionName).Test</TestProjectName>
     <TestProjectFileName>$(TestProjectName).csproj</TestProjectFileName>
@@ -74,17 +74,17 @@
     <TestProjectName Condition="$(TestProjectExists) == 'false'">$(SolutionName).Tests</TestProjectName>
     <TestProjectFileName Condition="$(TestProjectExists) == 'false'">$(TestProjectName).csproj</TestProjectFileName>
     <TestProjectPath Condition="$(TestProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(TestProjectName)\$(TestProjectFileName)"))</TestProjectPath>
-    <TestProjectExists Condition="$(TestProjectExists) == 'false'">true</TestProjectExists>
+    <TestProjectExists Condition="$(TestProjectExists) == 'false' And Exists($(TestProjectPath))">true</TestProjectExists>
 
     <TestProjectName Condition="$(TestProjectExists) == 'false'">$(SolutionName)Test</TestProjectName>
     <TestProjectFileName Condition="$(TestProjectExists) == 'false'">$(TestProjectName).csproj</TestProjectFileName>
     <TestProjectPath Condition="$(TestProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(TestProjectName)\$(TestProjectFileName)"))</TestProjectPath>
-    <TestProjectExists Condition="$(TestProjectExists) == 'false'">true</TestProjectExists>
+    <TestProjectExists Condition="$(TestProjectExists) == 'false' And Exists($(TestProjectPath))">true</TestProjectExists>
 
     <TestProjectName Condition="$(TestProjectExists) == 'false'">$(SolutionName)Tests</TestProjectName>
     <TestProjectFileName Condition="$(TestProjectExists) == 'false'">$(TestProjectName).csproj</TestProjectFileName>
     <TestProjectPath Condition="$(TestProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(TestProjectName)\$(TestProjectFileName)"))</TestProjectPath>
-    <TestProjectExists Condition="$(TestProjectExists) == 'false'">true</TestProjectExists>
+    <TestProjectExists Condition="$(TestProjectExists) == 'false' And Exists($(TestProjectPath))">true</TestProjectExists>
 
     <!-- Primary Project properties-->
     <PrimaryProjectName>$(SolutionName)</PrimaryProjectName>
@@ -97,19 +97,19 @@
     <PrimaryProjectName Condition="$(PrimaryProjectExists) == 'false'">$(SolutionName).Core</PrimaryProjectName>
     <PrimaryProjectFileName Condition="$(PrimaryProjectExists) == 'false'">$(PrimaryProjectName).csproj</PrimaryProjectFileName>
     <PrimaryProjectPath Condition="$(PrimaryProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(PrimaryProjectName)\$(PrimaryProjectFileName)"))</PrimaryProjectPath>
-    <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false'">true</PrimaryProjectExists>
+    <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false' And Exists($(PrimaryProjectPath))">true</PrimaryProjectExists>
 
     <!-- Fallback primary project properties-->
     <PrimaryProjectName Condition="$(PrimaryProjectExists) == 'false'">$(AppProjectName)</PrimaryProjectName>
     <PrimaryProjectFileName Condition="$(PrimaryProjectExists) == 'false'">$(PrimaryProjectName).csproj</PrimaryProjectFileName>
     <PrimaryProjectPath Condition="$(PrimaryProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(PrimaryProjectName)\$(PrimaryProjectFileName)"))</PrimaryProjectPath>
-    <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false'">true</PrimaryProjectExists>
+    <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false' And Exists($(PrimaryProjectPath))">true</PrimaryProjectExists>
 
     <!-- Fallback primary project properties-->
     <PrimaryProjectName Condition="$(PrimaryProjectExists) == 'false'">$(CliProjectName)</PrimaryProjectName>
     <PrimaryProjectFileName Condition="$(PrimaryProjectExists) == 'false'">$(PrimaryProjectName).csproj</PrimaryProjectFileName>
     <PrimaryProjectPath Condition="$(PrimaryProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(PrimaryProjectName)\$(PrimaryProjectFileName)"))</PrimaryProjectPath>
-    <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false'">true</PrimaryProjectExists>
+    <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false' And Exists($(PrimaryProjectPath))">true</PrimaryProjectExists>
 
     <IsPrimaryProject>false</IsPrimaryProject>
     <IsPrimaryProject Condition="$(MSBuildProjectName) == $(PrimaryProjectName)">true</IsPrimaryProject>
