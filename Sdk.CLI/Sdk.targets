@@ -1,3 +1,12 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.50.0" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
+    <PackageReference Include="Spectre.Console.Testing" Version="0.50.0" />
+    <PackageReference Include="Spectre.Console.Json" Version="0.50.0" />
+    <PackageReference Include="Spectre.Console.Analyzer" Version="0.50.0" />
+    <PackageReference Include="Spectre.Console.ImageSharp" Version="0.50.0" />
+    <Using Include="Spectre.Console" />
+    <Using Include="Spectre.Console.Cli" />
+  </ItemGroup>
 </Project>

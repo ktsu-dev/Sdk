@@ -13,12 +13,38 @@
     <IsPackable Condition="$(IsLibrary)">true</IsPackable>
   </PropertyGroup>
 
+  <!-- Reference to core project -->
+  <ItemGroup Condition="!$(IsPrimaryProject)">
+    <ProjectReference Include="$(PrimaryProjectPath)" />
+    <Using Include="ktsu.$(PrimaryProjectName)" />
+  </ItemGroup>
+
+  <!-- Expose internals to test projects -->
+  <ItemGroup Condition="!$(IsTestProject)">
+    <InternalsVisibleTo Include="$(TestProjectName)" />
+  </ItemGroup>
+
+  <!-- Standard packages for all projects -->
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0" PrivateAssets="All"/>
-    <InternalsVisibleTo Condition="!$(IsTestProject)" Include="$(AssemblyName).Test" />
+    <PackageReference Include="ktsu.AppDataStorage" Version="*" />
+    <PackageReference Include="ktsu.DeepClone" Version="*" />
+    <PackageReference Include="ktsu.Sorting" Version="*" />
+    <PackageReference Include="ktsu.SemanticString" Version="*" />
+    <Using Include="ktsu.AppDataStorage" />
+    <Using Include="ktsu.DeepClone" />
+    <Using Include="ktsu.Sorting" />
+    <Using Include="ktsu.SemanticString" />
   </ItemGroup>
 
+  <!-- Executable project specific packages -->
+  <ItemGroup Condition="$(IsExecutable)">
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <Using Include="CommandLine" />
+  </ItemGroup>
+
+  <!-- Show solution scoped files inside the primary project -->
   <ItemGroup Condition="$(IsPrimaryProject)">
     <!-- Build related files -->
     <None Include="$(DirectoryBuildPropsFilePath)" Condition="Exists('$(DirectoryBuildPropsFilePath)')" Link="_Build\$(DirectoryBuildPropsFileName)" />

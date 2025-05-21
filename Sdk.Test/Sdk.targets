@@ -9,4 +9,21 @@
     <!-- CA5394: Do not use insecure randomness -->
     <!-- CA1707: Identifiers should not contain underscores -->
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="20.0.15" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="20.0.15" />
+    <Using Include="Moq" />
+    <Using Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
+    <Using Include="TestableIO.System.IO.Abstractions.Wrappers" />
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Condition="$(CliProjectExists)" Include="$(CliProjectPath)" />
+    <ProjectReference Condition="$(AppProjectExists)" Include="$(AppProjectPath)" />
+    <Using Condition="$(CliProjectExists) And $(CliProjectName) != $(PrimaryProjectName)" Include="ktsu.$(CliProjectName)" />
+    <Using Condition="$(AppProjectExists) And $(AppProjectName) != $(PrimaryProjectName)" Include="ktsu.$(AppProjectName)" />
+  </ItemGroup>
 </Project>
