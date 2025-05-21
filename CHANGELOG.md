@@ -1,3 +1,9 @@
+## v1.20.1-pre.1 (prerelease)
+
+Changes since v1.20.0:
+
+- [minor] Update TestableIO.System.IO.Abstractions package version ([@matt-edmondson](https://github.com/matt-edmondson))
+- Merge branch 'main' of https://github.com/ktsu-dev/Sdk ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.20.0 (minor)
 
 Changes since v1.19.0:
