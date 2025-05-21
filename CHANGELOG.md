@@ -1,3 +1,8 @@
+## v1.12.1 (patch)
+
+Changes since v1.12.0:
+
+- Add MSBuildSdk packaging support to project files ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.12.0 (minor)
 
 Changes since v1.11.0:
