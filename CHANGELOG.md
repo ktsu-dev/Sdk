@@ -1,3 +1,8 @@
+## v1.16.0 (minor)
+
+Changes since v1.15.0:
+
+- Enhance project existence checks in Sdk.props ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.15.0 (minor)
 
 Changes since v1.14.0:
