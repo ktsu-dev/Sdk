@@ -1,3 +1,8 @@
+## v1.28.0 (minor)
+
+Changes since v1.27.0:
+
+- [minor] Remove duplicate CommandLineParser package reference ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.27.0 (minor)
 
 Changes since v1.26.0:
