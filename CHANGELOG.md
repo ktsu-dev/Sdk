@@ -1,3 +1,8 @@
+## v1.30.0 (minor)
+
+Changes since v1.29.0:
+
+- Cleanup: Remove unused ktsu package references ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.29.0 (minor)
 
 Changes since v1.28.0:
