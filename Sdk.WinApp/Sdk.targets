@@ -1,8 +1,2 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup>
-    <PackageReference Include="ktsu.ImGuiApp" Version="*" />
-
-    <Using Include="ktsu.ImGuiApp" />
-
-  </ItemGroup>
 </Project>
