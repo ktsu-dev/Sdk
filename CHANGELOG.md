@@ -1,3 +1,8 @@
+## v1.31.0 (minor)
+
+Changes since v1.30.0:
+
+- Update package references and manage versions centrally ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.30.0 (minor)
 
 Changes since v1.29.0:
