@@ -1,3 +1,8 @@
+## v1.32.0 (minor)
+
+Changes since v1.31.0:
+
+- Update PackageReferences in Sdk.targets ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.31.0 (minor)
 
 Changes since v1.30.0:
