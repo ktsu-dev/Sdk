@@ -292,6 +292,7 @@
     <!-- <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences> -->
     <!-- <DisableTransitiveFrameworkReferenceDownloads>true</DisableTransitiveFrameworkReferenceDownloads> -->
     <!-- <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences> -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 
     <!-- Restore-related properties -->
     <!-- <RestoreIgnoreFailedSource>true</RestoreIgnoreFailedSource> -->

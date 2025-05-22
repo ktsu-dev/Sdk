@@ -1,9 +1,9 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <PackageReference Include="ktsu.ImGuiApp" Version="*" />
-    <PackageReference Include="ktsu.ImGuiWidgets" Version="*" />
-    <PackageReference Include="ktsu.ImGuiStyler" Version="*" />
-    <PackageReference Include="ktsu.ImGuiPopups" Version="*" />
+    <PackageReference Include="ktsu.ImGuiApp" />
+    <PackageReference Include="ktsu.ImGuiWidgets" />
+    <PackageReference Include="ktsu.ImGuiStyler" />
+    <PackageReference Include="ktsu.ImGuiPopups" />
     <Using Include="ktsu.ImGuiApp" />
     <Using Include="ktsu.ImGuiWidgets" />
     <Using Include="ktsu.ImGuiStyler" />
