@@ -47,6 +47,8 @@
     <None Include="$(GitHubCopilotInstructionsFilePath)" Condition="Exists('$(GitHubCopilotInstructionsFilePath)')" Link="_Build\$(GitHubCopilotInstructionsFileName)" />
     <None Include="$(EditorConfigFilePath)" Condition="Exists('$(EditorConfigFilePath)')" Link="_Build\$(EditorConfigFileName)" />
     <None Include="$(RunSettingsFilePath)" Condition="Exists('$(RunSettingsFilePath)')" Link="_Build\$(RunSettingsFileName)" />
+    <None Include="$(GlobalJsonFilePath)" Condition="Exists('$(GlobalJsonFilePath)')" Link="_Build\$(GlobalJsonFileName)" />
+    <None Include="$(DirectoryPackagesPropsFilePath)" Condition="Exists('$(DirectoryPackagesPropsFilePath)')" Link="_Build\$(DirectoryPackagesPropsFileName)" />
 
     <!-- Git related files -->
     <None Include="$(GitIgnoreFilePath)" Condition="Exists('$(GitIgnoreFilePath)')" Link="_Git\$(GitIgnoreFileName)" />
