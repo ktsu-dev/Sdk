@@ -1,3 +1,8 @@
+## v1.33.0 (minor)
+
+Changes since v1.32.0:
+
+- Update project to .NET 9.0 and enhance configuration ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.32.0 (minor)
 
 Changes since v1.31.0:
