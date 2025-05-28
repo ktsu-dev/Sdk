@@ -1,3 +1,8 @@
+## v1.34.0 (minor)
+
+Changes since v1.33.0:
+
+- Update SDK configurations and add centralized package management ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.33.0 (minor)
 
 Changes since v1.32.0:
