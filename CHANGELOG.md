@@ -1,3 +1,8 @@
+## v1.35.0 (minor)
+
+Changes since v1.34.0:
+
+- Refactor project structure and update dependencies ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.34.0 (minor)
 
 Changes since v1.33.0:
