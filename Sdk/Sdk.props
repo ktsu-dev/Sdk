@@ -58,6 +58,16 @@
     <CliProjectPath Condition="$(CliProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(CliProjectName)\$(CliProjectFileName)"))</CliProjectPath>
     <CliProjectExists Condition="$(CliProjectExists) == 'false' And Exists($(CliProjectPath))">true</CliProjectExists>
 
+    <CliProjectName Condition="$(CliProjectExists) == 'false'">$(SolutionName).ConsoleApp</CliProjectName>
+    <CliProjectFileName Condition="$(CliProjectExists) == 'false'">$(CliProjectName).csproj</CliProjectFileName>
+    <CliProjectPath Condition="$(CliProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(CliProjectName)\$(CliProjectFileName)"))</CliProjectPath>
+    <CliProjectExists Condition="$(CliProjectExists) == 'false' And Exists($(CliProjectPath))">true</CliProjectExists>
+
+    <CliProjectName Condition="$(CliProjectExists) == 'false'">$(SolutionName).Console</CliProjectName>
+    <CliProjectFileName Condition="$(CliProjectExists) == 'false'">$(CliProjectName).csproj</CliProjectFileName>
+    <CliProjectPath Condition="$(CliProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(CliProjectName)\$(CliProjectFileName)"))</CliProjectPath>
+    <CliProjectExists Condition="$(CliProjectExists) == 'false' And Exists($(CliProjectPath))">true</CliProjectExists>
+
     <AppProjectName>$(SolutionName).App</AppProjectName>
     <AppProjectFileName>$(AppProjectName).csproj</AppProjectFileName>
     <AppProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(AppProjectName)\$(AppProjectFileName)"))</AppProjectPath>
@@ -65,6 +75,26 @@
     <AppProjectExists Condition="Exists($(AppProjectPath))">true</AppProjectExists>
 
     <AppProjectName Condition="$(AppProjectExists) == 'false'">$(SolutionName)App</AppProjectName>
+    <AppProjectFileName Condition="$(AppProjectExists) == 'false'">$(AppProjectName).csproj</AppProjectFileName>
+    <AppProjectPath Condition="$(AppProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(AppProjectName)\$(AppProjectFileName)"))</AppProjectPath>
+    <AppProjectExists Condition="$(AppProjectExists) == 'false' And Exists($(AppProjectPath))">true</AppProjectExists>
+
+    <AppProjectName Condition="$(AppProjectExists) == 'false'">$(SolutionName)WinApp</AppProjectName>
+    <AppProjectFileName Condition="$(AppProjectExists) == 'false'">$(AppProjectName).csproj</AppProjectFileName>
+    <AppProjectPath Condition="$(AppProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(AppProjectName)\$(AppProjectFileName)"))</AppProjectPath>
+    <AppProjectExists Condition="$(AppProjectExists) == 'false' And Exists($(AppProjectPath))">true</AppProjectExists>
+
+    <AppProjectName Condition="$(AppProjectExists) == 'false'">$(SolutionName).WinApp</AppProjectName>
+    <AppProjectFileName Condition="$(AppProjectExists) == 'false'">$(AppProjectName).csproj</AppProjectFileName>
+    <AppProjectPath Condition="$(AppProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(AppProjectName)\$(AppProjectFileName)"))</AppProjectPath>
+    <AppProjectExists Condition="$(AppProjectExists) == 'false' And Exists($(AppProjectPath))">true</AppProjectExists>
+
+    <AppProjectName Condition="$(AppProjectExists) == 'false'">$(SolutionName)ImGuiApp</AppProjectName>
+    <AppProjectFileName Condition="$(AppProjectExists) == 'false'">$(AppProjectName).csproj</AppProjectFileName>
+    <AppProjectPath Condition="$(AppProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(AppProjectName)\$(AppProjectFileName)"))</AppProjectPath>
+    <AppProjectExists Condition="$(AppProjectExists) == 'false' And Exists($(AppProjectPath))">true</AppProjectExists>
+
+    <AppProjectName Condition="$(AppProjectExists) == 'false'">$(SolutionName).ImGuiApp</AppProjectName>
     <AppProjectFileName Condition="$(AppProjectExists) == 'false'">$(AppProjectName).csproj</AppProjectFileName>
     <AppProjectPath Condition="$(AppProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(AppProjectName)\$(AppProjectFileName)"))</AppProjectPath>
     <AppProjectExists Condition="$(AppProjectExists) == 'false' And Exists($(AppProjectPath))">true</AppProjectExists>
