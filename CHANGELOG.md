@@ -1,3 +1,8 @@
+## v1.38.0 (minor)
+
+Changes since v1.37.0:
+
+- Update SelfContained property in Sdk.props ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.37.0 (minor)
 
 Changes since v1.36.0:
