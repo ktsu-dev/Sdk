@@ -1,3 +1,8 @@
+## v1.37.0 (minor)
+
+Changes since v1.36.0:
+
+- Enable self-contained deployment in Sdk.props ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.36.0 (minor)
 
 Changes since v1.35.0:
