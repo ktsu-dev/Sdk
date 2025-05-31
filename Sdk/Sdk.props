@@ -271,7 +271,8 @@
     <!-- <RuntimeIdentifier>win-x64</RuntimeIdentifier> -->
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64;osx-x64;linux-x64;osx-arm64;linux-arm64</RuntimeIdentifiers>
     <!-- <SatelliteResourceLanguages>en-US;de-DE</SatelliteResourceLanguages> -->
-    <SelfContained>true</SelfContained>
+    <SelfContained>false</SelfContained>
+    <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
     <!-- <UseAppHost>false</UseAppHost> -->
     <PublishSingleFile>true</PublishSingleFile>
     <PublishTrimmed>false</PublishTrimmed>
