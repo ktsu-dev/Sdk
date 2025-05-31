@@ -1,3 +1,8 @@
+## v1.36.0 (minor)
+
+Changes since v1.35.0:
+
+- Update runtime identifiers and publishing properties ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.35.0 (minor)
 
 Changes since v1.34.0:
