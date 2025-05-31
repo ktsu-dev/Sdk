@@ -265,19 +265,12 @@
     <PublishDocumentationFiles>true</PublishDocumentationFiles>
     <PublishReferencesDocumentationFiles>true</PublishReferencesDocumentationFiles>
     <PublishRelease>true</PublishRelease>
-    <PublishSelfContained>true</PublishSelfContained>
     <RollForward>LatestMinor</RollForward>
     <RuntimeFrameworkVersion>9.0.0</RuntimeFrameworkVersion>
     <!-- <RuntimeIdentifier>win-x64</RuntimeIdentifier> -->
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64;osx-x64;linux-x64;osx-arm64;linux-arm64</RuntimeIdentifiers>
     <!-- <SatelliteResourceLanguages>en-US;de-DE</SatelliteResourceLanguages> -->
-    <SelfContained>false</SelfContained>
-    <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
     <!-- <UseAppHost>false</UseAppHost> -->
-    <PublishSingleFile>true</PublishSingleFile>
-    <PublishTrimmed>false</PublishTrimmed>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 
     <!-- Build-related properties -->
     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
