@@ -16,7 +16,6 @@
   <!-- Reference to core project -->
   <ItemGroup Condition="$(IsPrimaryProject) == 'false'">
     <ProjectReference Include="$(PrimaryProjectPath)" />
-    <Using Include="ktsu.$(PrimaryProjectName)" />
   </ItemGroup>
 
   <!-- Expose internals to test projects -->
