@@ -1,3 +1,9 @@
+## v1.39.0 (minor)
+
+Changes since v1.38.0:
+
+- Remove self-contained and single-file publish settings ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update configuration files and dependencies ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.38.0 (minor)
 
 Changes since v1.37.0:
