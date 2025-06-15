@@ -1,3 +1,8 @@
+## v1.44.0 (minor)
+
+Changes since v1.43.0:
+
+- Add Microsoft.NET.Sdk to Sdk.props for enhanced project configuration ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.43.0 (minor)
 
 Changes since v1.42.0:
