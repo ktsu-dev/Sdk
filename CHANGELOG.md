@@ -1,3 +1,8 @@
+## v1.45.0 (minor)
+
+Changes since v1.44.0:
+
+- Add Microsoft.Testing.Extensions.CodeCoverage package reference to Sdk.props ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.44.0 (minor)
 
 Changes since v1.43.0:
