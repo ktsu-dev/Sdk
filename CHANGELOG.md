@@ -1,3 +1,8 @@
+## v1.43.0 (minor)
+
+Changes since v1.42.0:
+
+- Enhance test project configuration in Sdk.props ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.42.0 (minor)
 
 Changes since v1.41.0:
