@@ -1,3 +1,8 @@
+## v1.42.0 (minor)
+
+Changes since v1.41.0:
+
+- Standardize library usage across projects in MSBuild SDK ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.41.0 (minor)
 
 Changes since v1.40.0:
