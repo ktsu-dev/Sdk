@@ -1,3 +1,8 @@
+## v1.41.0 (minor)
+
+Changes since v1.40.0:
+
+- Update SDK documentation and streamline scripts ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.40.0 (minor)
 
 Changes since v1.39.0:
