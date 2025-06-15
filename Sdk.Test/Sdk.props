@@ -1,5 +1,14 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Sdk Name="ktsu.Sdk" />
-  <Sdk Name="MSTest.Sdk" />
-</Project>
 
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
+  </ItemGroup>
+
+</Project>
