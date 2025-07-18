@@ -233,6 +233,9 @@
     <PackageReadmeFile>$(ReadmeFileName)</PackageReadmeFile>
     <PackageLicenseFile>$(LicenseFileName)</PackageLicenseFile>
     <PackageReleaseNotes>$(Changelog)</PackageReleaseNotes>
+    <!-- Set PackageReleaseNotes only if not already set, with truncation if needed -->
+    <PackageReleaseNotes Condition="'$(PackageReleaseNotes)' == '' AND '$(Changelog)' != ''">$(Changelog)</PackageReleaseNotes>
+    <PackageReleaseNotes Condition="$([MSBuild]::GetStringLength('$(PackageReleaseNotes)')) > 35000">$(PackageReleaseNotes.Substring(0, 34950))... (truncated due to NuGet length limits)</PackageReleaseNotes>
     <PackageDescription>$(Description)</PackageDescription>
     <PackageTags>$(Tags)</PackageTags>
     <PackageProjectUrl>$(ProjectUrl)</PackageProjectUrl>
