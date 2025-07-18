@@ -1,3 +1,8 @@
+## v1.47.0 (minor)
+
+Changes since v1.46.0:
+
+- Enhance PackageReleaseNotes handling in Sdk.props ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.46.0 (minor)
 
 Changes since v1.45.0:
