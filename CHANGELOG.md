@@ -1,3 +1,8 @@
+## v1.48.0 (minor)
+
+Changes since v1.47.0:
+
+- Fix PackageReleaseNotes condition syntax in Sdk.props for NuGet compliance ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.47.0 (minor)
 
 Changes since v1.46.0:
