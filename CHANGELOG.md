@@ -1,3 +1,8 @@
+## v1.49.0 (minor)
+
+Changes since v1.48.0:
+
+- Update project configuration and build scripts ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.48.0 (minor)
 
 Changes since v1.47.0:
