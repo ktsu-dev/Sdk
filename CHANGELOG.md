@@ -1,3 +1,8 @@
+## v1.50.0 (minor)
+
+Changes since v1.49.0:
+
+- Remove deprecated files and update project configurations for multi-targeting support ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.49.0 (minor)
 
 Changes since v1.48.0:
