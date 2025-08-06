@@ -10,4 +10,6 @@
     <!-- CA5394: Do not use insecure randomness -->
     <!-- CA1707: Identifiers should not contain underscores -->
   </PropertyGroup>
+  <Import Project="Sdk.targets" Sdk="ktsu.Sdk" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>
