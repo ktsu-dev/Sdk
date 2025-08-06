@@ -1,3 +1,8 @@
+## v1.53.0 (minor)
+
+Changes since v1.52.0:
+
+- Refactor SDK import statements in Sdk.props files for ConsoleApp and ImGuiApp to enhance modularity and maintainability. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.52.0 (minor)
 
 Changes since v1.51.0:
