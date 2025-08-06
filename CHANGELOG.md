@@ -1,3 +1,8 @@
+## v1.52.0 (minor)
+
+Changes since v1.51.0:
+
+- Remove redundant SDK import statements from Sdk.targets files across multiple projects to streamline project configuration. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.51.0 (minor)
 
 Changes since v1.50.0:
