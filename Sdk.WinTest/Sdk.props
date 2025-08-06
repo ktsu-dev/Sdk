@@ -1,6 +1,7 @@
+<!-- ktsu.Sdk.WinTest/Sdk.props -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Sdk Name="ktsu.Sdk" />
-  <Sdk Name="MSTest.Sdk" />
+  <Import Project="Sdk.props" Sdk="MSTest.Sdk" />
+  <Import Project="Sdk.props" Sdk="ktsu.Sdk" />
 
   <PropertyGroup>
     <RuntimeIdentifiers></RuntimeIdentifiers>

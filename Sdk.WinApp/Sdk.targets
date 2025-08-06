@@ -1,2 +1,5 @@
+<!-- ktsu.Sdk.WinApp/Sdk.targets -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Sdk.targets" Sdk="ktsu.Sdk" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

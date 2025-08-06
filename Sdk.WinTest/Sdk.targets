@@ -1,3 +1,4 @@
+<!-- ktsu.Sdk.WinTest/Sdk.targets -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <NoWarn>$(NoWarn);CS1591;CA2225;IDE0022;IDE0058;CA1305;CA5394;CA1707;</NoWarn>
@@ -9,4 +10,7 @@
     <!-- CA5394: Do not use insecure randomness -->
     <!-- CA1707: Identifiers should not contain underscores -->
   </PropertyGroup>
+
+  <Import Project="Sdk.targets" Sdk="ktsu.Sdk" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

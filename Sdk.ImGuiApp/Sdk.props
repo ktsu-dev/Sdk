@@ -1,3 +1,4 @@
+<!-- ktsu.Sdk.ImGuiApp/Sdk.props -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Sdk Name="ktsu.Sdk" />
   <Sdk Name="Microsoft.NET.Sdk"/>
@@ -11,7 +12,7 @@
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows')) And $(RuntimeIdentifier.StartsWith('win'))">
     <OutputType>WinExe</OutputType>
   </PropertyGroup>
-  
+
   <!-- Fallback for Windows detection if no RID is specified -->
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows')) And '$(RuntimeIdentifier)' == ''">
     <OutputType>WinExe</OutputType>

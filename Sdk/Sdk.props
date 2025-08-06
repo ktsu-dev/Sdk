@@ -1,3 +1,4 @@
+<!-- ktsu.Sdk/Sdk.props -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <!-- These seem to only be populated when building via the IDE -->
