@@ -1,3 +1,8 @@
+## v1.55.0 (minor)
+
+Changes since v1.54.0:
+
+- Refactor SDK import statements in Sdk.props files and remove redundant imports from Sdk.targets files across multiple projects to enhance modularity and maintainability. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.54.0 (minor)
 
 Changes since v1.53.0:
