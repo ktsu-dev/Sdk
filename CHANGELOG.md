@@ -1,3 +1,8 @@
+## v1.54.0 (minor)
+
+Changes since v1.53.0:
+
+- Enhance SDK import statements in Sdk.targets files for multiple projects to improve modularity and maintainability. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.53.0 (minor)
 
 Changes since v1.52.0:
