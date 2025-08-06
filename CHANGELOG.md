@@ -1,3 +1,8 @@
+## v1.56.0 (minor)
+
+Changes since v1.55.0:
+
+- Update TargetFrameworks in Sdk.props to include additional frameworks for improved compatibility ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.55.0 (minor)
 
 Changes since v1.54.0:
