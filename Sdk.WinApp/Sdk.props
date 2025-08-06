@@ -3,7 +3,6 @@
   <Sdk Name="Microsoft.NET.Sdk"/>
 
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RuntimeIdentifiers></RuntimeIdentifiers>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>

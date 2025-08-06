@@ -3,7 +3,6 @@
   <Sdk Name="MSTest.Sdk" />
 
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
     <RuntimeIdentifiers></RuntimeIdentifiers>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>

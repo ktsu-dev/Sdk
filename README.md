@@ -1,10 +1,10 @@
 # ktsu.Sdk
 
-A comprehensive .NET SDK that simplifies project configuration, metadata management, and package creation for .NET applications targeting .NET 9.0.
+A comprehensive MSBuild-based SDK for .NET projects that standardizes configuration, metadata management, and package workflows. Supports multiple .NET versions (.NET 5.0+, .NET Standard 2.0/2.1) with optimizations for .NET 9.0.
 
 ## Features
 
--   **Focused on .NET 9.0**: Optimized for the latest .NET framework
+-   **Multi-Target Support**: Supports .NET 5.0+, .NET Standard 2.0/2.1, with optimizations for .NET 9.0
 -   **MSBuildSdk Packaging Support**: Properly configured for MSBuild SDK project packaging
 -   **Standardized Project Structure**: Enforces consistent organization across solution components
 -   **Metadata Management**: Automatically handles project metadata from markdown files
@@ -12,15 +12,17 @@ A comprehensive .NET SDK that simplifies project configuration, metadata managem
 -   **Documentation**: Automated inclusion of documentation in packages
 -   **GitHub Integration**: Built-in support for GitHub workflows and CI/CD
 -   **Cross-Platform Support**: Compatible with Windows, macOS, and Linux
--   **Smart Project Detection**: Automatic detection of primary, CLI, App, and Test projects
+-   **Smart Project Detection**: Automatic detection of primary, console, GUI, and test projects
 
 ## Project Structure
 
 -   **Sdk**: Core SDK implementation with MSBuild props and targets
--   **Sdk.App**: Application-specific SDK extensions
--   **Sdk.Lib**: Library-focused SDK components
--   **Sdk.CLI**: Command-line application SDK support
--   **Sdk.Test**: Testing infrastructure and configuration
+-   **Sdk.Lib**: Library-focused SDK components for class libraries
+-   **Sdk.ConsoleApp**: Console application SDK support with cross-platform console configurations
+-   **Sdk.ImGuiApp**: ImGui application SDK for modern GUI applications
+-   **Sdk.WinApp**: Windows application SDK for platform-specific GUI applications
+-   **Sdk.Test**: Testing infrastructure and configuration for unit tests
+-   **Sdk.WinTest**: Windows-specific testing infrastructure and configuration
 
 ## Usage
 
@@ -39,11 +41,11 @@ To use this SDK in your project:
 The SDK automatically detects different project types in your solution:
 
 -   **Primary Project**: The main project of your solution (YourSolution, YourSolution.Core)
--   **CLI Project**: Command-line interface projects (YourSolution.CLI, YourSolutionCLI)
--   **App Project**: Application projects (YourSolution.App, YourSolutionApp)
--   **Test Project**: Test projects (YourSolution.Test, YourSolution.Tests)
+-   **Console Projects**: Command-line interface projects (YourSolution.ConsoleApp, YourSolutionConsoleApp, YourSolution.CLI, YourSolutionCLI)
+-   **GUI App Projects**: Application projects (YourSolution.App, YourSolutionApp, YourSolution.WinApp, YourSolutionWinApp, YourSolution.ImGuiApp, YourSolutionImGuiApp)
+-   **Test Projects**: Test projects (YourSolution.Test, YourSolution.Tests, YourSolutionTest, YourSolutionTests, YourSolution.WinTest, YourSolutionWinTest)
 
-Each project type receives appropriate default settings and references.
+Each project type receives appropriate default settings, references, and output configurations (console apps vs. GUI apps).
 
 ## Metadata Files
 
@@ -58,7 +60,7 @@ This SDK supports the following metadata files at the solution root:
 -   `TAGS.md`: Project tags for NuGet packages
 -   `COPYRIGHT.md`: Copyright information
 -   `AUTHORS.url`: URL to authors' information
--   `PROJECT.url`: URL to project information
+-   `PROJECT_URL.url`: URL to project information
 
 These files are automatically included in the NuGet package and used to populate package metadata.
 
@@ -82,7 +84,7 @@ Internals are automatically exposed to test projects, and testing configurations
 
 ## Requirements
 
--   .NET SDK 9.0 or later
+-   .NET SDK 5.0 or later (optimized for .NET SDK 9.0)
 
 ## License
 
