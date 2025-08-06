@@ -1,3 +1,8 @@
+## v1.51.0 (minor)
+
+Changes since v1.50.0:
+
+- Add SDK metadata and update project configurations ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.50.0 (minor)
 
 Changes since v1.49.0:
