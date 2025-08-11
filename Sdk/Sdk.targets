@@ -15,12 +15,12 @@
   </PropertyGroup>
 
   <!-- Reference to core project -->
-  <ItemGroup Condition="$(IsPrimaryProject) == 'false'">
+  <ItemGroup Condition="$(IsPrimaryProject) == 'false' And $(PrimaryProjectExists) == 'true'">
     <ProjectReference Include="$(PrimaryProjectPath)" />
   </ItemGroup>
 
   <!-- Expose internals to test projects -->
-  <ItemGroup Condition="$(IsTestProject) == 'false'">
+  <ItemGroup Condition="$(IsTestProject) == 'false' And $(TestProjectExists) == 'true'">
     <InternalsVisibleTo Include="$(TestProjectNamespace)" />
   </ItemGroup>
 
@@ -50,7 +50,7 @@
     <None Include="$(GitMailMapFilePath)" Condition="Exists('$(GitMailMapFilePath)')" Link="_Git\$(GitMailMapFileName)" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(IsTestProject) == 'false'">
+  <ItemGroup Condition="$(IsTestProject) == 'false' And $(TestProjectExists) == 'true'">
     <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" />
     <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" />
     <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" />

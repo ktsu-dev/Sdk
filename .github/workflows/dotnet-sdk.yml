@@ -171,6 +171,11 @@ jobs:
       shell: pwsh
       run: dotnet nuget push ${{ env.PACKAGE_PATTERN }} --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
+    - name: Publish Libraries to ktsu.dev
+      if: ${{ env.SHOULD_RELEASE == 'True' && hashFiles(env.PACKAGE_PATTERN) != '' }}
+      shell: pwsh
+      run: dotnet nuget push ${{ env.PACKAGE_PATTERN }} --api-key ${{ secrets.KTSU_PACKAGE_KEY }} --source https://packages.ktsu.dev/v3/index.json --skip-duplicate
+
     - name: Release
       if: ${{ env.SHOULD_RELEASE == 'True' }}
       uses: ncipollo/release-action@v1
