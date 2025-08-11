@@ -1,3 +1,8 @@
+## v1.58.0 (minor)
+
+Changes since v1.57.0:
+
+- Refine conditions in Sdk.targets to improve project file inclusion logic for primary and test projects. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.57.0 (minor)
 
 Changes since v1.56.0:
