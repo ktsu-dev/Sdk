@@ -1,3 +1,8 @@
+## v1.59.0 (minor)
+
+Changes since v1.58.0:
+
+- Enhance SDK documentation and features in DESCRIPTION.md and README.md. Improve project structure detection, error handling, and package management capabilities. Update Sdk.props and Sdk.targets for better namespace generation and project inclusion logic. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.58.0 (minor)
 
 Changes since v1.57.0:
