@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <!-- Show solution scoped files inside the primary project -->
-  <ItemGroup Condition="$(IsPrimaryProject)">
+  <ItemGroup Condition="$(IsPrimaryProject) Or $(PrimaryProjectExists) == 'false'">
     <!-- Build related files -->
     <None Include="$(DirectoryBuildPropsFilePath)" Condition="Exists('$(DirectoryBuildPropsFilePath)')" Link="_Build\$(DirectoryBuildPropsFileName)" />
     <None Include="$(DirectoryBuildTargetsFilePath)" Condition="Exists('$(DirectoryBuildTargetsFilePath)')" Link="_Build\$(DirectoryBuildTargetsFileName)" />
@@ -50,7 +50,7 @@
     <None Include="$(GitMailMapFilePath)" Condition="Exists('$(GitMailMapFilePath)')" Link="_Git\$(GitMailMapFileName)" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(IsTestProject) == 'false' And $(TestProjectExists) == 'true'">
+  <ItemGroup Condition="$(IsTestProject) == 'false'">
     <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" />
     <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" />
     <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" />
