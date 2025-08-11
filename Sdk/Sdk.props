@@ -2,9 +2,42 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <!-- These seem to only be populated when building via the IDE -->
-    <SolutionDir Condition="'$(SolutionDir)' == ''">$([System.IO.Path]::Combine($(MSBuildProjectDirectory), `..`))</SolutionDir>
     <SolutionExt Condition="'$(SolutionExt)' == ''">.sln</SolutionExt>
-    <SolutionPath Condition="'$(SolutionPath)' == ''">$([MSBuild]::NormalizePath($([System.IO.Path]::GetFullPath($([System.IO.Directory]::GetFiles("$(SolutionDir)", "*$(SolutionExt)")[0])))))</SolutionPath>
+
+    <!-- Find solution directory by searching up the hierarchy -->
+    <!-- Start from the project directory and search upward for solution files -->
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildProjectDirectory)</SolutionDir>
+
+    <!-- Define a macro for repetitive search logic -->
+    <_SearchDir0>$(SolutionDir)</_SearchDir0>
+    <_SearchDir1>$([System.IO.Path]::GetDirectoryName($(_SearchDir0)))</_SearchDir1>
+    <_SearchDir2>$([System.IO.Path]::GetDirectoryName($(_SearchDir1)))</_SearchDir2>
+    <_SearchDir3>$([System.IO.Path]::GetDirectoryName($(_SearchDir2)))</_SearchDir3>
+    <_SearchDir4>$([System.IO.Path]::GetDirectoryName($(_SearchDir3)))</_SearchDir4>
+    <_SearchDir5>$([System.IO.Path]::GetDirectoryName($(_SearchDir4)))</_SearchDir5>
+
+    <!-- Check each directory level for solution files -->
+    <_SolutionFiles0 Condition="'$(_SearchDir0)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir0)", "*$(SolutionExt)"))</_SolutionFiles0>
+    <_SolutionFiles1 Condition="'$(_SearchDir1)' != '' And '$(_SolutionFiles0)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir1)", "*$(SolutionExt)"))</_SolutionFiles1>
+    <_SolutionFiles2 Condition="'$(_SearchDir2)' != '' And '$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir2)", "*$(SolutionExt)"))</_SolutionFiles2>
+    <_SolutionFiles3 Condition="'$(_SearchDir3)' != '' And '$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir3)", "*$(SolutionExt)"))</_SolutionFiles3>
+    <_SolutionFiles4 Condition="'$(_SearchDir4)' != '' And '$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir4)", "*$(SolutionExt)"))</_SolutionFiles4>
+    <_SolutionFiles5 Condition="'$(_SearchDir5)' != '' And '$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == '' And '$(_SolutionFiles4)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir5)", "*$(SolutionExt)"))</_SolutionFiles5>
+
+    <!-- Set SolutionDir to the first directory that contains solution files -->
+    <SolutionDir Condition="'$(_SolutionFiles0)' != ''">$(_SearchDir0)</SolutionDir>
+    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' != ''">$(_SearchDir1)</SolutionDir>
+    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' != ''">$(_SearchDir2)</SolutionDir>
+    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' != ''">$(_SearchDir3)</SolutionDir>
+    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == '' And '$(_SolutionFiles4)' != ''">$(_SearchDir4)</SolutionDir>
+    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == '' And '$(_SolutionFiles4)' == '' And '$(_SolutionFiles5)' != ''">$(_SearchDir5)</SolutionDir>
+
+    <!-- Fallback to parent directory if no solution found within 5 levels -->
+    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == '' And '$(_SolutionFiles4)' == '' And '$(_SolutionFiles5)' == ''">$([System.IO.Path]::Combine($(MSBuildProjectDirectory), `..`))</SolutionDir>
+
+    <!-- Find solution file safely - only set if solution files exist -->
+    <_SolutionFiles>$([System.IO.Directory]::GetFiles("$(SolutionDir)", "*$(SolutionExt)"))</_SolutionFiles>
+    <SolutionPath Condition="'$(SolutionPath)' == '' And '$(_SolutionFiles)' != '' And !$(_SolutionFiles.StartsWith('System.String[]'))">$([MSBuild]::NormalizePath($([System.IO.Path]::GetFullPath($(_SolutionFiles.Split(';')[0])))))</SolutionPath>
     <SolutionFileName Condition="'$(SolutionFileName)' == ''">$([System.IO.Path]::GetFileName($(SolutionPath)))</SolutionFileName>
     <SolutionName Condition="'$(SolutionName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(SolutionPath)))</SolutionName>
 
@@ -204,16 +237,44 @@
     <IconFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(IconFileName)"))</IconFilePath>
 
     <!-- Namespace properties -->
-    <AuthorsNamespace>$(Authors.Replace(" ", "").Replace('-', '.').Split('.')[0])</AuthorsNamespace>
-    <SolutionNamespace>$(SolutionName.Replace(" ", ""))</SolutionNamespace>
-    <ProjectNamespace>$(MSBuildProjectName.Replace(" ", ""))</ProjectNamespace>
-    <RootNamespace>$(AuthorsNamespace).$(ProjectNamespace)</RootNamespace>
+    <!-- Safely extract first part of authors for namespace -->
+    <_AuthorsParts Condition="'$(Authors)' != ''">$(Authors.Replace(" ", "").Replace('-', '.'))</_AuthorsParts>
+    <AuthorsNamespace Condition="'$(_AuthorsParts)' != '' And $(_AuthorsParts.Contains('.'))">$(_AuthorsParts.Split('.')[0])</AuthorsNamespace>
+    <AuthorsNamespace Condition="'$(_AuthorsParts)' != '' And !$(_AuthorsParts.Contains('.'))">$(_AuthorsParts)</AuthorsNamespace>
+    <SolutionNamespace Condition="'$(SolutionName)' != ''">$(SolutionName.Replace(" ", ""))</SolutionNamespace>
+
+    <!-- Build ProjectNamespace from subdirectories between solution and project -->
+    <!-- Examples:
+         Solution: /MySln/, Project: /MySln/src/Core/MyLib/ → ProjectNamespace: src.Core.MyLib
+         Solution: /MySln/, Project: /MySln/libs/Utils/Utils.csproj → ProjectNamespace: libs.Utils (Utils already included)
+         Solution: /MySln/, Project: /MySln/MyApp/ → ProjectNamespace: MyApp -->
+    <_ProjectRelativePath Condition="'$(SolutionDir)' != '' And '$(MSBuildProjectDirectory)' != ''">$([MSBuild]::MakeRelative($(SolutionDir), $(MSBuildProjectDirectory)))</_ProjectRelativePath>
+    <_ProjectPathNamespace Condition="'$(_ProjectRelativePath)' != ''">$(_ProjectRelativePath.Replace('\', '.').Replace('/', '.').TrimEnd('.'))</_ProjectPathNamespace>
+    <_CleanProjectName Condition="'$(MSBuildProjectName)' != ''">$(MSBuildProjectName.Replace(" ", ""))</_CleanProjectName>
+
+    <!-- Check if path already ends with project name (case-sensitive) -->
+    <_PathEndsWithProjectName Condition="'$(_ProjectPathNamespace)' != '' And '$(_CleanProjectName)' != ''">$(_ProjectPathNamespace.EndsWith('.$(_CleanProjectName)'))</_PathEndsWithProjectName>
+    <_PathIsProjectName Condition="'$(_ProjectPathNamespace)' != '' And '$(_CleanProjectName)' != ''">$(_ProjectPathNamespace.Equals('$(_CleanProjectName)'))</_PathIsProjectName>
+
+    <!-- Build final ProjectNamespace -->
+    <ProjectNamespace Condition="'$(_ProjectPathNamespace)' != '' And ('$(_PathEndsWithProjectName)' == 'true' Or '$(_PathIsProjectName)' == 'true')">$(_ProjectPathNamespace)</ProjectNamespace>
+    <ProjectNamespace Condition="'$(_ProjectPathNamespace)' != '' And '$(_PathEndsWithProjectName)' != 'true' And '$(_PathIsProjectName)' != 'true' And '$(_CleanProjectName)' != ''">$(_ProjectPathNamespace).$(_CleanProjectName)</ProjectNamespace>
+    <ProjectNamespace Condition="'$(_ProjectPathNamespace)' == '' And '$(_CleanProjectName)' != ''">$(_CleanProjectName)</ProjectNamespace>
+    <!-- Build RootNamespace safely -->
+    <RootNamespace Condition="'$(AuthorsNamespace)' != '' And '$(ProjectNamespace)' != ''">$(AuthorsNamespace).$(ProjectNamespace)</RootNamespace>
+    <RootNamespace Condition="'$(AuthorsNamespace)' == '' And '$(ProjectNamespace)' != ''">$(ProjectNamespace)</RootNamespace>
+    <RootNamespace Condition="'$(AuthorsNamespace)' != '' And '$(ProjectNamespace)' == ''">$(AuthorsNamespace)</RootNamespace>
+    <RootNamespace Condition="'$(AuthorsNamespace)' == '' And '$(ProjectNamespace)' == ''">$(MSBuildProjectName)</RootNamespace>
+
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Title>$(AssemblyName)</Title>
     <Company>$(Authors)</Company>
     <Product>$(AssemblyName)</Product>
 
-    <TestProjectNamespace>$(AuthorsNamespace).$(TestProjectName)</TestProjectNamespace>
+    <!-- Build TestProjectNamespace safely -->
+    <TestProjectNamespace Condition="'$(AuthorsNamespace)' != '' And '$(TestProjectName)' != ''">$(AuthorsNamespace).$(TestProjectName)</TestProjectNamespace>
+    <TestProjectNamespace Condition="'$(AuthorsNamespace)' == '' And '$(TestProjectName)' != ''">$(TestProjectName)</TestProjectNamespace>
+    <TestProjectNamespace Condition="'$(TestProjectName)' == ''">$(RootNamespace).Test</TestProjectNamespace>
 
     <!-- Assembly validation properties -->
     <ApiCompatStrictMode>true</ApiCompatStrictMode>
@@ -236,7 +297,7 @@
     <PackageReleaseNotes>$(Changelog)</PackageReleaseNotes>
     <!-- Set PackageReleaseNotes only if not already set, with truncation if needed -->
     <PackageReleaseNotes Condition="'$(PackageReleaseNotes)' == '' AND '$(Changelog)' != ''">$(Changelog)</PackageReleaseNotes>
-    <PackageReleaseNotes Condition="$(PackageReleaseNotes.Length) > 35000">$(PackageReleaseNotes.Substring(0, 34950))... (truncated due to NuGet length limits)</PackageReleaseNotes>
+    <PackageReleaseNotes Condition="'$(PackageReleaseNotes)' != '' And $(PackageReleaseNotes.Length) > 35000">$(PackageReleaseNotes.Substring(0, 34950))... (truncated due to NuGet length limits)</PackageReleaseNotes>
     <PackageDescription>$(Description)</PackageDescription>
     <PackageTags>$(Tags)</PackageTags>
     <PackageProjectUrl>$(ProjectUrl)</PackageProjectUrl>
