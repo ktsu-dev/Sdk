@@ -1,3 +1,8 @@
+## v1.57.0 (minor)
+
+Changes since v1.56.0:
+
+- Add publishing step for libraries to ktsu.dev in GitHub Actions workflow and refine conditions in Sdk.targets ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.56.0 (minor)
 
 Changes since v1.55.0:
