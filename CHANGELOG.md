@@ -1,3 +1,8 @@
+## v1.60.0 (minor)
+
+Changes since v1.59.0:
+
+- Refactor SDK structure by removing Sdk.Lib and updating project files to streamline SDK usage. Enhance README.md with clearer project type descriptions and usage instructions. Remove outdated version update script from workflows. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.59.0 (minor)
 
 Changes since v1.58.0:
