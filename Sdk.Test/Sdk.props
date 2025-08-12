@@ -2,12 +2,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <IsTestProject>true</IsTestProject>
-
     <!-- Test Results Configuration -->
     <VSTestResultsDirectory>$(SolutionDir)coverage</VSTestResultsDirectory>
-
-    <!-- Automatically collect code coverage for all tests -->
-    <VSTestCollect>Code Coverage</VSTestCollect>
   </PropertyGroup>
 
   <ItemGroup>
