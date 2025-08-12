@@ -2,10 +2,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <IsTestProject>true</IsTestProject>
-    <CollectCoverage>true</CollectCoverage>
-    <CoverletOutputFormat>cobertura</CoverletOutputFormat>
-    <CoverletOutput>$(SolutionDir)/coverage/coverage.cobertura.xml</CoverletOutput>
-    <Exclude>[xunit.*]*,[MSTest.*]*,[Microsoft.*]*</Exclude>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +9,6 @@
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
-    <PackageReference Include="coverlet.msbuild" />
   </ItemGroup>
 
 </Project>
