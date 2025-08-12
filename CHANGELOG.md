@@ -1,3 +1,8 @@
+## v1.63.0 (minor)
+
+Changes since v1.62.0:
+
+- Add test results configuration and enable code coverage collection in Sdk.props ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.62.0 (minor)
 
 Changes since v1.61.0:
