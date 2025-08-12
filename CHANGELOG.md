@@ -1,3 +1,8 @@
+## v1.65.0 (minor)
+
+Changes since v1.64.0:
+
+- Remove code coverage collection configuration from Sdk.props to simplify test project setup. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.64.0 (minor)
 
 Changes since v1.63.0:
