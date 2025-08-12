@@ -1,3 +1,8 @@
+## v1.62.0 (minor)
+
+Changes since v1.61.0:
+
+- Remove coverage-related properties and dependencies from Sdk.props to simplify test project configuration. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.61.0 (minor)
 
 Changes since v1.60.0:
