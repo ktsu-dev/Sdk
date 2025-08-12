@@ -30,8 +30,8 @@
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" PrivateAssets="All"/>
   </ItemGroup>
 
-  <!-- Show solution scoped files inside the primary project -->
-  <ItemGroup Condition="$(IsPrimaryProject) Or $(PrimaryProjectExists) == 'false'">
+  <!-- Show solution scoped files inside non-test projects -->
+  <ItemGroup Condition="$(IsTestProject) == 'false'">
     <!-- Build related files -->
     <None Include="$(DirectoryBuildPropsFilePath)" Condition="Exists('$(DirectoryBuildPropsFilePath)')" Link="_Build\$(DirectoryBuildPropsFileName)" />
     <None Include="$(DirectoryBuildTargetsFilePath)" Condition="Exists('$(DirectoryBuildTargetsFilePath)')" Link="_Build\$(DirectoryBuildTargetsFileName)" />
@@ -48,9 +48,8 @@
     <None Include="$(GitConfigFilePath)" Condition="Exists('$(GitConfigFilePath)')" Link="_Git\$(GitConfigFileName)" />
     <None Include="$(GitModulesFilePath)" Condition="Exists('$(GitModulesFilePath)')" Link="_Git\$(GitModulesFileName)" />
     <None Include="$(GitMailMapFilePath)" Condition="Exists('$(GitMailMapFilePath)')" Link="_Git\$(GitMailMapFileName)" />
-  </ItemGroup>
 
-  <ItemGroup Condition="$(IsTestProject) == 'false'">
+    <!-- Package related files -->
     <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" />
     <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" />
     <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" />
