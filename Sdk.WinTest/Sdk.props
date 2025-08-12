@@ -1,8 +1,5 @@
 <!-- ktsu.Sdk.WinTest/Sdk.props -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Sdk Name="Microsoft.NET.Sdk"/>
-  <Sdk Name="ktsu.Sdk"/>
-
   <PropertyGroup>
     <RuntimeIdentifiers></RuntimeIdentifiers>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>

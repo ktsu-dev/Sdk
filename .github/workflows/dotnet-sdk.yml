@@ -111,10 +111,6 @@ jobs:
       shell: pwsh
       run: dotnet tool install -g dotnet-script
 
-    - name: Update Versions
-      shell: pwsh
-      run: ./update-versions.ps1
-
     - name: Commit Version Updates
       if: ${{ env.SHOULD_RELEASE == 'True' }}
       shell: pwsh

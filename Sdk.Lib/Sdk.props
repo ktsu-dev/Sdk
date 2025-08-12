@@ -1,5 +1,0 @@
-<!-- ktsu.Sdk.Lib/Sdk.props -->
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Sdk Name="Microsoft.NET.Sdk"/>
-  <Sdk Name="ktsu.Sdk"/>
-</Project>

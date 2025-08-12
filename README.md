@@ -32,11 +32,10 @@ A comprehensive, robust MSBuild-based SDK for .NET projects that standardizes co
 
 ## Project Structure
 
--   **Sdk**: Core SDK implementation with MSBuild props and targets
--   **Sdk.Lib**: Library-focused SDK components for class libraries
+-   **Sdk**: Core SDK implementation with MSBuild props and targets (for all project types)
 -   **Sdk.ConsoleApp**: Console application SDK support with cross-platform console configurations
 -   **Sdk.ImGuiApp**: ImGui application SDK for modern GUI applications
--   **Sdk.WinApp**: Windows application SDK for platform-specific GUI applications
+-   **Sdk.WinApp**: Windows application SDK for platform-specific GUI applications (WinForms, WPF, etc.)
 -   **Sdk.Test**: Testing infrastructure and configuration for unit tests
 -   **Sdk.WinTest**: Windows-specific testing infrastructure and configuration
 
@@ -45,7 +44,22 @@ A comprehensive, robust MSBuild-based SDK for .NET projects that standardizes co
 To use this SDK in your project:
 
 ```xml
-<Project Sdk="ktsu.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="ktsu.Sdk" />
+
+  <PropertyGroup>
+    <!-- Your project-specific properties here -->
+  </PropertyGroup>
+</Project>
+```
+
+Add sdk extensions to your project (for specific project types):
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.ConsoleApp" />
+
   <PropertyGroup>
     <!-- Your project-specific properties here -->
   </PropertyGroup>

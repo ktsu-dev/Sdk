@@ -1,8 +1,5 @@
 <!-- ktsu.Sdk.WinApp/Sdk.props -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Sdk Name="Microsoft.NET.Sdk"/>
-  <Sdk Name="ktsu.Sdk"/>
-
   <PropertyGroup>
     <UseWindowsForms>true</UseWindowsForms>
     <RuntimeIdentifiers></RuntimeIdentifiers>

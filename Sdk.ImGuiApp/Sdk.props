@@ -1,8 +1,5 @@
 <!-- ktsu.Sdk.ImGuiApp/Sdk.props -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Sdk Name="Microsoft.NET.Sdk"/>
-  <Sdk Name="ktsu.Sdk"/>
-
   <PropertyGroup>
     <!-- Default OutputType, will be overridden for Windows -->
     <OutputType>Exe</OutputType>
