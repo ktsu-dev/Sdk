@@ -1,3 +1,8 @@
+## v1.61.0 (minor)
+
+Changes since v1.60.0:
+
+- Refine project inclusion logic in Sdk.targets to show solution scoped files only in non-test projects, enhancing clarity and organization. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.60.0 (minor)
 
 Changes since v1.59.0:
