@@ -63,11 +63,9 @@
 
     <!-- Build related files -->
     <EditorConfigFileName>.editorconfig</EditorConfigFileName>
-    <RunSettingsFileName>.runsettings</RunSettingsFileName>
     <GlobalJsonFileName>global.json</GlobalJsonFileName>
     <DirectoryPackagesPropsFileName>Directory.Packages.props</DirectoryPackagesPropsFileName>
     <EditorConfigFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(EditorConfigFileName)"))</EditorConfigFilePath>
-    <RunSettingsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(RunSettingsFileName)"))</RunSettingsFilePath>
     <GlobalJsonFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(GlobalJsonFileName)"))</GlobalJsonFilePath>
     <DirectoryPackagesPropsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(DirectoryPackagesPropsFileName)"))</DirectoryPackagesPropsFilePath>
 

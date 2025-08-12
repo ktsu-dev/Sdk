@@ -30,26 +30,8 @@
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" PrivateAssets="All"/>
   </ItemGroup>
 
-  <!-- Show solution scoped files inside non-test projects -->
+  <!-- Add package data to the package -->
   <ItemGroup Condition="$(IsTestProject) == 'false'">
-    <!-- Build related files -->
-    <None Include="$(DirectoryBuildPropsFilePath)" Condition="Exists('$(DirectoryBuildPropsFilePath)')" Link="_Build\$(DirectoryBuildPropsFileName)" />
-    <None Include="$(DirectoryBuildTargetsFilePath)" Condition="Exists('$(DirectoryBuildTargetsFilePath)')" Link="_Build\$(DirectoryBuildTargetsFileName)" />
-    <None Include="$(GitHubWorkflowFilePath)" Condition="Exists('$(GitHubWorkflowFilePath)')" Link="_Build\$(GitHubWorkflowFileName)" />
-    <None Include="$(GitHubCopilotInstructionsFilePath)" Condition="Exists('$(GitHubCopilotInstructionsFilePath)')" Link="_Build\$(GitHubCopilotInstructionsFileName)" />
-    <None Include="$(EditorConfigFilePath)" Condition="Exists('$(EditorConfigFilePath)')" Link="_Build\$(EditorConfigFileName)" />
-    <None Include="$(RunSettingsFilePath)" Condition="Exists('$(RunSettingsFilePath)')" Link="_Build\$(RunSettingsFileName)" />
-    <None Include="$(GlobalJsonFilePath)" Condition="Exists('$(GlobalJsonFilePath)')" Link="_Build\$(GlobalJsonFileName)" />
-    <None Include="$(DirectoryPackagesPropsFilePath)" Condition="Exists('$(DirectoryPackagesPropsFilePath)')" Link="_Build\$(DirectoryPackagesPropsFileName)" />
-
-    <!-- Git related files -->
-    <None Include="$(GitIgnoreFilePath)" Condition="Exists('$(GitIgnoreFilePath)')" Link="_Git\$(GitIgnoreFileName)" />
-    <None Include="$(GitAttributesFilePath)" Condition="Exists('$(GitAttributesFilePath)')" Link="_Git\$(GitAttributesFileName)" />
-    <None Include="$(GitConfigFilePath)" Condition="Exists('$(GitConfigFilePath)')" Link="_Git\$(GitConfigFileName)" />
-    <None Include="$(GitModulesFilePath)" Condition="Exists('$(GitModulesFilePath)')" Link="_Git\$(GitModulesFileName)" />
-    <None Include="$(GitMailMapFilePath)" Condition="Exists('$(GitMailMapFilePath)')" Link="_Git\$(GitMailMapFileName)" />
-
-    <!-- Package related files -->
     <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" />
     <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" />
     <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" />
