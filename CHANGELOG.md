@@ -1,3 +1,8 @@
+## v1.64.0 (minor)
+
+Changes since v1.63.0:
+
+- Refactor Sdk.props and Sdk.targets to remove unused RunSettingsFile references and streamline package data inclusion for non-test projects. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.63.0 (minor)
 
 Changes since v1.62.0:
