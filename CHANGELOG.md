@@ -2,6 +2,7 @@
 
 Changes since v1.65.0:
 
+- Remove Sdk.Test project from solution to streamline project structure and eliminate obsolete configurations. ([@matt-edmondson](https://github.com/matt-edmondson))
 - Update target framework settings in project files and remove obsolete test project configurations. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.65.0 (minor)
 
