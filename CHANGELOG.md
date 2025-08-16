@@ -2,6 +2,7 @@
 
 Changes since v1.64.0:
 
+- Refactor Sdk solution by removing Sdk.WinApp and Sdk.WinTest projects, and adding Sdk.App project with multi-targeting support. Update Sdk.Test properties to explicitly include supported target frameworks. ([@matt-edmondson](https://github.com/matt-edmondson))
 - Remove code coverage collection configuration from Sdk.props to simplify test project setup. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.64.0 (minor)
 
