@@ -4,7 +4,6 @@
     <TargetFrameworks>net9.0;net8.0;net7.0;</TargetFrameworks>
 
     <IsTestProject>true</IsTestProject>
-    <!-- Test Results Configuration -->
     <VSTestResultsDirectory>$(SolutionDir)coverage</VSTestResultsDirectory>
   </PropertyGroup>
 
