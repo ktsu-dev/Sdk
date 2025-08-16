@@ -1,3 +1,8 @@
+## v1.68.0 (minor)
+
+Changes since v1.67.0:
+
+- Add NoWarn property for test projects in Sdk.targets to suppress specific warnings ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.67.0 (minor)
 
 Changes since v1.66.0:
