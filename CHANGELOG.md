@@ -1,3 +1,8 @@
+## v1.67.0 (minor)
+
+Changes since v1.66.0:
+
+- Consolidate target framework settings across project files by adding TargetFrameworks property to Sdk.csproj, Sdk.App.csproj, and Sdk.ConsoleApp.csproj, while removing redundant entries from Directory.Build.props and Sdk.props. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.66.0 (minor)
 
 Changes since v1.65.0:
