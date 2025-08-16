@@ -3,21 +3,6 @@
     <!-- Sdk related files -->
     <None Include="Sdk.props" Pack="true" PackagePath="\Sdk" />
     <None Include="Sdk.targets" Pack="true" PackagePath="\Sdk" />
-    <None Include="..\Directory.Build.props" Pack="false" Link="_Build\Directory.Build.props" />
-    <None Include="..\Directory.Build.targets" Pack="false" Link="_Build\Directory.Build.targets" />
-
-    <!-- Build related files -->
-    <None Include="$(GitHubWorkflowFilePath)" Condition="Exists('$(GitHubWorkflowFilePath)')" Link="_Build\$(GitHubWorkflowFileName)" />
-    <None Include="$(GitHubCopilotInstructionsFilePath)" Condition="Exists('$(GitHubCopilotInstructionsFilePath)')" Link="_Build\$(GitHubCopilotInstructionsFileName)" />
-    <None Include="$(EditorConfigFilePath)" Condition="Exists('$(EditorConfigFilePath)')" Link="_Build\$(EditorConfigFileName)" />
-    <None Include="$(RunSettingsFilePath)" Condition="Exists('$(RunSettingsFilePath)')" Link="_Build\$(RunSettingsFileName)" />
-
-    <!-- Git related files -->
-    <None Include="$(GitIgnoreFilePath)" Condition="Exists('$(GitIgnoreFilePath)')" Link="_Git\$(GitIgnoreFileName)" />
-    <None Include="$(GitAttributesFilePath)" Condition="Exists('$(GitAttributesFilePath)')" Link="_Git\$(GitAttributesFileName)" />
-    <None Include="$(GitConfigFilePath)" Condition="Exists('$(GitConfigFilePath)')" Link="_Git\$(GitConfigFileName)" />
-    <None Include="$(GitModulesFilePath)" Condition="Exists('$(GitModulesFilePath)')" Link="_Git\$(GitModulesFileName)" />
-    <None Include="$(GitMailMapFilePath)" Condition="Exists('$(GitMailMapFilePath)')" Link="_Git\$(GitMailMapFileName)" />
 
     <!-- Package data files -->
     <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" />
