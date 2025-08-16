@@ -1,3 +1,8 @@
+## v1.66.0 (minor)
+
+Changes since v1.65.0:
+
+- Update target framework settings in project files and remove obsolete test project configurations. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.65.0 (minor)
 
 Changes since v1.64.0:
