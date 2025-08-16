@@ -1,6 +1,8 @@
 <!-- ktsu.Sdk.Test/Sdk.props -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <TargetFrameworks>net9.0;net8.0;net7.0;</TargetFrameworks>
+
     <IsTestProject>true</IsTestProject>
     <!-- Test Results Configuration -->
     <VSTestResultsDirectory>$(SolutionDir)coverage</VSTestResultsDirectory>

@@ -1,9 +1,0 @@
-<!-- ktsu.Sdk.WinApp/Sdk.props -->
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <UseWindowsForms>true</UseWindowsForms>
-    <RuntimeIdentifiers></RuntimeIdentifiers>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <OutputType>WinExe</OutputType>
-  </PropertyGroup>
-</Project>
