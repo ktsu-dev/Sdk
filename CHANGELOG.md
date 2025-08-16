@@ -2,6 +2,7 @@
 
 Changes since v1.64.0:
 
+- Enable target framework net9.0 in Sdk.props to support the latest .NET version. ([@matt-edmondson](https://github.com/matt-edmondson))
 - Refactor Sdk solution by removing Sdk.WinApp and Sdk.WinTest projects, and adding Sdk.App project with multi-targeting support. Update Sdk.Test properties to explicitly include supported target frameworks. ([@matt-edmondson](https://github.com/matt-edmondson))
 - Remove code coverage collection configuration from Sdk.props to simplify test project setup. ([@matt-edmondson](https://github.com/matt-edmondson))
 - Remove commented-out test results configuration from Sdk.props to clean up project properties. ([@matt-edmondson](https://github.com/matt-edmondson))
