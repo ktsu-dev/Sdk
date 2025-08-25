@@ -1,3 +1,8 @@
+## v1.69.0 (minor)
+
+Changes since v1.68.0:
+
+- Update line ending configurations in .editorconfig and .gitattributes, and add target framework properties to Sdk.props, Sdk.App.props, and Sdk.ConsoleApp.props for improved project consistency. Also, clean up .gitignore and update scripts for better functionality. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.68.0 (minor)
 
 Changes since v1.67.0:
