@@ -1,6 +1,8 @@
 <!-- ktsu.Sdk.ConsoleApp/Sdk.props -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 </Project>

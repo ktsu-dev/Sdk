@@ -1270,7 +1270,7 @@ function Update-ProjectMetadata {
             "PROJECT_URL.url",
             "AUTHORS.url"
         )
-        
+
         # Add latest changelog if it exists
         if (Test-Path $BuildConfiguration.LatestChangelogFile) {
             $filesToAdd += $BuildConfiguration.LatestChangelogFile

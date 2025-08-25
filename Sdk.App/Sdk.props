@@ -1,7 +1,9 @@
 <!-- ktsu.Sdk.ImGuiApp/Sdk.props -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <PropertyGroup>
-    <!-- Default OutputType, will be overridden for Windows -->
+    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
