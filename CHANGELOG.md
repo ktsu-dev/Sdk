@@ -1,3 +1,8 @@
+## v1.73.0 (minor)
+
+Changes since v1.72.0:
+
+- Add SuppressTfmSupportBuildWarnings property to Sdk.targets to suppress build warnings related to target framework support. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.72.0 (minor)
 
 Changes since v1.71.0:
