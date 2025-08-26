@@ -1,3 +1,8 @@
+## v1.75.0 (minor)
+
+Changes since v1.74.0:
+
+- Remove System.Runtime.Numerics package reference from Sdk.targets to simplify target framework support. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.74.0 (minor)
 
 Changes since v1.73.0:
