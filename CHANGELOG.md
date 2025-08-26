@@ -1,3 +1,8 @@
+## v1.70.0 (minor)
+
+Changes since v1.69.0:
+
+- Update package references in Sdk.targets with version overrides and add new properties for PolyGuard and PolyNullability to enhance project configuration. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.69.0 (minor)
 
 Changes since v1.68.0:
