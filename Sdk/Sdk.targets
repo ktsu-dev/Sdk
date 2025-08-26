@@ -72,6 +72,10 @@
                              $(TargetFramework) == 'net6.0'" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
+
   <PropertyGroup Condition="$(IsTestProject) == 'false'">
     <PolyGuard>true</PolyGuard>
     <PolyNullability>true</PolyNullability>
