@@ -63,18 +63,14 @@
                              $(TargetFramework) == 'netcoreapp2.0' or
                              $(TargetFrameworkIdentifier) == '.NETFramework'" />
 
-    <PackageReference Include="Microsoft.Bcl.Numerics"
-                  VersionOverride="9.0.8"
+    <PackageReference Include="System.Runtime.Numerics"
+                  VersionOverride="4.3.0"
                   Condition="$(TargetFrameworkIdentifier) == '.NETStandard' or
                              $(TargetFrameworkIdentifier) == '.NETFramework' or
                              $(TargetFrameworkIdentifier) == '.NETCoreApp' or
                              $(TargetFramework) == 'net5.0' or
                              $(TargetFramework) == 'net6.0'" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-  </PropertyGroup>
 
   <PropertyGroup Condition="$(IsTestProject) == 'false'">
     <PolyGuard>true</PolyGuard>
