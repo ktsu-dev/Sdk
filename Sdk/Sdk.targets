@@ -46,7 +46,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
-    <PackageReference Include="Polyfill" VersionOverride="8.8.0">
+    <PackageReference Include="Polyfill" VersionOverride="8.8.0" Condition="$(IsTestProject) == 'false'">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
@@ -64,7 +64,7 @@
                              $(TargetFrameworkIdentifier) == '.NETFramework'" />
   </ItemGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="$(IsTestProject) == 'false'">
     <PolyGuard>true</PolyGuard>
     <PolyNullability>true</PolyNullability>
   </PropertyGroup>
