@@ -1,3 +1,8 @@
+## v1.72.0 (minor)
+
+Changes since v1.71.0:
+
+- Add Microsoft.Bcl.Numerics package reference with version override in Sdk.targets for .NETStandard and .NETFramework compatibility ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.71.0 (minor)
 
 Changes since v1.70.0:
