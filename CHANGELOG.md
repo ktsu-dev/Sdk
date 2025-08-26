@@ -1,3 +1,8 @@
+## v1.74.0 (minor)
+
+Changes since v1.73.0:
+
+- Replace Microsoft.Bcl.Numerics with System.Runtime.Numerics package reference in Sdk.targets and remove SuppressTfmSupportBuildWarnings property to streamline target framework support. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.73.0 (minor)
 
 Changes since v1.72.0:
