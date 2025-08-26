@@ -37,17 +37,37 @@
 
   <!-- Standard packages for all projects -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub">
+
+    <PackageReference Include="Microsoft.SourceLink.GitHub" VersionOverride="8.0.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git">
+
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" VersionOverride="8.0.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="PolySharp">
+
+    <PackageReference Include="Polyfill" VersionOverride="8.8.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+
+    <PackageReference Include="System.Memory"
+                  VersionOverride="4.6.3"
+                  Condition="$(TargetFrameworkIdentifier) == '.NETStandard' or
+                             $(TargetFrameworkIdentifier) == '.NETFramework' or
+                             $(TargetFramework.StartsWith('netcoreapp2'))" />
+
+    <PackageReference Include="System.Threading.Tasks.Extensions"
+                  VersionOverride="4.6.3"
+                  Condition="$(TargetFramework) == 'netstandard2.0' or
+                             $(TargetFramework) == 'netcoreapp2.0' or
+                             $(TargetFrameworkIdentifier) == '.NETFramework'" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <PolyGuard>true</PolyGuard>
+    <PolyNullability>true</PolyNullability>
+  </PropertyGroup>
 
   <!-- Add package data to the package -->
   <ItemGroup Condition="$(IsTestProject) == 'false'">
