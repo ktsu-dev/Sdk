@@ -1,3 +1,8 @@
+## v1.71.0 (minor)
+
+Changes since v1.70.0:
+
+- Refine Sdk.targets by adding conditions to Polyfill package reference and PolyGuard/PolyNullability properties to ensure they are only applied to non-test projects. ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.70.0 (minor)
 
 Changes since v1.69.0:
