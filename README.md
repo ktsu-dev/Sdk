@@ -2,66 +2,181 @@
 
 A comprehensive, robust MSBuild-based SDK for .NET projects that standardizes configuration, metadata management, and package workflows. Features intelligent project structure detection, hierarchical solution discovery, and path-based namespace generation. Supports multiple .NET versions (.NET 5.0+, .NET Standard 2.0/2.1) with optimizations for .NET 9.0.
 
-## Key Features
+## Quick Start
 
-### 🏗️ **Intelligent Project Structure**
--   **Hierarchical Solution Discovery**: Automatically finds solution files up to 5 directory levels above the project
--   **Path-Based Namespace Generation**: Creates namespaces from directory structure between solution and project
--   **Smart Project Detection**: Automatically detects primary, console, GUI, and test project types
--   **Nested Project Support**: Works seamlessly with deeply nested project structures
+### Installation
 
-### 🛡️ **Robust Error Handling**
--   **Safe Array Operations**: Prevents index-out-of-bounds errors in MSBuild expressions
--   **Null-Safe String Operations**: Comprehensive null/empty checks for all string manipulations  
--   **Graceful Fallbacks**: Provides sensible defaults when metadata files or properties are missing
--   **Comprehensive Validation**: Built-in validation for all file operations and property access
+Add the SDK to your global.json (recommended):
 
-### 📦 **Advanced Package Management**
--   **Multi-Target Support**: .NET 9.0, 8.0, 7.0, 6.0, 5.0, .NET Standard 2.0/2.1
--   **MSBuildSdk Packaging**: Properly configured for MSBuild SDK project packaging
--   **Automatic Metadata Integration**: Seamlessly includes markdown files in package metadata
--   **Package Validation**: Built-in API compatibility and package validation
--   **Source Link Integration**: Automatic source linking for debugging
+```json
+{
+  "sdk": {
+    "version": "9.0.0",
+    "rollForward": "latestMinor"
+  },
+  "msbuild-sdks": {
+    "ktsu.Sdk": "1.0.0",
+    "ktsu.Sdk.ConsoleApp": "1.0.0",
+    "ktsu.Sdk.App": "1.0.0"
+  }
+}
+```
 
-### 🔧 **Development Workflow**
--   **Automatic Project References**: Smart cross-project referencing based on project types
--   **Internals Visibility**: Automatic InternalsVisibleTo configuration for test projects
--   **GitHub Integration**: Built-in support for GitHub workflows and CI/CD
--   **Cross-Platform Support**: Compatible with Windows, macOS, and Linux
--   **Documentation Generation**: Automated XML documentation file generation
-
-## Project Structure
-
--   **Sdk**: Core SDK implementation with MSBuild props and targets (for all project types)
--   **Sdk.ConsoleApp**: Console application SDK support with cross-platform console configurations
--   **Sdk.ImGuiApp**: ImGui application SDK for modern GUI applications
--   **Sdk.WinApp**: Windows application SDK for platform-specific GUI applications (WinForms, WPF, etc.)
--   **Sdk.Test**: Testing infrastructure and configuration for unit tests
--   **Sdk.WinTest**: Windows-specific testing infrastructure and configuration
-
-## Usage
-
-To use this SDK in your project:
+Or reference directly in your project file:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
-  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk" Version="1.0.0" />
 
   <PropertyGroup>
-    <!-- Your project-specific properties here -->
+    <!-- Your project-specific properties -->
   </PropertyGroup>
 </Project>
 ```
 
-Add sdk extensions to your project (for specific project types):
+### Basic Usage
+
+For a library project:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="ktsu.Sdk" />
+</Project>
+```
+
+For a console application:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <Sdk Name="ktsu.Sdk" />
   <Sdk Name="ktsu.Sdk.ConsoleApp" />
+</Project>
+```
+
+For a GUI application:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.App" />
+</Project>
+```
+
+## Key Features
+
+### 🏗️ **Intelligent Project Structure**
+
+- **Hierarchical Solution Discovery**: Automatically finds solution files up to 5 directory levels above the project
+- **Path-Based Namespace Generation**: Creates namespaces from directory structure between solution and project
+- **Smart Project Detection**: Automatically detects primary, console, GUI, and test project types
+- **Nested Project Support**: Works seamlessly with deeply nested project structures
+
+### 🛡️ **Robust Error Handling**
+
+- **Safe Array Operations**: Prevents index-out-of-bounds errors in MSBuild expressions
+- **Null-Safe String Operations**: Comprehensive null/empty checks for all string manipulations
+- **Graceful Fallbacks**: Provides sensible defaults when metadata files or properties are missing
+- **Comprehensive Validation**: Built-in validation for all file operations and property access
+
+### 📦 **Advanced Package Management**
+
+- **Multi-Target Support**: .NET 9.0, 8.0, 7.0, 6.0, 5.0, .NET Standard 2.0/2.1
+- **MSBuildSdk Packaging**: Properly configured for MSBuild SDK project packaging
+- **Automatic Metadata Integration**: Seamlessly includes markdown files in package metadata
+- **Package Validation**: Built-in API compatibility and package validation
+- **Source Link Integration**: Automatic GitHub and Azure Repos source linking for debugging
+- **Central Package Management**: Requires and works with Directory.Packages.props
+
+### 🔧 **Development Workflow**
+
+- **Automatic Project References**: Smart cross-project referencing based on project types
+- **Internals Visibility**: Automatic InternalsVisibleTo configuration for test projects
+- **GitHub Integration**: Built-in support for GitHub workflows and CI/CD
+- **Cross-Platform Support**: Compatible with Windows, macOS, and Linux
+- **Documentation Generation**: Automated XML documentation file generation
+- **Strict Code Quality**: Nullable enabled, warnings as errors, latest analyzer rules
+
+## SDK Components
+
+This repository contains three SDK packages:
+
+### **ktsu.Sdk** (Core)
+
+The base SDK that all projects should reference. Provides:
+
+- Solution and project discovery
+- Namespace generation
+- Metadata file integration
+- Multi-target framework support
+- Automatic project references
+- Package configuration
+- Code quality defaults
+
+### **ktsu.Sdk.ConsoleApp**
+
+Extension SDK for console applications. Adds:
+
+- `OutputType=Exe` configuration
+- Single target framework (net9.0)
+- Cross-platform console optimizations
+
+### **ktsu.Sdk.App**
+
+Extension SDK for GUI applications (ImGui, WinForms, WPF, etc.). Adds:
+
+- `OutputType=WinExe` on Windows (no console window)
+- `OutputType=Exe` on other platforms
+- Single target framework (net9.0)
+- Platform-specific runtime configurations
+
+## Detailed Usage
+
+### Setup Requirements
+
+1. **Central Package Management**: Create a `Directory.Packages.props` file at your solution root:
+
+```xml
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>
+```
+
+1. **Metadata Files**: Create these optional markdown files at your solution root (they will be automatically included in NuGet packages):
+   - `AUTHORS.md` - Used for namespace generation and package authors
+   - `VERSION.md` - Version number (can be managed by build scripts)
+   - `DESCRIPTION.md` - Package description
+   - `CHANGELOG.md` - Release notes
+   - `LICENSE.md` - License information
+   - `COPYRIGHT.md` - Copyright notice
+   - `TAGS.md` - NuGet package tags
+   - `README.md` - Package documentation
+   - `AUTHORS.url` - URL to author/organization
+   - `PROJECT_URL.url` - URL to project repository
+
+2. **icon.png**: Optional package icon at solution root
+
+### Overriding Defaults
+
+The SDK provides sensible defaults, but you can override any property:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="ktsu.Sdk" />
 
   <PropertyGroup>
-    <!-- Your project-specific properties here -->
+    <!-- Override target frameworks -->
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+
+    <!-- Override namespace -->
+    <RootNamespace>MyCompany.MyProject</RootNamespace>
+
+    <!-- Disable nullable if needed -->
+    <Nullable>disable</Nullable>
+
+    <!-- Allow warnings in test projects -->
+    <TreatWarningsAsErrors Condition="$(IsTestProject) == 'true'">false</TreatWarningsAsErrors>
   </PropertyGroup>
 </Project>
 ```
@@ -70,10 +185,10 @@ Add sdk extensions to your project (for specific project types):
 
 The SDK automatically detects different project types in your solution:
 
--   **Primary Project**: The main project of your solution (YourSolution, YourSolution.Core)
--   **Console Projects**: Command-line interface projects (YourSolution.ConsoleApp, YourSolutionConsoleApp, YourSolution.CLI, YourSolutionCLI)
--   **GUI App Projects**: Application projects (YourSolution.App, YourSolutionApp, YourSolution.WinApp, YourSolutionWinApp, YourSolution.ImGuiApp, YourSolutionImGuiApp)
--   **Test Projects**: Test projects (YourSolution.Test, YourSolution.Tests, YourSolutionTest, YourSolutionTests, YourSolution.WinTest, YourSolutionWinTest)
+- **Primary Project**: The main project of your solution (YourSolution, YourSolution.Core)
+- **Console Projects**: Command-line interface projects (YourSolution.ConsoleApp, YourSolutionConsoleApp, YourSolution.CLI, YourSolutionCLI)
+- **GUI App Projects**: Application projects (YourSolution.App, YourSolutionApp, YourSolution.WinApp, YourSolutionWinApp, YourSolution.ImGuiApp, YourSolutionImGuiApp)
+- **Test Projects**: Test projects (YourSolution.Test, YourSolution.Tests, YourSolutionTest, YourSolutionTests, YourSolution.WinTest, YourSolutionWinTest)
 
 Each project type receives appropriate default settings, references, and output configurations (console apps vs. GUI apps).
 
@@ -82,6 +197,7 @@ Each project type receives appropriate default settings, references, and output 
 The SDK creates intelligent namespaces based on your project's directory structure:
 
 **Examples:**
+
 ```
 MySolution/src/Core/Utils/MyProject.csproj
 → ProjectNamespace: src.Core.Utils.MyProject
@@ -111,28 +227,68 @@ MyProject/                     ← Level 3: Check here
 
 This enables the SDK to work with any nested project structure without configuration.
 
-## Metadata Files
-
-This SDK supports the following metadata files at the solution root:
-
--   `README.md`: Project documentation (this file)
--   `AUTHORS.md`: Project authors and contributors
--   `LICENSE.md`: Project license information
--   `CHANGELOG.md`: Version history and changes
--   `DESCRIPTION.md`: Detailed project description
--   `VERSION.md`: Current version information
--   `TAGS.md`: Project tags for NuGet packages
--   `COPYRIGHT.md`: Copyright information
--   `AUTHORS.url`: URL to authors' information
--   `PROJECT_URL.url`: URL to project information
-
-These files are automatically included in the NuGet package and used to populate package metadata.
-
 ## Advanced Configuration Features
 
 ### Automatic Project References
 
 Projects automatically reference the primary project and expose internals to test projects. Cross-references are intelligently configured based on project types and naming conventions.
+
+For example:
+
+- Non-primary projects automatically get `<ProjectReference>` to the primary project
+- Primary project automatically exposes internals to test projects via `<InternalsVisibleTo>`
+
+### Available Properties
+
+The SDK makes these properties available for conditional logic in your project files:
+
+**Project Type Detection:**
+
+- `IsPrimaryProject` - True if this is the main library project
+- `IsCliProject` - True if this is a console application
+- `IsAppProject` - True if this is a GUI application
+- `IsTestProject` - True if this is a test project
+
+**Project Type Existence:**
+
+- `PrimaryProjectExists` - True if primary project was found
+- `CliProjectExists` - True if CLI project was found
+- `AppProjectExists` - True if app project was found
+- `TestProjectExists` - True if test project was found
+
+**Project Paths:**
+
+- `SolutionDir` - Path to solution directory
+- `SolutionPath` - Full path to .sln file
+- `SolutionName` - Solution name without extension
+- `PrimaryProjectPath` - Path to primary project
+- `TestProjectPath` - Path to test project
+
+**Namespace Properties:**
+
+- `AuthorsNamespace` - Namespace prefix from AUTHORS.md
+- `ProjectNamespace` - Namespace from directory path
+- `RootNamespace` - Final combined namespace
+- `TestProjectNamespace` - Namespace for test project
+
+**Package Properties:**
+
+- `IsPackable` - True for library projects
+- `IsPublishable` - True for executable projects
+- `IsExecutable` - True if OutputType is Exe or WinExe
+- `IsLibrary` - True if OutputType is Library and not a test project
+
+Use these in your project files:
+
+```xml
+<PropertyGroup>
+  <!-- Example: Only pack if not a prerelease -->
+  <IsPackable Condition="$(IsPrerelease) == 'true'">false</IsPackable>
+
+  <!-- Example: Different settings for test projects -->
+  <SomeProperty Condition="$(IsTestProject) == 'true'">TestValue</SomeProperty>
+</PropertyGroup>
+```
 
 ### Robust Error Handling
 
@@ -155,19 +311,131 @@ Library projects are automatically configured for NuGet packaging with:
 ### Cross-Platform Compatibility
 
 Projects are configured with multiple runtime identifiers:
+
 - **Windows**: `win-x64`, `win-x86`, `win-arm64`
-- **macOS**: `osx-x64`, `osx-arm64` 
+- **macOS**: `osx-x64`, `osx-arm64`
 - **Linux**: `linux-x64`, `linux-arm64`
 
 ### Advanced Testing Support
 
 - **Automatic InternalsVisibleTo**: Test projects automatically access internal members
 - **Test Project Detection**: Identifies and configures test projects with appropriate settings
-- **Multi-Platform Testing**: Test configurations for both standard and Windows-specific tests
+- **Relaxed Warnings**: Test projects suppress documentation and code style warnings
+
+## Automatic Package References
+
+The SDK automatically includes these NuGet packages in all projects:
+
+### Source Link Support (All Projects)
+
+- **Microsoft.SourceLink.GitHub** (8.0.0) - GitHub source linking for debugging
+- **Microsoft.SourceLink.AzureRepos.Git** (8.0.0) - Azure Repos source linking
+
+### Polyfills (Non-Test Projects)
+
+- **Polyfill** (8.8.0) - Modern language feature support for older frameworks
+
+### Compatibility Packages (Framework-Specific)
+
+- **System.Memory** (4.6.3) - For .NET Standard and .NET Framework
+- **System.Threading.Tasks.Extensions** (4.6.3) - For netstandard2.0, netcoreapp2.0, and .NET Framework
+
+## Code Quality Defaults
+
+The SDK enforces strict code quality standards by default:
+
+### Compiler Settings
+
+- **LangVersion**: `latest` - Use latest C# language features
+- **Nullable**: `enable` - Nullable reference types enabled
+- **TreatWarningsAsErrors**: `true` - All warnings treated as errors
+- **ImplicitUsings**: `enable` - Implicit global usings enabled
+
+### Code Analysis
+
+- **AnalysisLevel**: `latest-all` - All latest analyzer rules enabled
+- **EnableNETAnalyzers**: `true` - .NET code analyzers enabled
+- **EnforceCodeStyleInBuild**: `true` - Code style rules enforced during build
+
+### Suppressed Warnings
+
+The following warnings are suppressed globally:
+
+- **CA1724**: Type names should not match namespaces
+- **CA1034**: Nested types should not be visible
+- **CA1000**: Do not declare static members on generic types
+- **CA2260**: Implement ISerializable correctly
+- **CA1515**: Override methods should call base methods
+
+Additional suppressions for test projects:
+
+- **CS1591**: Missing XML comment
+- **CA2225**: Operator overloads have named alternates
+- **IDE0022**: Use expression body for methods
+- **IDE0058**: Expression value is never used
+- **CA1305**: Specify IFormatProvider
+- **CA5394**: Do not use insecure randomness
+- **CA1707**: Identifiers should not contain underscores
+
+### Runtime Configuration
+
+- **InvariantGlobalization**: `true` - Invariant culture for better performance
+- **NeutralLanguage**: `en-US`
+
+## Troubleshooting
+
+### Package Restore Fails
+
+**Problem**: NuGet restore fails with "ManagePackageVersionsCentrally is not enabled"
+
+**Solution**: Ensure `Directory.Packages.props` exists at your solution root with `ManagePackageVersionsCentrally` enabled.
+
+### Namespace Generation Issues
+
+**Problem**: Generated namespace doesn't match expectations
+
+**Solution**:
+
+- Check that `AUTHORS.md` exists and contains valid content
+- The namespace format is: `{FirstPartOfAuthors}.{PathToProject}.{ProjectName}`
+- You can always override with `<RootNamespace>` in your project file
+
+### Build Warnings as Errors
+
+**Problem**: Build fails due to warnings being treated as errors
+
+**Solution**: Either fix the warnings or selectively disable warnings:
+
+```xml
+<PropertyGroup>
+  <NoWarn>$(NoWarn);CA1234;IDE5678</NoWarn>
+</PropertyGroup>
+```
+
+### Multi-Target Framework Issues
+
+**Problem**: Project builds for too many frameworks
+
+**Solution**: Override `TargetFrameworks` for specific projects:
+
+```xml
+<PropertyGroup>
+  <!-- Single target for applications -->
+  <TargetFramework>net9.0</TargetFramework>
+  <TargetFrameworks></TargetFrameworks>
+</PropertyGroup>
+```
+
+### Solution Not Found
+
+**Problem**: SDK reports it cannot find a solution file
+
+**Solution**: The SDK searches up to 5 directory levels. Ensure your project is within 5 levels of your .sln file, or manually set `<SolutionDir>` in your project.
 
 ## Requirements
 
--   .NET SDK 5.0 or later (optimized for .NET SDK 9.0)
+- .NET SDK 5.0 or later (optimized for .NET SDK 9.0)
+- Central Package Management (Directory.Packages.props)
 
 ## License
 
