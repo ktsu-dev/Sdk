@@ -38,15 +38,15 @@
   <!-- Standard packages for all projects -->
   <ItemGroup>
 
-    <PackageReference Include="Microsoft.SourceLink.GitHub" VersionOverride="8.0.0">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" VersionOverride="10.0.102">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" VersionOverride="8.0.0">
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" VersionOverride="10.0.102">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
-    <PackageReference Include="Polyfill" VersionOverride="8.8.0" Condition="$(IsTestProject) == 'false'">
+    <PackageReference Include="Polyfill" VersionOverride="9.7.3" Condition="$(IsTestProject) == 'false'">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
