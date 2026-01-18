@@ -18,11 +18,11 @@
 
     <!-- Level 4: Great-grandparent directory -->
     <_SolutionFileExists_Level4 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..\..\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..'))','*.sln').Length)</_SolutionFileExists_Level4>
-    <SolutionDir Condition="'$(SolutionDir)' == '' And '$(_SolutionFileExists_Level4)' != '0'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..') )</SolutionDir>
+    <SolutionDir Condition="'$(SolutionDir)' == '' And '$(_SolutionFileExists_Level4)' != '0'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..'))</SolutionDir>
 
     <!-- Level 5: Great-great-grandparent directory -->
     <_SolutionFileExists_Level5 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..\..\..\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..\'))','*.sln').Length)</_SolutionFileExists_Level5>
-    <SolutionDir Condition="'$(SolutionDir)' == '' And '$(_SolutionFileExists_Level5)' != '0'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..') )</SolutionDir>
+    <SolutionDir Condition="'$(SolutionDir)' == '' And '$(_SolutionFileExists_Level5)' != '0'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..'))</SolutionDir>
 
     <!-- Fallback to MSBuildProjectDirectory if no solution found -->
     <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildProjectDirectory)</SolutionDir>
