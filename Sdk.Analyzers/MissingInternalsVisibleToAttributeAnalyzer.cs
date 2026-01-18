@@ -86,7 +86,9 @@ public class MissingInternalsVisibleToAttributeAnalyzer : KtsuAnalyzerBase
 				TypedConstant firstArg = attr.ConstructorArguments[0];
 				if (firstArg.Kind == TypedConstantKind.Primitive && firstArg.Value is string assemblyName)
 				{
-					return assemblyName == testNamespace;
+					// Handle both non-strong-named ("MyTest") and strong-named ("MyTest, PublicKey=...") assemblies
+					return assemblyName == testNamespace ||
+						   assemblyName.StartsWith(testNamespace + ",", System.StringComparison.Ordinal);
 				}
 			}
 			return false;
