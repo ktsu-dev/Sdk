@@ -1,8 +1,11 @@
-## v2.2.1-pre.1 (prerelease)
+## v2.2.1 (patch)
 
 Changes since v2.2.0:
 
-- Refactor release process and update analyzer package versioning ([@matt-edmondson](https://github.com/matt-edmondson))
+- Add check to skip non-application projects in build workflow ([@matt-edmondson](https://github.com/matt-edmondson))
+## v2.2.1-pre.1 (prerelease)
+
+Changes since v2.2.0:
 ## v2.2.0 (minor)
 
 Changes since v2.1.0:
