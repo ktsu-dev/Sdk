@@ -117,7 +117,7 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 
 	private static bool RequiresSystemMemory(string? targetFramework, string? targetFrameworkIdentifier)
 	{
-		if (string.IsNullOrEmpty(targetFramework) || string.IsNullOrEmpty(targetFrameworkIdentifier))
+		if (string.IsNullOrEmpty(targetFramework))
 		{
 			return false;
 		}
@@ -128,7 +128,7 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 
 		return targetFrameworkIdentifier == ".NETStandard" ||
 			   targetFrameworkIdentifier == ".NETFramework" ||
-			   targetFramework!.StartsWith("netcoreapp2", System.StringComparison.Ordinal);
+			   targetFramework.StartsWith("netcoreapp2", System.StringComparison.Ordinal);
 	}
 
 	private static bool RequiresTaskExtensions(string? targetFramework, string? targetFrameworkIdentifier)
