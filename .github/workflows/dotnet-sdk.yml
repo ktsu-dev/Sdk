@@ -96,6 +96,11 @@ jobs:
       shell: pwsh
       run: scripts/make-changelog.ps1 "${{ env.VERSION }}" "${{ github.sha }}"
 
+    - name: Update Analyzer Releases
+      if: ${{ env.SHOULD_RELEASE == 'True' }}
+      shell: pwsh
+      run: scripts/make-analyzer-releases.ps1
+
     - name: Commit Metadata
       if: ${{ env.SHOULD_RELEASE == 'True' }}
       shell: pwsh

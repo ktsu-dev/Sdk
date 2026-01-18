@@ -5,4 +5,3 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-KTSU0001 | ktsu.Sdk | Info | Use string.Length instead of Count()

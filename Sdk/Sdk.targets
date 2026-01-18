@@ -25,54 +25,22 @@
     <!-- CA1707: Identifiers should not contain underscores -->
   </PropertyGroup>
 
-  <!-- Reference to core project -->
-  <ItemGroup Condition="$(IsPrimaryProject) == 'false' And $(PrimaryProjectExists) == 'true'">
-    <ProjectReference Include="$(PrimaryProjectPath)" />
-  </ItemGroup>
-
-  <!-- Expose internals to test projects -->
-  <ItemGroup Condition="$(IsTestProject) == 'false' And $(TestProjectExists) == 'true'">
-    <InternalsVisibleTo Include="$(TestProjectNamespace)" />
-  </ItemGroup>
-
-  <!-- Standard packages for all projects -->
+  <!-- Make SDK-computed properties visible to analyzers -->
   <ItemGroup>
+    <CompilerVisibleProperty Include="IsTestProject" />
+    <CompilerVisibleProperty Include="TestProjectExists" />
+    <CompilerVisibleProperty Include="TestProjectNamespace" />
+    <CompilerVisibleProperty Include="TargetFramework" />
+    <CompilerVisibleProperty Include="TargetFrameworkIdentifier" />
+  </ItemGroup>
 
-    <!-- ktsu.Sdk Analyzers - automatically included for all projects -->
+  <!-- Analyzer package - automatically included to enforce other requirements -->
+  <ItemGroup>
     <PackageReference Include="ktsu.Sdk.Analyzers" VersionOverride="$(Version)" Condition="$(IsTestProject) == 'false'">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-
-    <PackageReference Include="Microsoft.SourceLink.GitHub" VersionOverride="10.0.102">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-
-    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" VersionOverride="10.0.102">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-
-    <PackageReference Include="Polyfill" VersionOverride="9.7.3" Condition="$(IsTestProject) == 'false'">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-
-    <PackageReference Include="System.Memory"
-                  VersionOverride="4.6.3"
-                  Condition="$(TargetFrameworkIdentifier) == '.NETStandard' or
-                             $(TargetFrameworkIdentifier) == '.NETFramework' or
-                             $(TargetFramework.StartsWith('netcoreapp2'))" />
-
-    <PackageReference Include="System.Threading.Tasks.Extensions"
-                  VersionOverride="4.6.3"
-                  Condition="$(TargetFramework) == 'netstandard2.0' or
-                             $(TargetFramework) == 'netcoreapp2.0' or
-                             $(TargetFrameworkIdentifier) == '.NETFramework'" />
   </ItemGroup>
 
-  <PropertyGroup Condition="$(IsTestProject) == 'false'">
-    <PolyGuard>true</PolyGuard>
-    <PolyNullability>true</PolyNullability>
-  </PropertyGroup>
 
   <!-- Add package data to the package -->
   <ItemGroup Condition="$(IsTestProject) == 'false'">
