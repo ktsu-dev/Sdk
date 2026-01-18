@@ -1,0 +1,38 @@
+<Project>
+  <!--
+    Common NuGet package properties
+    Requires: Authors, Version, Description, Tags, ProjectUrl, etc. from metadata files
+  -->
+  <PropertyGroup>
+    <!-- Assembly naming -->
+    <AssemblyName Condition="'$(AssemblyName)' == ''">ktsu.$(MSBuildProjectName.Replace(" ", ""))</AssemblyName>
+    <OutputType Condition="'$(OutputType)' == ''">Library</OutputType>
+
+    <!-- Package identity -->
+    <Title Condition="'$(Title)' == ''">$(AssemblyName)</Title>
+    <Company Condition="'$(Company)' == ''">$(Authors)</Company>
+    <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
+    <PackageId Condition="'$(PackageId)' == ''">$(AssemblyName)</PackageId>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">$(Version)</PackageVersion>
+
+    <!-- Package metadata -->
+    <PackageIcon Condition="'$(PackageIcon)' == ''">$(IconFileName)</PackageIcon>
+    <PackageReadmeFile Condition="'$(PackageReadmeFile)' == ''">$(ReadmeFileName)</PackageReadmeFile>
+    <PackageLicenseFile Condition="'$(PackageLicenseFile)' == ''">$(LicenseFileName)</PackageLicenseFile>
+    <PackageReleaseNotes Condition="'$(PackageReleaseNotes)' == ''">$(Changelog)</PackageReleaseNotes>
+    <PackageDescription Condition="'$(PackageDescription)' == ''">$(Description)</PackageDescription>
+    <PackageTags Condition="'$(PackageTags)' == ''">$(Tags)</PackageTags>
+    <PackageProjectUrl Condition="'$(PackageProjectUrl)' == ''">$(ProjectUrl)</PackageProjectUrl>
+
+    <!-- Package settings -->
+    <IncludeSource Condition="'$(IncludeSource)' == ''">true</IncludeSource>
+    <IncludeContentInPack Condition="'$(IncludeContentInPack)' == ''">true</IncludeContentInPack>
+    <PackRelease Condition="'$(PackRelease)' == ''">true</PackRelease>
+    <SymbolPackageFormat Condition="'$(SymbolPackageFormat)' == ''">snupkg</SymbolPackageFormat>
+    <IsPackable Condition="'$(IsPackable)' == ''">true</IsPackable>
+
+    <!-- Continuous Integration Build -->
+    <ContinuousIntegrationBuild Condition="'$(ContinuousIntegrationBuild)' == ''">false</ContinuousIntegrationBuild>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true' Or '$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+</Project>

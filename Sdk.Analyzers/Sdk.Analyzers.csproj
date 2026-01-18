@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Import modular shared configuration -->
+  <Import Project="..\Sdk.Common.SolutionDiscovery.props" />
+  <Import Project="..\Sdk.Common.MetadataFiles.props" />
+  <Import Project="..\Sdk.Common.PackageProperties.props" />
+
+  <PropertyGroup>
+    <!-- Basic project properties -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+
+    <!-- Analyzer packaging properties -->
+    <PackageType>Analyzer</PackageType>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+
+    <!-- Override symbol package settings (analyzers don't need symbols packages) -->
+    <IncludeSource>false</IncludeSource>
+    <IncludeSymbols>false</IncludeSymbols>
+    <SymbolPackageFormat></SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Include analyzer DLL in package -->
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
+  <!-- Import modular shared targets (only package content, not SDK content) -->
+  <Import Project="..\Sdk.Common.PackageContent.targets" />
+</Project>

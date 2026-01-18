@@ -1,0 +1,62 @@
+<Project>
+  <!--
+    Metadata file loading from solution root
+    Reads VERSION.md, AUTHORS.md, DESCRIPTION.md, etc.
+    Requires: SolutionDir property (import Sdk.Common.SolutionDiscovery.props first)
+  -->
+  <PropertyGroup>
+    <!-- Authors -->
+    <AuthorsFileName>AUTHORS.md</AuthorsFileName>
+    <AuthorsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(AuthorsFileName)"))</AuthorsFilePath>
+    <Authors Condition="Exists($(AuthorsFilePath))">$([System.IO.File]::ReadAllText($(AuthorsFilePath)).Trim())</Authors>
+
+    <!-- Version -->
+    <VersionFileName>VERSION.md</VersionFileName>
+    <VersionFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(VersionFileName)"))</VersionFilePath>
+    <Version Condition="Exists($(VersionFilePath))">$([System.IO.File]::ReadAllText($(VersionFilePath)).Trim())</Version>
+
+    <!-- Description -->
+    <DescriptionFileName>DESCRIPTION.md</DescriptionFileName>
+    <DescriptionFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(DescriptionFileName)"))</DescriptionFilePath>
+    <Description Condition="Exists($(DescriptionFilePath))">$([System.IO.File]::ReadAllText($(DescriptionFilePath)).Trim())</Description>
+
+    <!-- Tags -->
+    <TagsFileName>TAGS.md</TagsFileName>
+    <TagsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(TagsFileName)"))</TagsFilePath>
+    <Tags Condition="Exists($(TagsFilePath))">$([System.IO.File]::ReadAllText($(TagsFilePath)).Trim())</Tags>
+
+    <!-- License -->
+    <LicenseFileName>LICENSE.md</LicenseFileName>
+    <LicenseFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(LicenseFileName)"))</LicenseFilePath>
+    <License Condition="Exists($(LicenseFilePath))">$([System.IO.File]::ReadAllText($(LicenseFilePath)).Trim())</License>
+
+    <!-- Changelog -->
+    <ChangelogFileName>CHANGELOG.md</ChangelogFileName>
+    <ChangelogFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ChangelogFileName)"))</ChangelogFilePath>
+    <Changelog Condition="Exists($(ChangelogFilePath))">$([System.IO.File]::ReadAllText($(ChangelogFilePath)).Trim())</Changelog>
+
+    <!-- Readme -->
+    <ReadmeFileName>README.md</ReadmeFileName>
+    <ReadmeFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ReadmeFileName)"))</ReadmeFilePath>
+    <Readme Condition="Exists($(ReadmeFilePath))">$([System.IO.File]::ReadAllText($(ReadmeFilePath)).Trim())</Readme>
+
+    <!-- Icon -->
+    <IconFileName>icon.png</IconFileName>
+    <IconFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(IconFileName)"))</IconFilePath>
+
+    <!-- Authors URL -->
+    <AuthorsUrlFileName>AUTHORS.url</AuthorsUrlFileName>
+    <AuthorsUrlFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(AuthorsUrlFileName)"))</AuthorsUrlFilePath>
+    <AuthorsUrl Condition="Exists($(AuthorsUrlFilePath))">$([System.IO.File]::ReadAllText($(AuthorsUrlFilePath)).Trim())</AuthorsUrl>
+
+    <!-- Project URL -->
+    <ProjectUrlFileName>PROJECT.url</ProjectUrlFileName>
+    <ProjectUrlFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ProjectUrlFileName)"))</ProjectUrlFilePath>
+    <ProjectUrl Condition="Exists($(ProjectUrlFilePath))">$([System.IO.File]::ReadAllText($(ProjectUrlFilePath)).Trim())</ProjectUrl>
+
+    <!-- Copyright -->
+    <CopyrightFileName>COPYRIGHT.md</CopyrightFileName>
+    <CopyrightFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(CopyrightFileName)"))</CopyrightFilePath>
+    <Copyright Condition="Exists($(CopyrightFilePath))">$([System.IO.File]::ReadAllText($(CopyrightFilePath)).Trim())</Copyright>
+  </PropertyGroup>
+</Project>

@@ -38,6 +38,11 @@
   <!-- Standard packages for all projects -->
   <ItemGroup>
 
+    <!-- ktsu.Sdk Analyzers - automatically included for all projects -->
+    <PackageReference Include="ktsu.Sdk.Analyzers" VersionOverride="$(Version)" Condition="$(IsTestProject) == 'false'">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+
     <PackageReference Include="Microsoft.SourceLink.GitHub" VersionOverride="10.0.102">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
