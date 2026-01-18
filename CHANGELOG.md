@@ -1,3 +1,18 @@
+## v2.0.0 (major)
+
+Changes since v1.76.0:
+
+- [major] Add Roslyn analyzers to enforce SDK requirements and remove UseStringLengthAnalyzer ([@matt-edmondson](https://github.com/matt-edmondson))
+- Add ktsu.Sdk.Analyzers project with initial analyzer implementation and metadata files ([@matt-edmondson](https://github.com/matt-edmondson))
+- Add PolyGuard and PolyNullability properties for non-test projects ([@matt-edmondson](https://github.com/matt-edmondson))
+- Enhance assembly name check to support strong-named assemblies in MissingInternalsVisibleToAttributeAnalyzer ([@matt-edmondson](https://github.com/matt-edmondson))
+- Enhance MissingStandardPackagesAnalyzer to validate additional package references via MSBuild properties ([@matt-edmondson](https://github.com/matt-edmondson))
+- Fix attribute syntax for InternalsVisibleTo in code fix provider ([@matt-edmondson](https://github.com/matt-edmondson))
+- Fix erroneous spaces in solution discovery ([@matt-edmondson](https://github.com/matt-edmondson))
+- Fix solution directory discovery logic for great-grandparent level ([@matt-edmondson](https://github.com/matt-edmondson))
+- Refactor RequiresSystemMemory method to simplify null checks on targetFramework ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update Sdk.targets to replace {version} placeholder with actual SDK version in release script ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update SetPackageReferenceProperties target to run before GenerateMSBuildEditorConfigFile ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.76.0 (minor)
 
 Changes since v1.75.0:
