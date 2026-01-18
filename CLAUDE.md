@@ -25,7 +25,7 @@ dotnet pack --configuration Release --output ./staging
 
 ### Publishing Applications
 ```powershell
-dotnet publish <project>.csproj --no-build --configuration Release --framework net9.0 --output ./output/<project>
+dotnet publish <project>.csproj --no-build --configuration Release --framework net10.0 --output ./output/<project>
 ```
 
 ## Version Management
@@ -54,10 +54,11 @@ The SDK consists of multiple sub-SDKs:
   - `Sdk.targets`: Project type detection, automatic references, package inclusion logic
 
 - **Sdk.ConsoleApp/**: Console application SDK
-  - Sets `OutputType=Exe` and `TargetFramework=net9.0`
+  - Sets `OutputType=Exe` and `TargetFramework=net10.0`
 
 - **Sdk.App/**: GUI application SDK (ImGui/Windows apps)
   - Sets `OutputType=WinExe` on Windows, `Exe` on other platforms
+  - Sets `TargetFramework=net10.0`
   - Configures runtime identifiers for cross-platform GUI support
 
 ## Key SDK Features
@@ -81,20 +82,24 @@ The SDK intelligently handles cases where the directory name matches the project
 
 The SDK automatically detects project types based on naming conventions:
 - **Primary Project**: `{SolutionName}` or `{SolutionName}.Core`
-- **Console Projects**: `{SolutionName}.CLI`, `{SolutionName}.ConsoleApp`, etc.
-- **GUI Projects**: `{SolutionName}.App`, `{SolutionName}.WinApp`, `{SolutionName}.ImGuiApp`, etc.
-- **Test Projects**: `{SolutionName}.Test`, `{SolutionName}.Tests`, etc.
+- **Console Projects**: `{SolutionName}.CLI`, `{SolutionName}.Cli`, `{SolutionName}Cli`, `{SolutionName}CLI`, `{SolutionName}.ConsoleApp`, `{SolutionName}.Console`
+- **GUI Projects**: `{SolutionName}.App`, `{SolutionName}App`, `{SolutionName}.WinApp`, `{SolutionName}WinApp`, `{SolutionName}.ImGuiApp`, `{SolutionName}ImGuiApp`
+- **Test Projects**: `{SolutionName}.Test`, `{SolutionName}.Tests`, `{SolutionName}Test`, `{SolutionName}Tests`
 
 Properties set based on detection: `IsPrimaryProject`, `IsCliProject`, `IsAppProject`, `IsTestProject`
 
 ### Analyzer-Enforced Requirements
 
-The SDK uses Roslyn analyzers to enforce proper project configuration:
+The SDK automatically includes the `ktsu.Sdk.Analyzers` package (with version synchronization via `{version}` placeholder) to enforce proper project configuration:
 
 - **KTSU0001 (Error)**: Projects must include required standard packages (SourceLink, Polyfill, System.Memory, System.Threading.Tasks.Extensions). Requirements vary based on project type and target framework.
 - **KTSU0002 (Error)**: Projects must expose internals to test projects using `[assembly: InternalsVisibleTo(...)]`. A code fixer is available to automatically add this attribute.
 
-These properties are passed to analyzers via `CompilerVisibleProperty`: `IsTestProject`, `TestProjectExists`, `TestProjectNamespace`, `TargetFramework`, `TargetFrameworkIdentifier`.
+These properties are passed to analyzers via `CompilerVisibleProperty`: `IsTestProject`, `TestProjectExists`, `TestProjectNamespace`, `TargetFramework`, `TargetFrameworkIdentifier`, `HasSourceLinkGitHub`, `HasSourceLinkAzureRepos`, `HasPolyfill`, `HasSystemMemory`, `HasSystemThreadingTasksExtensions`.
+
+**Polyfill Configuration**: For non-test projects, the SDK automatically sets:
+- `PolyEnsure=true` - Enables ensure/guard clause polyfills
+- `PolyNullability=true` - Enables nullability-related polyfills
 
 ### Metadata File Integration
 
@@ -107,7 +112,7 @@ The SDK reads markdown files from the solution root and uses them to populate pa
 - `LICENSE.md` → PackageLicenseFile
 - `README.md` → PackageReadmeFile
 - `COPYRIGHT.md` → Copyright
-- `PROJECT_URL.url` → ProjectUrl, PackageProjectUrl
+- `PROJECT.url` → ProjectUrl, PackageProjectUrl
 - `AUTHORS.url` → AuthorsUrl
 - `icon.png` → PackageIcon
 
@@ -116,9 +121,9 @@ All metadata files are automatically included in NuGet packages.
 ## Important MSBuild Properties
 
 ### Multi-Targeting
-Default: `net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1`
+Default: `net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1`
 
-Individual SDK sub-projects can override `TargetFrameworks` to target a single framework.
+Individual SDK sub-projects (ConsoleApp, App) override `TargetFrameworks` to target a single framework (net10.0).
 
 ### Code Quality
 - `LangVersion=latest`
@@ -141,16 +146,20 @@ The GitHub Actions workflow (`.github/workflows/dotnet-sdk.yml`) runs on:
 - Push to `main` or `develop` branches
 - Pull requests
 - Nightly schedule (11 PM UTC)
+- Manual workflow dispatch
+
+The workflow uses .NET SDK 10.0.
 
 Release process (only on main branch, non-fork):
 1. Generate VERSION.md, LICENSE.md, CHANGELOG.md from git history
-2. Commit metadata changes with bot attribution
-3. Commit Sdk.props/Sdk.targets version updates
-4. Build all projects
-5. Run tests
-6. Create NuGet packages
-7. Publish to GitHub Packages, NuGet.org, and ktsu.dev package feeds
-8. Create GitHub release with artifacts
+2. Update analyzer releases with `make-analyzer-releases.ps1`
+3. Commit metadata changes with bot attribution
+4. Commit Sdk.props/Sdk.targets version updates
+5. Build all projects
+6. Run tests
+7. Create NuGet packages
+8. Publish to GitHub Packages, NuGet.org, and ktsu.dev package feeds
+9. Create GitHub release with artifacts
 
 ## Common Development Tasks
 
@@ -183,6 +192,17 @@ Release process (only on main branch, non-fork):
 4. Reference the local version in consuming project's csproj or global.json
 
 ## Architecture Notes
+
+### Modular Structure
+
+The SDK projects (Sdk, Sdk.ConsoleApp, Sdk.App) use a modular architecture with shared configuration files:
+- **Sdk.Common.SolutionDiscovery.props**: Shared solution/project discovery logic
+- **Sdk.Common.MetadataFiles.props**: Shared metadata file loading logic
+- **Sdk.Common.PackageProperties.props**: Shared package configuration
+- **Sdk.Common.SdkContent.targets**: Shared SDK content packaging logic
+- **Sdk.Common.PackageContent.targets**: Shared package content inclusion logic
+
+Each SDK project imports these modular files to avoid code duplication and ensure consistency.
 
 ### MSBuild Evaluation Order
 

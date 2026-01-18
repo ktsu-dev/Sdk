@@ -21,7 +21,7 @@ permissions:
 env:
   OUTPUT_PATH: 'output'
   STAGING_PATH: 'staging'
-  DOTNET_VERSION: '9.0'
+  DOTNET_VERSION: '10.0'
 
 jobs:
   dotnet:

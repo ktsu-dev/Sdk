@@ -1,6 +1,6 @@
 # ktsu.Sdk
 
-A comprehensive, robust MSBuild-based SDK for .NET projects that standardizes configuration, metadata management, and package workflows. Features intelligent project structure detection, hierarchical solution discovery, and path-based namespace generation. Supports multiple .NET versions (.NET 5.0+, .NET Standard 2.0/2.1) with optimizations for .NET 9.0.
+A comprehensive, robust MSBuild-based SDK for .NET projects that standardizes configuration, metadata management, and package workflows. Features intelligent project structure detection, hierarchical solution discovery, and path-based namespace generation. Supports multiple .NET versions (.NET 5.0+, .NET Standard 2.0/2.1) with optimizations for .NET 9.0+.
 
 ## Quick Start
 
@@ -11,13 +11,13 @@ Add the SDK to your global.json (recommended):
 ```json
 {
   "sdk": {
-    "version": "9.0.0",
+    "version": "10.0.0",
     "rollForward": "latestMinor"
   },
   "msbuild-sdks": {
-    "ktsu.Sdk": "1.0.0",
-    "ktsu.Sdk.ConsoleApp": "1.0.0",
-    "ktsu.Sdk.App": "1.0.0"
+    "ktsu.Sdk": "2.2.0",
+    "ktsu.Sdk.ConsoleApp": "2.2.0",
+    "ktsu.Sdk.App": "2.2.0"
   }
 }
 ```
@@ -26,7 +26,7 @@ Or reference directly in your project file:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
-  <Sdk Name="ktsu.Sdk" Version="1.0.0" />
+  <Sdk Name="ktsu.Sdk" Version="2.2.0" />
 
   <PropertyGroup>
     <!-- Your project-specific properties -->
@@ -80,7 +80,7 @@ For a GUI application:
 
 ### 📦 **Advanced Package Management**
 
-- **Multi-Target Support**: .NET 9.0, 8.0, 7.0, 6.0, 5.0, .NET Standard 2.0/2.1
+- **Multi-Target Support**: .NET 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, .NET Standard 2.0/2.1 (default: net10.0)
 - **MSBuildSdk Packaging**: Properly configured for MSBuild SDK project packaging
 - **Automatic Metadata Integration**: Seamlessly includes markdown files in package metadata
 - **Package Validation**: Built-in API compatibility and package validation
@@ -117,7 +117,7 @@ The base SDK that all projects should reference. Provides:
 Extension SDK for console applications. Adds:
 
 - `OutputType=Exe` configuration
-- Single target framework (net9.0)
+- Single target framework (net10.0)
 - Cross-platform console optimizations
 
 ### **ktsu.Sdk.App**
@@ -126,7 +126,7 @@ Extension SDK for GUI applications (ImGui, WinForms, WPF, etc.). Adds:
 
 - `OutputType=WinExe` on Windows (no console window)
 - `OutputType=Exe` on other platforms
-- Single target framework (net9.0)
+- Single target framework (net10.0)
 - Platform-specific runtime configurations
 
 ## Detailed Usage
@@ -153,7 +153,7 @@ Extension SDK for GUI applications (ImGui, WinForms, WPF, etc.). Adds:
    - `TAGS.md` - NuGet package tags
    - `README.md` - Package documentation
    - `AUTHORS.url` - URL to author/organization
-   - `PROJECT_URL.url` - URL to project repository
+   - `PROJECT.url` - URL to project repository
 
 2. **icon.png**: Optional package icon at solution root
 
@@ -167,7 +167,7 @@ The SDK provides sensible defaults, but you can override any property:
 
   <PropertyGroup>
     <!-- Override target frameworks -->
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net9.0</TargetFrameworks>
 
     <!-- Override namespace -->
     <RootNamespace>MyCompany.MyProject</RootNamespace>
@@ -186,9 +186,9 @@ The SDK provides sensible defaults, but you can override any property:
 The SDK automatically detects different project types in your solution:
 
 - **Primary Project**: The main project of your solution (YourSolution, YourSolution.Core)
-- **Console Projects**: Command-line interface projects (YourSolution.ConsoleApp, YourSolutionConsoleApp, YourSolution.CLI, YourSolutionCLI)
+- **Console Projects**: Command-line interface projects (YourSolution.CLI, YourSolution.Cli, YourSolutionCli, YourSolutionCLI, YourSolution.ConsoleApp, YourSolution.Console)
 - **GUI App Projects**: Application projects (YourSolution.App, YourSolutionApp, YourSolution.WinApp, YourSolutionWinApp, YourSolution.ImGuiApp, YourSolutionImGuiApp)
-- **Test Projects**: Test projects (YourSolution.Test, YourSolution.Tests, YourSolutionTest, YourSolutionTests, YourSolution.WinTest, YourSolutionWinTest)
+- **Test Projects**: Test projects (YourSolution.Test, YourSolution.Tests, YourSolutionTest, YourSolutionTests)
 
 Each project type receives appropriate default settings, references, and output configurations (console apps vs. GUI apps).
 
@@ -231,7 +231,7 @@ This enables the SDK to work with any nested project structure without configura
 
 ### Analyzer-Enforced Requirements
 
-The SDK includes Roslyn analyzers that enforce proper project configuration with helpful diagnostics and code fixers:
+The SDK automatically includes the `ktsu.Sdk.Analyzers` package (with version synchronization) that enforces proper project configuration with helpful diagnostics and code fixers:
 
 **KTSU0001 (Error)**: Projects must include required standard packages
 - Enforces SourceLink packages (GitHub, Azure Repos)
@@ -242,6 +242,10 @@ The SDK includes Roslyn analyzers that enforce proper project configuration with
 **KTSU0002 (Error)**: Projects must expose internals to test projects
 - Code fixer automatically adds `[assembly: InternalsVisibleTo(...)]` attribute
 - Use Ctrl+. (Quick Actions) to apply the fix
+
+**Polyfill Configuration**: For non-test projects, the SDK automatically enables:
+- `PolyEnsure=true` - Enables ensure/guard clause polyfills
+- `PolyNullability=true` - Enables nullability-related polyfills
 
 These analyzers ensure consistent project structure while giving you explicit control over dependencies.
 
@@ -331,21 +335,25 @@ Projects are configured with multiple runtime identifiers:
 
 ## Automatic Package References
 
-The SDK automatically includes these NuGet packages in all projects:
+The SDK enforces (via analyzers) that projects include these NuGet packages:
 
 ### Source Link Support (All Projects)
 
-- **Microsoft.SourceLink.GitHub** (8.0.0) - GitHub source linking for debugging
-- **Microsoft.SourceLink.AzureRepos.Git** (8.0.0) - Azure Repos source linking
+- **Microsoft.SourceLink.GitHub** - GitHub source linking for debugging
+- **Microsoft.SourceLink.AzureRepos.Git** - Azure Repos source linking
 
 ### Polyfills (Non-Test Projects)
 
-- **Polyfill** (8.8.0) - Modern language feature support for older frameworks
+- **Polyfill** - Modern language feature support for older frameworks, with automatic configuration for PolyEnsure and PolyNullability source generators
 
 ### Compatibility Packages (Framework-Specific)
 
-- **System.Memory** (4.6.3) - For .NET Standard and .NET Framework
-- **System.Threading.Tasks.Extensions** (4.6.3) - For netstandard2.0, netcoreapp2.0, and .NET Framework
+- **System.Memory** - For .NET Standard and .NET Framework
+- **System.Threading.Tasks.Extensions** - For netstandard2.0, netcoreapp2.0, and .NET Framework
+
+### Analyzer Package (Non-Test Projects)
+
+- **ktsu.Sdk.Analyzers** - Automatically included with version synchronization to enforce SDK requirements
 
 ## Code Quality Defaults
 
@@ -428,7 +436,7 @@ Additional suppressions for test projects:
 ```xml
 <PropertyGroup>
   <!-- Single target for applications -->
-  <TargetFramework>net9.0</TargetFramework>
+  <TargetFramework>net10.0</TargetFramework>
   <TargetFrameworks></TargetFrameworks>
 </PropertyGroup>
 ```
@@ -441,7 +449,7 @@ Additional suppressions for test projects:
 
 ## Requirements
 
-- .NET SDK 5.0 or later (optimized for .NET SDK 9.0)
+- .NET SDK 5.0 or later (optimized for .NET SDK 10.0)
 - Central Package Management (Directory.Packages.props)
 
 ## License

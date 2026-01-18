@@ -284,7 +284,7 @@
 
     <!-- Framework properties -->
     <TargetFramework></TargetFramework>
-    <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
 
     <!-- Package properties -->
     <PackageId>$(AssemblyName)</PackageId>
@@ -329,7 +329,7 @@
     <PublishReferencesDocumentationFiles>true</PublishReferencesDocumentationFiles>
     <PublishRelease>true</PublishRelease>
     <RollForward>LatestMinor</RollForward>
-    <RuntimeFrameworkVersion>9.0.0</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>10.0.0</RuntimeFrameworkVersion>
     <!-- <RuntimeIdentifier>win-x64</RuntimeIdentifier> -->
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64;osx-x64;linux-x64;osx-arm64;linux-arm64</RuntimeIdentifiers>
     <!-- <SatelliteResourceLanguages>en-US;de-DE</SatelliteResourceLanguages> -->
