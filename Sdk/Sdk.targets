@@ -68,7 +68,7 @@
 
   <!-- Analyzer package - automatically included to enforce other requirements -->
   <ItemGroup>
-    <PackageReference Include="ktsu.Sdk.Analyzers" VersionOverride="2.2.0" Condition="$(IsTestProject) == 'false'">
+    <PackageReference Include="ktsu.Sdk.Analyzers" VersionOverride="{version}" Condition="$(IsTestProject) == 'false'">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>

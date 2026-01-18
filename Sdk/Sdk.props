@@ -404,7 +404,7 @@
 
     <!-- Test project–related properties -->
     <IsTestProject>false</IsTestProject>
-
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <!-- Hosting-related properties -->
     <!-- <AppHostDotNetSearch>Global</AppHostDotNetSearch> -->
     <!-- <AppHostRelativeDotNet>./relative/path/to/runtime</AppHostRelativeDotNet> -->
