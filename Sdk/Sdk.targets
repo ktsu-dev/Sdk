@@ -25,6 +25,33 @@
     <!-- CA1707: Identifiers should not contain underscores -->
   </PropertyGroup>
 
+  <!-- Collect package references for analyzer validation -->
+  <Target Name="SetPackageReferenceProperties" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <_SourceLinkGitHub Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.SourceLink.GitHub'" />
+      <_SourceLinkAzureRepos Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.SourceLink.AzureRepos.Git'" />
+      <_Polyfill Include="@(PackageReference)" Condition="'%(Identity)' == 'Polyfill'" />
+      <_SystemMemory Include="@(PackageReference)" Condition="'%(Identity)' == 'System.Memory'" />
+      <_SystemThreadingTasksExtensions Include="@(PackageReference)" Condition="'%(Identity)' == 'System.Threading.Tasks.Extensions'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <HasSourceLinkGitHub Condition="'@(_SourceLinkGitHub)' != ''">true</HasSourceLinkGitHub>
+      <HasSourceLinkGitHub Condition="'@(_SourceLinkGitHub)' == ''">false</HasSourceLinkGitHub>
+
+      <HasSourceLinkAzureRepos Condition="'@(_SourceLinkAzureRepos)' != ''">true</HasSourceLinkAzureRepos>
+      <HasSourceLinkAzureRepos Condition="'@(_SourceLinkAzureRepos)' == ''">false</HasSourceLinkAzureRepos>
+
+      <HasPolyfill Condition="'@(_Polyfill)' != ''">true</HasPolyfill>
+      <HasPolyfill Condition="'@(_Polyfill)' == ''">false</HasPolyfill>
+
+      <HasSystemMemory Condition="'@(_SystemMemory)' != ''">true</HasSystemMemory>
+      <HasSystemMemory Condition="'@(_SystemMemory)' == ''">false</HasSystemMemory>
+
+      <HasSystemThreadingTasksExtensions Condition="'@(_SystemThreadingTasksExtensions)' != ''">true</HasSystemThreadingTasksExtensions>
+      <HasSystemThreadingTasksExtensions Condition="'@(_SystemThreadingTasksExtensions)' == ''">false</HasSystemThreadingTasksExtensions>
+    </PropertyGroup>
+  </Target>
+
   <!-- Make SDK-computed properties visible to analyzers -->
   <ItemGroup>
     <CompilerVisibleProperty Include="IsTestProject" />
@@ -32,6 +59,11 @@
     <CompilerVisibleProperty Include="TestProjectNamespace" />
     <CompilerVisibleProperty Include="TargetFramework" />
     <CompilerVisibleProperty Include="TargetFrameworkIdentifier" />
+    <CompilerVisibleProperty Include="HasSourceLinkGitHub" />
+    <CompilerVisibleProperty Include="HasSourceLinkAzureRepos" />
+    <CompilerVisibleProperty Include="HasPolyfill" />
+    <CompilerVisibleProperty Include="HasSystemMemory" />
+    <CompilerVisibleProperty Include="HasSystemThreadingTasksExtensions" />
   </ItemGroup>
 
   <!-- Analyzer package - automatically included to enforce other requirements -->

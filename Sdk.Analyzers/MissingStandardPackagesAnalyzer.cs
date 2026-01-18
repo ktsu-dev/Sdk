@@ -56,47 +56,53 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 		options.TryGetValue("build_property.TargetFramework", out string? targetFramework);
 		options.TryGetValue("build_property.TargetFrameworkIdentifier", out string? targetFrameworkIdentifier);
 
-		// Check for Microsoft.SourceLink.GitHub
+		// Get package reference properties (passed from MSBuild)
 
-		CheckPackage(context, "Microsoft.SourceLink.GitHub");
+		options.TryGetValue("build_property.HasSourceLinkGitHub", out string? hasSourceLinkGitHub);
+		options.TryGetValue("build_property.HasSourceLinkAzureRepos", out string? hasSourceLinkAzureRepos);
+		options.TryGetValue("build_property.HasPolyfill", out string? hasPolyfill);
+		options.TryGetValue("build_property.HasSystemMemory", out string? hasSystemMemory);
+		options.TryGetValue("build_property.HasSystemThreadingTasksExtensions", out string? hasSystemThreadingTasksExtensions);
 
-		// Check for Microsoft.SourceLink.AzureRepos.Git
+		// Check for Microsoft.SourceLink.GitHub (build-time-only package)
 
-		CheckPackage(context, "Microsoft.SourceLink.AzureRepos.Git");
+		CheckPackageProperty(context, "Microsoft.SourceLink.GitHub", hasSourceLinkGitHub);
 
-		// Check for Polyfill (non-test projects only)
+		// Check for Microsoft.SourceLink.AzureRepos.Git (build-time-only package)
+
+		CheckPackageProperty(context, "Microsoft.SourceLink.AzureRepos.Git", hasSourceLinkAzureRepos);
+
+		// Check for Polyfill (build-time-only package, non-test projects only)
 
 		if (isTestProject != "true")
 		{
-			CheckPackage(context, "Polyfill");
+			CheckPackageProperty(context, "Polyfill", hasPolyfill);
 		}
 
 		// Check for System.Memory (conditional on target framework)
 
 		if (RequiresSystemMemory(targetFramework, targetFrameworkIdentifier))
 		{
-			CheckPackage(context, "System.Memory");
+			CheckPackageProperty(context, "System.Memory", hasSystemMemory);
 		}
 
 		// Check for System.Threading.Tasks.Extensions (conditional on target framework)
 
 		if (RequiresTaskExtensions(targetFramework, targetFrameworkIdentifier))
 		{
-			CheckPackage(context, "System.Threading.Tasks.Extensions");
+			CheckPackageProperty(context, "System.Threading.Tasks.Extensions", hasSystemThreadingTasksExtensions);
 		}
 	}
 
-	private static void CheckPackage(CompilationAnalysisContext context, string packageName)
+	private static void CheckPackageProperty(CompilationAnalysisContext context, string packageName, string? hasPackageProperty)
 	{
-		// Check if package reference exists in compilation
-		// We look for the main assembly name from the package
+		// Check if package reference exists via MSBuild property
+		// Build-time-only packages (with PrivateAssets=all) don't appear in compilation references,
+		// so we need to check MSBuild properties passed via CompilerVisibleProperty
 
-		string assemblyName = packageName;
+		bool hasPackage = hasPackageProperty == "true";
 
-		bool hasReference = context.Compilation.References
-			.Any(r => r.Display?.Contains(assemblyName) == true);
-
-		if (!hasReference)
+		if (!hasPackage)
 		{
 			Location location = context.Compilation.SyntaxTrees.FirstOrDefault()?.GetRoot().GetLocation() ?? Location.None;
 
