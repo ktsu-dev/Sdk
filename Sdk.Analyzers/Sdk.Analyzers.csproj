@@ -1,8 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <!-- Import modular shared configuration -->
+<Project>
+  <!-- Import shared configuration BEFORE SDK to allow setting defaults -->
   <Import Project="..\Sdk.Common.SolutionDiscovery.props" />
   <Import Project="..\Sdk.Common.MetadataFiles.props" />
   <Import Project="..\Sdk.Common.PackageProperties.props" />
+
+  <!-- Import SDK props after our defaults are set -->
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
     <!-- Basic project properties -->
@@ -37,6 +40,9 @@
     <!-- Include analyzer DLL in package -->
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
+
+  <!-- Import SDK targets before our custom targets -->
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
   <!-- Import modular shared targets (only package content, not SDK content) -->
   <Import Project="..\Sdk.Common.PackageContent.targets" />
