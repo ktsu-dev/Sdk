@@ -92,11 +92,12 @@ public class AddInternalsVisibleToAttributeCodeFixProvider : CodeFixProvider
 				SyntaxFactory.Literal(testNamespace)));
 
 		AttributeSyntax attribute = SyntaxFactory.Attribute(
-			SyntaxFactory.ParseName("assembly: System.Runtime.CompilerServices.InternalsVisibleTo"),
+			SyntaxFactory.ParseName("System.Runtime.CompilerServices.InternalsVisibleTo"),
 			SyntaxFactory.AttributeArgumentList(
 				SyntaxFactory.SingletonSeparatedList(attributeArgument)));
 
 		AttributeListSyntax attributeList = SyntaxFactory.AttributeList(
+			SyntaxFactory.AttributeTargetSpecifier(SyntaxFactory.Token(SyntaxKind.AssemblyKeyword)),
 			SyntaxFactory.SingletonSeparatedList(attribute))
 			.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
 
