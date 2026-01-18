@@ -25,45 +25,55 @@
     <!-- CA1707: Identifiers should not contain underscores -->
   </PropertyGroup>
 
-  <!-- Reference to core project -->
-  <ItemGroup Condition="$(IsPrimaryProject) == 'false' And $(PrimaryProjectExists) == 'true'">
-    <ProjectReference Include="$(PrimaryProjectPath)" />
-  </ItemGroup>
+  <!-- Collect package references for analyzer validation -->
+  <Target Name="SetPackageReferenceProperties" BeforeTargets="GenerateMSBuildEditorConfigFile">
+    <ItemGroup>
+      <_SourceLinkGitHub Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.SourceLink.GitHub'" />
+      <_SourceLinkAzureRepos Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.SourceLink.AzureRepos.Git'" />
+      <_Polyfill Include="@(PackageReference)" Condition="'%(Identity)' == 'Polyfill'" />
+      <_SystemMemory Include="@(PackageReference)" Condition="'%(Identity)' == 'System.Memory'" />
+      <_SystemThreadingTasksExtensions Include="@(PackageReference)" Condition="'%(Identity)' == 'System.Threading.Tasks.Extensions'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <HasSourceLinkGitHub Condition="'@(_SourceLinkGitHub)' != ''">true</HasSourceLinkGitHub>
+      <HasSourceLinkGitHub Condition="'@(_SourceLinkGitHub)' == ''">false</HasSourceLinkGitHub>
 
-  <!-- Expose internals to test projects -->
-  <ItemGroup Condition="$(IsTestProject) == 'false' And $(TestProjectExists) == 'true'">
-    <InternalsVisibleTo Include="$(TestProjectNamespace)" />
-  </ItemGroup>
+      <HasSourceLinkAzureRepos Condition="'@(_SourceLinkAzureRepos)' != ''">true</HasSourceLinkAzureRepos>
+      <HasSourceLinkAzureRepos Condition="'@(_SourceLinkAzureRepos)' == ''">false</HasSourceLinkAzureRepos>
 
-  <!-- Standard packages for all projects -->
+      <HasPolyfill Condition="'@(_Polyfill)' != ''">true</HasPolyfill>
+      <HasPolyfill Condition="'@(_Polyfill)' == ''">false</HasPolyfill>
+
+      <HasSystemMemory Condition="'@(_SystemMemory)' != ''">true</HasSystemMemory>
+      <HasSystemMemory Condition="'@(_SystemMemory)' == ''">false</HasSystemMemory>
+
+      <HasSystemThreadingTasksExtensions Condition="'@(_SystemThreadingTasksExtensions)' != ''">true</HasSystemThreadingTasksExtensions>
+      <HasSystemThreadingTasksExtensions Condition="'@(_SystemThreadingTasksExtensions)' == ''">false</HasSystemThreadingTasksExtensions>
+    </PropertyGroup>
+  </Target>
+
+  <!-- Make SDK-computed properties visible to analyzers -->
   <ItemGroup>
-
-    <PackageReference Include="Microsoft.SourceLink.GitHub" VersionOverride="10.0.102">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-
-    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" VersionOverride="10.0.102">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-
-    <PackageReference Include="Polyfill" VersionOverride="9.7.3" Condition="$(IsTestProject) == 'false'">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-
-    <PackageReference Include="System.Memory"
-                  VersionOverride="4.6.3"
-                  Condition="$(TargetFrameworkIdentifier) == '.NETStandard' or
-                             $(TargetFrameworkIdentifier) == '.NETFramework' or
-                             $(TargetFramework.StartsWith('netcoreapp2'))" />
-
-    <PackageReference Include="System.Threading.Tasks.Extensions"
-                  VersionOverride="4.6.3"
-                  Condition="$(TargetFramework) == 'netstandard2.0' or
-                             $(TargetFramework) == 'netcoreapp2.0' or
-                             $(TargetFrameworkIdentifier) == '.NETFramework'" />
+    <CompilerVisibleProperty Include="IsTestProject" />
+    <CompilerVisibleProperty Include="TestProjectExists" />
+    <CompilerVisibleProperty Include="TestProjectNamespace" />
+    <CompilerVisibleProperty Include="TargetFramework" />
+    <CompilerVisibleProperty Include="TargetFrameworkIdentifier" />
+    <CompilerVisibleProperty Include="HasSourceLinkGitHub" />
+    <CompilerVisibleProperty Include="HasSourceLinkAzureRepos" />
+    <CompilerVisibleProperty Include="HasPolyfill" />
+    <CompilerVisibleProperty Include="HasSystemMemory" />
+    <CompilerVisibleProperty Include="HasSystemThreadingTasksExtensions" />
   </ItemGroup>
 
+  <!-- Analyzer package - automatically included to enforce other requirements -->
+  <ItemGroup>
+    <PackageReference Include="ktsu.Sdk.Analyzers" VersionOverride="{version}" Condition="$(IsTestProject) == 'false'">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Configure Polyfill source generators for non-test projects -->
   <PropertyGroup Condition="$(IsTestProject) == 'false'">
     <PolyGuard>true</PolyGuard>
     <PolyNullability>true</PolyNullability>

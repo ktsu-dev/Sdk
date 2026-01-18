@@ -87,9 +87,14 @@ The SDK automatically detects project types based on naming conventions:
 
 Properties set based on detection: `IsPrimaryProject`, `IsCliProject`, `IsAppProject`, `IsTestProject`
 
-### Automatic Project References
+### Analyzer-Enforced Requirements
 
-Non-primary projects automatically reference the primary project if it exists. Test projects automatically get `InternalsVisibleTo` access from the projects they test.
+The SDK uses Roslyn analyzers to enforce proper project configuration:
+
+- **KTSU0001 (Error)**: Projects must include required standard packages (SourceLink, Polyfill, System.Memory, System.Threading.Tasks.Extensions). Requirements vary based on project type and target framework.
+- **KTSU0002 (Error)**: Projects must expose internals to test projects using `[assembly: InternalsVisibleTo(...)]`. A code fixer is available to automatically add this attribute.
+
+These properties are passed to analyzers via `CompilerVisibleProperty`: `IsTestProject`, `TestProjectExists`, `TestProjectNamespace`, `TargetFramework`, `TargetFrameworkIdentifier`.
 
 ### Metadata File Integration
 

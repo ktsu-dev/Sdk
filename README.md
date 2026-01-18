@@ -89,8 +89,8 @@ For a GUI application:
 
 ### 🔧 **Development Workflow**
 
-- **Automatic Project References**: Smart cross-project referencing based on project types
-- **Internals Visibility**: Automatic InternalsVisibleTo configuration for test projects
+- **Analyzer-Enforced Requirements**: Roslyn analyzers (KTSU0001/KTSU0002) ensure proper package dependencies and internals visibility with helpful diagnostics and code fixers
+- **Internals Visibility**: Code fixer to easily add InternalsVisibleTo attributes for test projects
 - **GitHub Integration**: Built-in support for GitHub workflows and CI/CD
 - **Cross-Platform Support**: Compatible with Windows, macOS, and Linux
 - **Documentation Generation**: Automated XML documentation file generation
@@ -229,14 +229,21 @@ This enables the SDK to work with any nested project structure without configura
 
 ## Advanced Configuration Features
 
-### Automatic Project References
+### Analyzer-Enforced Requirements
 
-Projects automatically reference the primary project and expose internals to test projects. Cross-references are intelligently configured based on project types and naming conventions.
+The SDK includes Roslyn analyzers that enforce proper project configuration with helpful diagnostics and code fixers:
 
-For example:
+**KTSU0001 (Error)**: Projects must include required standard packages
+- Enforces SourceLink packages (GitHub, Azure Repos)
+- Enforces Polyfill package for non-test projects
+- Enforces compatibility packages (System.Memory, System.Threading.Tasks.Extensions) based on target framework
+- Diagnostic message includes package name and version number
 
-- Non-primary projects automatically get `<ProjectReference>` to the primary project
-- Primary project automatically exposes internals to test projects via `<InternalsVisibleTo>`
+**KTSU0002 (Error)**: Projects must expose internals to test projects
+- Code fixer automatically adds `[assembly: InternalsVisibleTo(...)]` attribute
+- Use Ctrl+. (Quick Actions) to apply the fix
+
+These analyzers ensure consistent project structure while giving you explicit control over dependencies.
 
 ### Available Properties
 

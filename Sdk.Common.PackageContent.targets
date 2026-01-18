@@ -1,10 +1,9 @@
 <Project>
+  <!--
+    Include package metadata files in NuGet packages
+    Requires: metadata file path properties from Sdk.Common.MetadataFiles.props
+  -->
   <ItemGroup>
-    <!-- Sdk related files -->
-    <None Include="Sdk.props" Pack="true" PackagePath="\Sdk" />
-    <None Include="Sdk.targets" Pack="true" PackagePath="\Sdk" />
-
-    <!-- Package data files -->
     <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" />
     <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" />
     <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" />

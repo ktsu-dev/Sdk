@@ -1,0 +1,10 @@
+<Project>
+  <!--
+    Include Sdk.props and Sdk.targets in MSBuild SDK packages
+    Only import this for projects that are MSBuild SDKs (PackageType=MSBuildSdk)
+  -->
+  <ItemGroup>
+    <None Include="Sdk.props" Pack="true" PackagePath="\Sdk" />
+    <None Include="Sdk.targets" Pack="true" PackagePath="\Sdk" />
+  </ItemGroup>
+</Project>
