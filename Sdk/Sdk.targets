@@ -75,7 +75,7 @@
 
   <!-- Configure Polyfill source generators for non-test projects -->
   <PropertyGroup Condition="$(IsTestProject) == 'false'">
-    <PolyGuard>true</PolyGuard>
+    <PolyEnsure>true</PolyEnsure>
     <PolyNullability>true</PolyNullability>
   </PropertyGroup>
 
