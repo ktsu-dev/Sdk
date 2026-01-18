@@ -1,3 +1,8 @@
+## v2.1.0 (minor)
+
+Changes since v2.0.0:
+
+- Migrate PolyGuard to PolyEnsure ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.0.0 (major)
 
 Changes since v1.76.0:
