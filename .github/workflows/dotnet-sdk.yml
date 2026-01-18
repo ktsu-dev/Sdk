@@ -148,6 +148,17 @@ jobs:
         Get-ChildItem -Recurse -Filter *.csproj | ForEach-Object {
           $csproj = $_
           $projName = [System.IO.Path]::GetFileNameWithoutExtension($csproj)
+
+          # Read project file to check if it's an application (OutputType=Exe/WinExe)
+          $projContent = Get-Content $csproj -Raw
+          $isApp = $projContent -match '<OutputType>\s*(Exe|WinExe)\s*</OutputType>'
+
+          # Skip non-application projects (libraries, SDKs, analyzers)
+          if (-not $isApp) {
+            Write-Host "Skipping $projName (not an application)"
+            return
+          }
+
           $outDir = "${{ github.workspace }}/${{ env.OUTPUT_PATH }}/$projName"
           $stageDir = "${{ github.workspace }}/${{ env.STAGING_PATH }}"
           $stageFile = "$stageDir/$projName-${{ env.VERSION }}.zip"
