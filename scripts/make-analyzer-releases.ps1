@@ -25,4 +25,18 @@ if (Test-Path $SHIPPED_FILE) {
     Write-Host "$SHIPPED_FILE not found, skipping analyzer releases update"
 }
 
+# Update Sdk.targets files to replace {version} placeholder with actual SDK version
+Get-ChildItem -Recurse -Filter "Sdk.targets" | ForEach-Object {
+    $TARGET_FILE = $_.FullName
+    $CONTENT = Get-Content $TARGET_FILE -Raw
+    if ($CONTENT -match '\{version\}') {
+        Write-Host "Updating $TARGET_FILE with version $VERSION"
+        $UPDATED_CONTENT = $CONTENT -replace '\{version\}', $VERSION
+        $UPDATED_CONTENT | Out-File -FilePath $TARGET_FILE -Encoding utf8 -NoNewline
+        Write-Host "Updated $TARGET_FILE"
+    } else {
+        Write-Host "No {version} placeholder found in $TARGET_FILE, skipping update"
+    }
+}
+
 $global:LASTEXITCODE = 0
