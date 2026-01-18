@@ -1,3 +1,9 @@
+## v2.2.0 (minor)
+
+Changes since v2.1.0:
+
+- Update analyzer package reference to use dynamic version ([@matt-edmondson](https://github.com/matt-edmondson))
+- Upgrade .NET SDK version from 9.0 to 10.0 across project files and documentation ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.1.0 (minor)
 
 Changes since v2.0.0:
