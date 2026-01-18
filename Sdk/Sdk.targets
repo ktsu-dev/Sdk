@@ -73,6 +73,11 @@
     </PackageReference>
   </ItemGroup>
 
+  <!-- Configure Polyfill source generators for non-test projects -->
+  <PropertyGroup Condition="$(IsTestProject) == 'false'">
+    <PolyGuard>true</PolyGuard>
+    <PolyNullability>true</PolyNullability>
+  </PropertyGroup>
 
   <!-- Add package data to the package -->
   <ItemGroup Condition="$(IsTestProject) == 'false'">
