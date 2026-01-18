@@ -10,6 +10,7 @@ Changes since v1.76.0:
 - Fix attribute syntax for InternalsVisibleTo in code fix provider ([@matt-edmondson](https://github.com/matt-edmondson))
 - Fix erroneous spaces in solution discovery ([@matt-edmondson](https://github.com/matt-edmondson))
 - Fix solution directory discovery logic for great-grandparent level ([@matt-edmondson](https://github.com/matt-edmondson))
+- Refactor project files to import shared configuration before SDK settings ([@matt-edmondson](https://github.com/matt-edmondson))
 - Refactor RequiresSystemMemory method to simplify null checks on targetFramework ([@matt-edmondson](https://github.com/matt-edmondson))
 - Update Sdk.targets to replace {version} placeholder with actual SDK version in release script ([@matt-edmondson](https://github.com/matt-edmondson))
 - Update SetPackageReferenceProperties target to run before GenerateMSBuildEditorConfigFile ([@matt-edmondson](https://github.com/matt-edmondson))
