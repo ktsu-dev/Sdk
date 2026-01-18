@@ -1,3 +1,11 @@
+## v1.76.0 (minor)
+
+Changes since v1.75.0:
+
+- Add CLAUDE.md for SDK guidance and build instructions ([@matt-edmondson](https://github.com/matt-edmondson))
+- add manual triggering capability to the dotnet GitHub workflow ([@matt-edmondson](https://github.com/matt-edmondson))
+- Enhance README.md with detailed installation instructions, usage examples, and advanced configuration features for ktsu.Sdk ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update package references to latest versions in Sdk.targets ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v1.75.0 (minor)
 
 Changes since v1.74.0:
