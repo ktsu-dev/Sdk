@@ -1,3 +1,8 @@
+## v2.2.2-pre.1 (prerelease)
+
+Changes since v2.2.1:
+
+- Bump the microsoft group with 2 updates ([@dependabot[bot]](https://github.com/dependabot[bot]))
 ## v2.2.1 (patch)
 
 Changes since v2.2.0:
@@ -5,7 +10,7 @@ Changes since v2.2.0:
 - Add check to skip non-application projects in build workflow ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.2.1-pre.1 (prerelease)
 
-Changes since v2.2.0:
+Incremental prerelease update.
 ## v2.2.0 (minor)
 
 Changes since v2.1.0:
