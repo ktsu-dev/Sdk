@@ -1,3 +1,10 @@
+## v2.2.2-pre.2 (prerelease)
+
+Changes since v2.2.2-pre.1:
+
+- Sync .gitignore ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync COPYRIGHT.md ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync scripts\PSBuild.psm1 ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v2.2.2-pre.1 (prerelease)
 
 Changes since v2.2.1:
