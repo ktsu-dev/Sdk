@@ -1,3 +1,8 @@
+## v2.2.2-pre.3 (prerelease)
+
+Changes since v2.2.2-pre.2:
+
+- Sync COPYRIGHT.md ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v2.2.2-pre.2 (prerelease)
 
 Changes since v2.2.2-pre.1:
