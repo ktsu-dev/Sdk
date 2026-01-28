@@ -1,3 +1,8 @@
+## v2.4.0 (minor)
+
+Changes since v2.3.0:
+
+- Add ManualNullCheckAnalyzer and CodeFixProvider to enforce Ensure.NotNull usage ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.3.1-pre.1 (prerelease)
 
 Changes since v2.3.0:
