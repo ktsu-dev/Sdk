@@ -1,3 +1,9 @@
+## v2.3.0 (minor)
+
+Changes since v2.2.0:
+
+- Add an analyzer to enforce usage of Ensure.NotNull ([@matt-edmondson](https://github.com/matt-edmondson))
+- Add check to skip non-application projects in build workflow ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.2.2-pre.4 (prerelease)
 
 Changes since v2.2.2-pre.3:
