@@ -128,7 +128,7 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 
 		return targetFrameworkIdentifier == ".NETStandard" ||
 			   targetFrameworkIdentifier == ".NETFramework" ||
-			   targetFramework.StartsWith("netcoreapp2", System.StringComparison.Ordinal);
+			   (targetFramework?.StartsWith("netcoreapp2", System.StringComparison.Ordinal) ?? false);
 	}
 
 	private static bool RequiresTaskExtensions(string? targetFramework, string? targetFrameworkIdentifier)
