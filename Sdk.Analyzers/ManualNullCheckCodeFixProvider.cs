@@ -60,7 +60,7 @@ public class ManualNullCheckCodeFixProvider : CodeFixProvider
 			context.RegisterCodeFix(
 				CodeAction.Create(
 					title: "Replace with Ensure.NotNull",
-					createChangedDocument: ct => ReplaceIfStatementWithEnsureNotNullAsync(context.Document, ifStatement, argumentName, ct),
+					createChangedDocument: ct => ReplaceIfStatementWithEnsureNotNullAsync(context.Document, ifStatement, argumentName!, ct),
 					equivalenceKey: nameof(ManualNullCheckCodeFixProvider)),
 				diagnostic);
 			return;
@@ -76,7 +76,7 @@ public class ManualNullCheckCodeFixProvider : CodeFixProvider
 			context.RegisterCodeFix(
 				CodeAction.Create(
 					title: "Replace with Ensure.NotNull",
-					createChangedDocument: ct => ReplaceCoalesceWithEnsureNotNullAsync(context.Document, coalesceExpr, argumentName, ct),
+					createChangedDocument: ct => ReplaceCoalesceWithEnsureNotNullAsync(context.Document, coalesceExpr, argumentName!, ct),
 					equivalenceKey: nameof(ManualNullCheckCodeFixProvider)),
 				diagnostic);
 		}

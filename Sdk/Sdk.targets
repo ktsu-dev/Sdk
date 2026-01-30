@@ -77,6 +77,8 @@
   <PropertyGroup Condition="$(IsTestProject) == 'false'">
     <PolyEnsure>true</PolyEnsure>
     <PolyNullability>true</PolyNullability>
+    <PolyArgumentExceptions>true</PolyArgumentExceptions>
+    <PolyStringInterpolation>true</PolyStringInterpolation>
   </PropertyGroup>
 
   <!-- Add package data to the package -->
