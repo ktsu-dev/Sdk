@@ -1,3 +1,9 @@
+## v2.5.0 (minor)
+
+Changes since v2.4.0:
+
+- Fix null check code fix provider to use non-nullable argument and update Sdk.targets for additional properties ([@matt-edmondson](https://github.com/matt-edmondson))
+- Remove .github\workflows\project.yml ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.4.1 (patch)
 
 Changes since v2.4.0:
