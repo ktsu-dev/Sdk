@@ -1,3 +1,8 @@
+## v2.6.0 (minor)
+
+Changes since v2.5.0:
+
+- Enhance SDK documentation and metadata handling ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.5.1-pre.1 (prerelease)
 
 Changes since v2.5.0:
