@@ -1,3 +1,9 @@
+## v2.5.1-pre.1 (prerelease)
+
+Changes since v2.5.0:
+
+- Sync scripts\PSBuild.psm1 ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync scripts\update-winget-manifests.ps1 ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v2.5.0 (minor)
 
 Changes since v2.4.0:
