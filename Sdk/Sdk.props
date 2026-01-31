@@ -195,8 +195,12 @@
     <ChangelogFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ChangelogFileName)"))</ChangelogFilePath>
     <Changelog Condition="Exists($(ChangelogFilePath))">$([System.IO.File]::ReadAllText($(ChangelogFilePath)).Trim())</Changelog>
 
+    <!-- Readme - check project directory first, then fall back to solution directory -->
     <ReadmeFileName>README.md</ReadmeFileName>
-    <ReadmeFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ReadmeFileName)"))</ReadmeFilePath>
+    <ReadmeFilePathProject>$([MSBuild]::NormalizePath("$(MSBuildProjectDirectory)\$(ReadmeFileName)"))</ReadmeFilePathProject>
+    <ReadmeFilePathSolution>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ReadmeFileName)"))</ReadmeFilePathSolution>
+    <ReadmeFilePath Condition="Exists($(ReadmeFilePathProject))">$(ReadmeFilePathProject)</ReadmeFilePath>
+    <ReadmeFilePath Condition="!Exists($(ReadmeFilePathProject)) And Exists($(ReadmeFilePathSolution))">$(ReadmeFilePathSolution)</ReadmeFilePath>
     <Readme Condition="Exists($(ReadmeFilePath))">$([System.IO.File]::ReadAllText($(ReadmeFilePath)).Trim())</Readme>
 
     <LicenseFileName>LICENSE.md</LicenseFileName>
@@ -223,12 +227,20 @@
     <VersionFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(VersionFileName)"))</VersionFilePath>
     <Version Condition="Exists($(VersionFilePath))">$([System.IO.File]::ReadAllText($(VersionFilePath)).Trim())</Version>
 
+    <!-- Description - check project directory first, then fall back to solution directory -->
     <DescriptionFileName>DESCRIPTION.md</DescriptionFileName>
-    <DescriptionFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(DescriptionFileName)"))</DescriptionFilePath>
+    <DescriptionFilePathProject>$([MSBuild]::NormalizePath("$(MSBuildProjectDirectory)\$(DescriptionFileName)"))</DescriptionFilePathProject>
+    <DescriptionFilePathSolution>$([MSBuild]::NormalizePath("$(SolutionDir)\$(DescriptionFileName)"))</DescriptionFilePathSolution>
+    <DescriptionFilePath Condition="Exists($(DescriptionFilePathProject))">$(DescriptionFilePathProject)</DescriptionFilePath>
+    <DescriptionFilePath Condition="!Exists($(DescriptionFilePathProject)) And Exists($(DescriptionFilePathSolution))">$(DescriptionFilePathSolution)</DescriptionFilePath>
     <Description Condition="Exists($(DescriptionFilePath))">$([System.IO.File]::ReadAllText($(DescriptionFilePath)).Trim())</Description>
 
+    <!-- Tags - check project directory first, then fall back to solution directory -->
     <TagsFileName>TAGS.md</TagsFileName>
-    <TagsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(TagsFileName)"))</TagsFilePath>
+    <TagsFilePathProject>$([MSBuild]::NormalizePath("$(MSBuildProjectDirectory)\$(TagsFileName)"))</TagsFilePathProject>
+    <TagsFilePathSolution>$([MSBuild]::NormalizePath("$(SolutionDir)\$(TagsFileName)"))</TagsFilePathSolution>
+    <TagsFilePath Condition="Exists($(TagsFilePathProject))">$(TagsFilePathProject)</TagsFilePath>
+    <TagsFilePath Condition="!Exists($(TagsFilePathProject)) And Exists($(TagsFilePathSolution))">$(TagsFilePathSolution)</TagsFilePath>
     <Tags Condition="Exists($(TagsFilePath))">$([System.IO.File]::ReadAllText($(TagsFilePath)).Trim())</Tags>
 
     <IconFileName>icon.png</IconFileName>

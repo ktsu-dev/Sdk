@@ -94,23 +94,28 @@ The SDK automatically includes the `ktsu.Sdk.Analyzers` package (with version sy
 
 - **KTSU0001 (Error)**: Projects must include required standard packages (SourceLink, Polyfill, System.Memory, System.Threading.Tasks.Extensions). Requirements vary based on project type and target framework.
 - **KTSU0002 (Error)**: Projects must expose internals to test projects using `[assembly: InternalsVisibleTo(...)]`. A code fixer is available to automatically add this attribute.
+- **KTSU0003 (Error)**: Use `Ensure.NotNull()` over `ArgumentNullException.ThrowIfNull()` for better framework compatibility. A code fixer is available to automatically replace the invocation.
+- **KTSU0004 (Error)**: Use `Ensure.NotNull()` instead of manual null checks with ArgumentNullException. Detects patterns like `if (x == null) throw new ArgumentNullException(...)`, `if (x is null) throw ...`, and `x ?? throw ...`. A code fixer is available.
 
 These properties are passed to analyzers via `CompilerVisibleProperty`: `IsTestProject`, `TestProjectExists`, `TestProjectNamespace`, `TargetFramework`, `TargetFrameworkIdentifier`, `HasSourceLinkGitHub`, `HasSourceLinkAzureRepos`, `HasPolyfill`, `HasSystemMemory`, `HasSystemThreadingTasksExtensions`.
 
 **Polyfill Configuration**: For non-test projects, the SDK automatically sets:
+
 - `PolyEnsure=true` - Enables ensure/guard clause polyfills
 - `PolyNullability=true` - Enables nullability-related polyfills
+- `PolyArgumentExceptions=true` - Enables argument exception polyfills
+- `PolyStringInterpolation=true` - Enables string interpolation polyfills
 
 ### Metadata File Integration
 
 The SDK reads markdown files from the solution root and uses them to populate package metadata:
 - `AUTHORS.md` → Authors, AuthorsNamespace
 - `VERSION.md` → Version, PackageVersion
-- `DESCRIPTION.md` → Description, PackageDescription
+- `DESCRIPTION.md` → Description, PackageDescription (checked in project directory first, then solution directory)
 - `CHANGELOG.md` → PackageReleaseNotes (truncated at 35KB if needed)
-- `TAGS.md` → Tags, PackageTags
+- `TAGS.md` → Tags, PackageTags (checked in project directory first, then solution directory)
 - `LICENSE.md` → PackageLicenseFile
-- `README.md` → PackageReadmeFile
+- `README.md` → PackageReadmeFile (checked in project directory first, then solution directory)
 - `COPYRIGHT.md` → Copyright
 - `PROJECT.url` → ProjectUrl, PackageProjectUrl
 - `AUTHORS.url` → AuthorsUrl
@@ -173,11 +178,13 @@ Release process (only on main branch, non-fork):
 
 ### Modifying Core SDK Logic
 
-- **Solution/project discovery**: Edit `Sdk/Sdk.props` (lines 1-42)
-- **Namespace generation**: Edit `Sdk/Sdk.props` (lines 237-266)
+- **Solution/project discovery**: Edit `Sdk/Sdk.props` (lines 1-70)
 - **Project type detection**: Edit `Sdk/Sdk.props` (lines 72-187)
-- **Automatic references**: Edit `Sdk/Sdk.targets` (lines 28-36)
-- **Package validation**: Edit `Sdk/Sdk.props` (lines 308-318)
+- **Metadata file loading**: Edit `Sdk/Sdk.props` (lines 189-248)
+- **Namespace generation**: Edit `Sdk/Sdk.props` (lines 249-287)
+- **Package configuration**: Edit `Sdk/Sdk.props` (lines 289-330)
+- **Package reference detection**: Edit `Sdk/Sdk.targets` (lines 29-53)
+- **Polyfill configuration**: Edit `Sdk/Sdk.targets` (lines 76-82)
 
 ### Testing SDK Changes Locally
 

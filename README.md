@@ -146,12 +146,12 @@ Extension SDK for GUI applications (ImGui, WinForms, WPF, etc.). Adds:
 1. **Metadata Files**: Create these optional markdown files at your solution root (they will be automatically included in NuGet packages):
    - `AUTHORS.md` - Used for namespace generation and package authors
    - `VERSION.md` - Version number (can be managed by build scripts)
-   - `DESCRIPTION.md` - Package description
+   - `DESCRIPTION.md` - Package description (checked in project directory first, then solution directory for multi-package support)
    - `CHANGELOG.md` - Release notes
    - `LICENSE.md` - License information
    - `COPYRIGHT.md` - Copyright notice
-   - `TAGS.md` - NuGet package tags
-   - `README.md` - Package documentation
+   - `TAGS.md` - NuGet package tags (checked in project directory first, then solution directory for multi-package support)
+   - `README.md` - Package documentation (checked in project directory first, then solution directory for multi-package support)
    - `AUTHORS.url` - URL to author/organization
    - `PROJECT.url` - URL to project repository
 
@@ -243,9 +243,24 @@ The SDK automatically includes the `ktsu.Sdk.Analyzers` package (with version sy
 - Code fixer automatically adds `[assembly: InternalsVisibleTo(...)]` attribute
 - Use Ctrl+. (Quick Actions) to apply the fix
 
+**KTSU0003 (Error)**: Use Ensure.NotNull over ArgumentNullException.ThrowIfNull
+
+- ArgumentNullException.ThrowIfNull was introduced in .NET 6
+- Ensure.NotNull from the Polyfill package maintains compatibility with older frameworks
+- Code fixer automatically replaces the invocation
+
+**KTSU0004 (Error)**: Use Ensure.NotNull instead of manual null checks
+
+- Detects patterns like `if (x == null) throw new ArgumentNullException(...)`
+- Detects patterns like `if (x is null) throw new ArgumentNullException(...)`
+- Detects patterns like `x ?? throw new ArgumentNullException(...)`
+- Code fixer automatically replaces with Ensure.NotNull
+
 **Polyfill Configuration**: For non-test projects, the SDK automatically enables:
 - `PolyEnsure=true` - Enables ensure/guard clause polyfills
 - `PolyNullability=true` - Enables nullability-related polyfills
+- `PolyArgumentExceptions=true` - Enables argument exception polyfills
+- `PolyStringInterpolation=true` - Enables string interpolation polyfills
 
 These analyzers ensure consistent project structure while giving you explicit control over dependencies.
 
