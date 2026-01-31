@@ -1,3 +1,8 @@
+## v2.6.1 (patch)
+
+Changes since v2.6.0:
+
+- Bump version to 2.6.1-pre.1, update COPYRIGHT.md, and add changelog entry ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.6.1-pre.1 (prerelease)
 
 Changes since v2.6.0:
