@@ -1,3 +1,8 @@
+## v2.6.1-pre.1 (prerelease)
+
+Changes since v2.6.0:
+
+- Sync COPYRIGHT.md ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v2.6.0 (minor)
 
 Changes since v2.5.0:
