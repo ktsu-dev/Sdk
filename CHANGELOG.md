@@ -1,3 +1,8 @@
+## v2.6.2-pre.1 (prerelease)
+
+Changes since v2.6.1:
+
+- Sync scripts\PSBuild.psm1 ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v2.6.1 (patch)
 
 Changes since v2.6.0:
@@ -5,9 +10,7 @@ Changes since v2.6.0:
 - Bump version to 2.6.1-pre.1, update COPYRIGHT.md, and add changelog entry ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.6.1-pre.1 (prerelease)
 
-Changes since v2.6.0:
-
-- Sync COPYRIGHT.md ([@ktsu[bot]](https://github.com/ktsu[bot]))
+Incremental prerelease update.
 ## v2.6.0 (minor)
 
 Changes since v2.5.0:
