@@ -61,6 +61,17 @@ The SDK consists of multiple sub-SDKs:
   - Sets `TargetFramework=net10.0`
   - Configures runtime identifiers for cross-platform GUI support
 
+- **Sdk.Windows/**, **Sdk.Linux/**, **Sdk.macOS/**: Desktop per-OS app SDKs
+  - RID-based presets on the base `net10.0` runtime (no extra prerequisites)
+  - Narrow `RuntimeIdentifiers` to the target OS and default `RuntimeIdentifier`
+  - Windows uses `OutputType=WinExe`; Linux/macOS use `Exe`
+
+- **Sdk.iOS/**, **Sdk.Android/**: Mobile app SDKs (TFM + workload based)
+  - Set `TargetFramework=net10.0-ios` / `net10.0-android` plus `SupportedOSPlatformVersion`
+  - Consuming projects require the `ios`/`android` workloads
+    (`dotnet workload install android ios maui`); iOS additionally needs a macOS host
+  - The SDK packages themselves carry no workload dependency and pack on any host
+
 ## Key SDK Features
 
 ### Hierarchical Solution Discovery
@@ -84,9 +95,14 @@ The SDK automatically detects project types based on naming conventions:
 - **Primary Project**: `{SolutionName}` or `{SolutionName}.Core`
 - **Console Projects**: `{SolutionName}.CLI`, `{SolutionName}.Cli`, `{SolutionName}Cli`, `{SolutionName}CLI`, `{SolutionName}.ConsoleApp`, `{SolutionName}.Console`
 - **GUI Projects**: `{SolutionName}.App`, `{SolutionName}App`, `{SolutionName}.WinApp`, `{SolutionName}WinApp`, `{SolutionName}.ImGuiApp`, `{SolutionName}ImGuiApp`
+- **iOS Projects**: `{SolutionName}.iOS`, `{SolutionName}iOS`, `{SolutionName}.Ios`
+- **Android Projects**: `{SolutionName}.Android`, `{SolutionName}Android`, `{SolutionName}.Droid`
+- **Windows Projects**: `{SolutionName}.Windows`, `{SolutionName}Windows`, `{SolutionName}.Win`
+- **Linux Projects**: `{SolutionName}.Linux`, `{SolutionName}Linux`
+- **macOS Projects**: `{SolutionName}.macOS`, `{SolutionName}.MacOS`, `{SolutionName}.Mac`
 - **Test Projects**: `{SolutionName}.Test`, `{SolutionName}.Tests`, `{SolutionName}Test`, `{SolutionName}Tests`
 
-Properties set based on detection: `IsPrimaryProject`, `IsCliProject`, `IsAppProject`, `IsTestProject`
+Properties set based on detection: `IsPrimaryProject`, `IsCliProject`, `IsAppProject`, `IsIosProject`, `IsAndroidProject`, `IsWindowsProject`, `IsLinuxProject`, `IsMacProject`, `IsTestProject`
 
 ### Analyzer-Enforced Requirements
 

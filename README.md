@@ -62,6 +62,20 @@ For a GUI application:
 </Project>
 ```
 
+For a platform-specific application (e.g. Linux), reference the matching SDK:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Linux" />
+</Project>
+```
+
+The same pattern applies to `ktsu.Sdk.Windows`, `ktsu.Sdk.macOS`,
+`ktsu.Sdk.iOS`, and `ktsu.Sdk.Android`. Mobile targets require the relevant .NET
+workload (`dotnet workload install android ios maui`), and iOS additionally
+requires a macOS host with Xcode.
+
 ## Key Features
 
 ### 🏗️ **Intelligent Project Structure**
@@ -98,7 +112,7 @@ For a GUI application:
 
 ## SDK Components
 
-This repository contains three SDK packages:
+This repository contains the following SDK packages:
 
 ### **ktsu.Sdk** (Core)
 
@@ -128,6 +142,29 @@ Extension SDK for GUI applications (ImGui, WinForms, WPF, etc.). Adds:
 - `OutputType=Exe` on other platforms
 - Single target framework (net10.0)
 - Platform-specific runtime configurations
+
+### Platform-Specific App SDKs
+
+These extension SDKs target a single platform. They fall into two groups:
+
+**Desktop (RID-based, no extra prerequisites):** build self-contained apps on
+the base `net10.0` runtime with the runtime identifiers narrowed to one OS.
+
+- **ktsu.Sdk.Windows** — `net10.0`, `OutputType=WinExe`, RIDs `win-x64;win-x86;win-arm64`
+- **ktsu.Sdk.Linux** — `net10.0`, `OutputType=Exe`, RIDs `linux-x64;linux-arm64;linux-musl-x64;linux-musl-arm64`
+- **ktsu.Sdk.macOS** — `net10.0`, `OutputType=Exe`, RIDs `osx-x64;osx-arm64`
+
+**Mobile (TFM + workload):** use platform-specific target frameworks and require
+the corresponding .NET workload.
+
+- **ktsu.Sdk.iOS** — `net10.0-ios`, `SupportedOSPlatformVersion=15.0`. Requires the
+  `ios` workload **and a macOS host with Xcode** to build/run consumers.
+- **ktsu.Sdk.Android** — `net10.0-android`, `SupportedOSPlatformVersion=21.0`.
+  Requires the `android` workload; builds on Linux, macOS, or Windows.
+
+> **Prerequisites for mobile targets:** install the workloads once with
+> `dotnet workload install android ios maui`. The SDK packages themselves carry no
+> workload dependency — only consuming app projects do.
 
 ## Detailed Usage
 

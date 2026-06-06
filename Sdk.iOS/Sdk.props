@@ -1,0 +1,14 @@
+<!-- ktsu.Sdk.iOS/Sdk.props -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- iOS uses a platform-specific TFM and requires the 'ios' workload.
+         Building/running consumers requires a macOS host with Xcode. -->
+    <TargetFramework>net10.0-ios</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+    <!-- iOS device + simulator RIDs only; replace the inherited desktop RIDs. -->
+    <RuntimeIdentifiers>ios-arm64;iossimulator-x64;iossimulator-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+</Project>
