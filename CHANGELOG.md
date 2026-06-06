@@ -1,3 +1,8 @@
+## v2.6.2-pre.8 (prerelease)
+
+Changes since v2.6.2-pre.7:
+
+- Expand platform targets plan to include Windows, Linux, and macOS (#5) ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.6.2-pre.7 (prerelease)
 
 Changes since v2.6.2-pre.6:
