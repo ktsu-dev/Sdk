@@ -1,3 +1,8 @@
+## v2.8.0 (minor)
+
+Changes since v2.7.0:
+
+- Add platform SDK validation gate; confirm analyzer/CI need no mobile changes ([@Claude](https://github.com/Claude))
 ## v2.7.0 (minor)
 
 Changes since v2.6.0:
