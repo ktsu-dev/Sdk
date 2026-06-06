@@ -131,6 +131,86 @@
     <AppProjectPath Condition="$(AppProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(AppProjectName)\$(AppProjectFileName)"))</AppProjectPath>
     <AppProjectExists Condition="$(AppProjectExists) == 'false' And Exists($(AppProjectPath))">true</AppProjectExists>
 
+    <!-- iOS Project properties -->
+    <IosProjectName>$(SolutionName).iOS</IosProjectName>
+    <IosProjectFileName>$(IosProjectName).csproj</IosProjectFileName>
+    <IosProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(IosProjectName)\$(IosProjectFileName)"))</IosProjectPath>
+    <IosProjectExists>false</IosProjectExists>
+    <IosProjectExists Condition="Exists($(IosProjectPath))">true</IosProjectExists>
+
+    <IosProjectName Condition="$(IosProjectExists) == 'false'">$(SolutionName)iOS</IosProjectName>
+    <IosProjectFileName Condition="$(IosProjectExists) == 'false'">$(IosProjectName).csproj</IosProjectFileName>
+    <IosProjectPath Condition="$(IosProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(IosProjectName)\$(IosProjectFileName)"))</IosProjectPath>
+    <IosProjectExists Condition="$(IosProjectExists) == 'false' And Exists($(IosProjectPath))">true</IosProjectExists>
+
+    <IosProjectName Condition="$(IosProjectExists) == 'false'">$(SolutionName).Ios</IosProjectName>
+    <IosProjectFileName Condition="$(IosProjectExists) == 'false'">$(IosProjectName).csproj</IosProjectFileName>
+    <IosProjectPath Condition="$(IosProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(IosProjectName)\$(IosProjectFileName)"))</IosProjectPath>
+    <IosProjectExists Condition="$(IosProjectExists) == 'false' And Exists($(IosProjectPath))">true</IosProjectExists>
+
+    <!-- Android Project properties -->
+    <AndroidProjectName>$(SolutionName).Android</AndroidProjectName>
+    <AndroidProjectFileName>$(AndroidProjectName).csproj</AndroidProjectFileName>
+    <AndroidProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(AndroidProjectName)\$(AndroidProjectFileName)"))</AndroidProjectPath>
+    <AndroidProjectExists>false</AndroidProjectExists>
+    <AndroidProjectExists Condition="Exists($(AndroidProjectPath))">true</AndroidProjectExists>
+
+    <AndroidProjectName Condition="$(AndroidProjectExists) == 'false'">$(SolutionName)Android</AndroidProjectName>
+    <AndroidProjectFileName Condition="$(AndroidProjectExists) == 'false'">$(AndroidProjectName).csproj</AndroidProjectFileName>
+    <AndroidProjectPath Condition="$(AndroidProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(AndroidProjectName)\$(AndroidProjectFileName)"))</AndroidProjectPath>
+    <AndroidProjectExists Condition="$(AndroidProjectExists) == 'false' And Exists($(AndroidProjectPath))">true</AndroidProjectExists>
+
+    <AndroidProjectName Condition="$(AndroidProjectExists) == 'false'">$(SolutionName).Droid</AndroidProjectName>
+    <AndroidProjectFileName Condition="$(AndroidProjectExists) == 'false'">$(AndroidProjectName).csproj</AndroidProjectFileName>
+    <AndroidProjectPath Condition="$(AndroidProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(AndroidProjectName)\$(AndroidProjectFileName)"))</AndroidProjectPath>
+    <AndroidProjectExists Condition="$(AndroidProjectExists) == 'false' And Exists($(AndroidProjectPath))">true</AndroidProjectExists>
+
+    <!-- Windows Project properties -->
+    <WindowsProjectName>$(SolutionName).Windows</WindowsProjectName>
+    <WindowsProjectFileName>$(WindowsProjectName).csproj</WindowsProjectFileName>
+    <WindowsProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(WindowsProjectName)\$(WindowsProjectFileName)"))</WindowsProjectPath>
+    <WindowsProjectExists>false</WindowsProjectExists>
+    <WindowsProjectExists Condition="Exists($(WindowsProjectPath))">true</WindowsProjectExists>
+
+    <WindowsProjectName Condition="$(WindowsProjectExists) == 'false'">$(SolutionName)Windows</WindowsProjectName>
+    <WindowsProjectFileName Condition="$(WindowsProjectExists) == 'false'">$(WindowsProjectName).csproj</WindowsProjectFileName>
+    <WindowsProjectPath Condition="$(WindowsProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(WindowsProjectName)\$(WindowsProjectFileName)"))</WindowsProjectPath>
+    <WindowsProjectExists Condition="$(WindowsProjectExists) == 'false' And Exists($(WindowsProjectPath))">true</WindowsProjectExists>
+
+    <WindowsProjectName Condition="$(WindowsProjectExists) == 'false'">$(SolutionName).Win</WindowsProjectName>
+    <WindowsProjectFileName Condition="$(WindowsProjectExists) == 'false'">$(WindowsProjectName).csproj</WindowsProjectFileName>
+    <WindowsProjectPath Condition="$(WindowsProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(WindowsProjectName)\$(WindowsProjectFileName)"))</WindowsProjectPath>
+    <WindowsProjectExists Condition="$(WindowsProjectExists) == 'false' And Exists($(WindowsProjectPath))">true</WindowsProjectExists>
+
+    <!-- Linux Project properties -->
+    <LinuxProjectName>$(SolutionName).Linux</LinuxProjectName>
+    <LinuxProjectFileName>$(LinuxProjectName).csproj</LinuxProjectFileName>
+    <LinuxProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(LinuxProjectName)\$(LinuxProjectFileName)"))</LinuxProjectPath>
+    <LinuxProjectExists>false</LinuxProjectExists>
+    <LinuxProjectExists Condition="Exists($(LinuxProjectPath))">true</LinuxProjectExists>
+
+    <LinuxProjectName Condition="$(LinuxProjectExists) == 'false'">$(SolutionName)Linux</LinuxProjectName>
+    <LinuxProjectFileName Condition="$(LinuxProjectExists) == 'false'">$(LinuxProjectName).csproj</LinuxProjectFileName>
+    <LinuxProjectPath Condition="$(LinuxProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(LinuxProjectName)\$(LinuxProjectFileName)"))</LinuxProjectPath>
+    <LinuxProjectExists Condition="$(LinuxProjectExists) == 'false' And Exists($(LinuxProjectPath))">true</LinuxProjectExists>
+
+    <!-- macOS Project properties -->
+    <MacProjectName>$(SolutionName).macOS</MacProjectName>
+    <MacProjectFileName>$(MacProjectName).csproj</MacProjectFileName>
+    <MacProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(MacProjectName)\$(MacProjectFileName)"))</MacProjectPath>
+    <MacProjectExists>false</MacProjectExists>
+    <MacProjectExists Condition="Exists($(MacProjectPath))">true</MacProjectExists>
+
+    <MacProjectName Condition="$(MacProjectExists) == 'false'">$(SolutionName).MacOS</MacProjectName>
+    <MacProjectFileName Condition="$(MacProjectExists) == 'false'">$(MacProjectName).csproj</MacProjectFileName>
+    <MacProjectPath Condition="$(MacProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(MacProjectName)\$(MacProjectFileName)"))</MacProjectPath>
+    <MacProjectExists Condition="$(MacProjectExists) == 'false' And Exists($(MacProjectPath))">true</MacProjectExists>
+
+    <MacProjectName Condition="$(MacProjectExists) == 'false'">$(SolutionName).Mac</MacProjectName>
+    <MacProjectFileName Condition="$(MacProjectExists) == 'false'">$(MacProjectName).csproj</MacProjectFileName>
+    <MacProjectPath Condition="$(MacProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(MacProjectName)\$(MacProjectFileName)"))</MacProjectPath>
+    <MacProjectExists Condition="$(MacProjectExists) == 'false' And Exists($(MacProjectPath))">true</MacProjectExists>
+
     <TestProjectName>$(SolutionName).Test</TestProjectName>
     <TestProjectFileName>$(TestProjectName).csproj</TestProjectFileName>
     <TestProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(TestProjectName)\$(TestProjectFileName)"))</TestProjectPath>
@@ -183,6 +263,16 @@
     <IsCliProject Condition="$(MSBuildProjectName) == $(CliProjectName)">true</IsCliProject>
     <IsAppProject>false</IsAppProject>
     <IsAppProject Condition="$(MSBuildProjectName) == $(AppProjectName)">true</IsAppProject>
+    <IsIosProject>false</IsIosProject>
+    <IsIosProject Condition="$(MSBuildProjectName) == $(IosProjectName)">true</IsIosProject>
+    <IsAndroidProject>false</IsAndroidProject>
+    <IsAndroidProject Condition="$(MSBuildProjectName) == $(AndroidProjectName)">true</IsAndroidProject>
+    <IsWindowsProject>false</IsWindowsProject>
+    <IsWindowsProject Condition="$(MSBuildProjectName) == $(WindowsProjectName)">true</IsWindowsProject>
+    <IsLinuxProject>false</IsLinuxProject>
+    <IsLinuxProject Condition="$(MSBuildProjectName) == $(LinuxProjectName)">true</IsLinuxProject>
+    <IsMacProject>false</IsMacProject>
+    <IsMacProject Condition="$(MSBuildProjectName) == $(MacProjectName)">true</IsMacProject>
     <IsTestProject>false</IsTestProject>
     <IsTestProject Condition="$(MSBuildProjectName) == $(TestProjectName)">true</IsTestProject>
 
