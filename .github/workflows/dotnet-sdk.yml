@@ -196,3 +196,24 @@ jobs:
         bodyFile: CHANGELOG.md
         replacesArtifacts: false
         makeLatest: true
+
+  validate-platform-sdks:
+    name: Validate Platform SDKs
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          ${{ env.DOTNET_VERSION }}.x
+
+    # Packs the platform app SDKs and asserts that a consuming project resolves the
+    # expected TargetFramework / OutputType / RuntimeIdentifiers / detection flag for
+    # each platform. No mobile workloads are required: property evaluation does not
+    # build the consumer, and the SDK packages themselves carry no workload dependency.
+    - name: Validate platform-specific app SDKs
+      shell: bash
+      run: scripts/validate-platform-sdks.sh
+

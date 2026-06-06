@@ -223,6 +223,18 @@ Action: review the requirement matrix; add explicit handling for `-ios` /
 adopted). Add/extend analyzer unit tests. Update analyzer release notes if
 diagnostic behavior changes.
 
+**Validation finding (resolved — no change required):** `net10.0-ios` and
+`net10.0-android` both report `TargetFrameworkIdentifier = .NETCoreApp`, so the
+existing legacy-TFM gates in `MissingStandardPackagesAnalyzer` already exclude
+them from the `System.Memory` and `System.Threading.Tasks.Extensions`
+requirements (those fire only for `.NETStandard` / `.NETFramework` /
+`netcoreapp2` / `netstandard2.0`). `Polyfill` and SourceLink remain required on
+all non-test projects across every TFM — and that is intentional: `Polyfill`'s
+`PolyEnsure` source generator provides the `Ensure.NotNull()` API that
+KTSU0003/KTSU0004 steer users toward, so it is needed regardless of TFM. The
+analyzer therefore needs no mobile-specific change, and no diagnostic behavior
+changed (so the analyzer release notes are untouched).
+
 ### E. Solution + packaging wiring
 
 - Add all five new projects to `Sdk.sln`.
@@ -241,6 +253,24 @@ diagnostic behavior changes.
   Validate early whether *packing the SDK* (vs. a consumer building an app)
   requires the toolchain at all — likely not, since these are content packages.
 - Ensure release/publish steps include all five new packages.
+
+**Validation finding (resolved):** *packing the SDK requires no workloads* — the
+sub-SDK `.csproj` files target plain `net*`/`netstandard*` (they are MSBuild
+content packages); only consuming mobile *app* projects need the workloads.
+Consequently:
+
+- The new packages already flow through the existing `dotnet build` /
+  `dotnet pack` / publish steps with no workload install and no macOS job. The
+  publish glob (`staging/*.nupkg`) picks them up automatically.
+- A dedicated `validate-platform-sdks` job (Ubuntu) runs
+  `scripts/validate-platform-sdks.sh`, which packs the SDKs to a local feed and
+  asserts that a consumer resolves the expected `TargetFramework`, `OutputType`,
+  `RuntimeIdentifiers`, and detection flag for each platform — a regression gate
+  on every PR. It needs no workloads because property evaluation does not build
+  the consumer.
+- A macOS job + workloads would only be needed to add *consumer* mobile build
+  smoke tests (building an actual `.app`/`.apk`), which remains a possible future
+  enhancement.
 
 ### G. Documentation
 
