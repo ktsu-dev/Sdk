@@ -1,3 +1,11 @@
+## v2.7.0 (minor)
+
+Changes since v2.6.0:
+
+- Add plan for iOS and Android app SDK targets ([@Claude](https://github.com/Claude))
+- Add platform-specific app SDKs for iOS, Android, Windows, Linux, and macOS ([@Claude](https://github.com/Claude))
+- Bump version to 2.6.1-pre.1, update COPYRIGHT.md, and add changelog entry ([@matt-edmondson](https://github.com/matt-edmondson))
+- Expand plan to cover Windows, Linux, and macOS app targets ([@Claude](https://github.com/Claude))
 ## v2.6.2-pre.8 (prerelease)
 
 Changes since v2.6.2-pre.7:
