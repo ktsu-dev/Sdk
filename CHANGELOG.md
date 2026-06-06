@@ -1,3 +1,8 @@
+## v2.6.2-pre.7 (prerelease)
+
+Changes since v2.6.2-pre.6:
+
+- Add plan for iOS and Android app SDK targets (#4) ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.6.2-pre.6 (prerelease)
 
 Changes since v2.6.2-pre.5:
