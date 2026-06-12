@@ -1,3 +1,10 @@
+## v2.8.1-pre.1 (prerelease)
+
+Changes since v2.8.0:
+
+- Sync .gitattributes ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync .github\dependabot.yml ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync .gitignore ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v2.8.0 (minor)
 
 Changes since v2.7.0:
