@@ -1,3 +1,8 @@
+## v2.9.1 (patch)
+
+Changes since v2.9.0:
+
+- [patch] Fix KTSU0001 false-positive from editorconfig target ordering ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.9.0 (minor)
 
 Changes since v2.8.0:
