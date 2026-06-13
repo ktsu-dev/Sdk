@@ -1,3 +1,8 @@
+## v2.10.1-pre.1 (prerelease)
+
+Changes since v2.10.0:
+
+- Sync examples\global.json ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v2.10.0 (minor)
 
 Changes since v2.9.0:
