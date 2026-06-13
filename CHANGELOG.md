@@ -1,3 +1,8 @@
+## v2.9.2 (patch)
+
+Changes since v2.9.1:
+
+- Mark KTSU0005/KTSU0006 as shipped analyzer rules ([@Claude](https://github.com/Claude))
 ## v2.9.1 (patch)
 
 Changes since v2.9.0:
