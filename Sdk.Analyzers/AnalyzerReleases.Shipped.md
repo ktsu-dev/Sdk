@@ -1,6 +1,15 @@
 ; Shipped analyzer releases
 ; https://github.com/dotnet/roslyn/blob/main/src/RoslynAnalyzers/Microsoft.CodeAnalysis.Analyzers/ReleaseTrackingAnalyzers.Help.md
 
+## Release 2.10.0
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+KTSU0005 | ktsu.Sdk | Error | Orphaned PackageVersion entry in Directory.Packages.props
+KTSU0006 | ktsu.Sdk | Error | Transitive package used directly without a PackageReference
+
 ## Release 2.0.0
 
 ### New Rules
