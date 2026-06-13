@@ -25,8 +25,13 @@
     <!-- CA1707: Identifiers should not contain underscores -->
   </PropertyGroup>
 
-  <!-- Collect package references for analyzer validation -->
-  <Target Name="SetPackageReferenceProperties" BeforeTargets="GenerateMSBuildEditorConfigFile">
+  <!-- Collect package references for analyzer validation.
+       Must run before GenerateMSBuildEditorConfigFileCore: that inner target (a
+       DependsOnTarget of GenerateMSBuildEditorConfigFile) snapshots the
+       CompilerVisibleProperty values into the generated editorconfig. Hooking the
+       outer GenerateMSBuildEditorConfigFile target runs after its dependencies have
+       already executed, so the Has* values would still be empty at snapshot time. -->
+  <Target Name="SetPackageReferenceProperties" BeforeTargets="GenerateMSBuildEditorConfigFileCore">
     <ItemGroup>
       <_SourceLinkGitHub Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.SourceLink.GitHub'" />
       <_SourceLinkAzureRepos Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.SourceLink.AzureRepos.Git'" />
