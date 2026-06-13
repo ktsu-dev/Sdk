@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <!-- Intentionally declares no standard packages: the project references none,
+       so there are no orphaned PackageVersion entries (no KTSU0005 noise). -->
+</Project>

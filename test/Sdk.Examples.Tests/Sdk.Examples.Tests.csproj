@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Integration tests for the ktsu.Sdk MSBuild SDKs.
+
+    This project deliberately uses the plain Microsoft.NET.Sdk (NOT ktsu.Sdk) so it can be
+    restored and built from nuget.org without first bootstrapping the local SDK packages.
+    The tests themselves pack the ktsu.Sdk packages to a temporary feed and then build the
+    example projects under /examples against that feed, asserting on the results.
+
+    It is intentionally kept out of Sdk.sln so the main build/release pipeline does not try
+    to consume the (not-yet-published) SDK. A dedicated CI job runs `dotnet test` here.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsPublishable>false</IsPublishable>
+    <!-- These are end-to-end build tests; building all the sample SDKs is the point. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.6.4" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
+  </ItemGroup>
+
+</Project>

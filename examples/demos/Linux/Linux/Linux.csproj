@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Linux desktop app (net10.0, Exe, linux RIDs). -->
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Linux" />
+<ItemGroup>
+    <!-- Standard packages required by KTSU0001 for non-test projects. -->
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

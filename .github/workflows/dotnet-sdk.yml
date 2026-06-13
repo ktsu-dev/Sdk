@@ -217,3 +217,23 @@ jobs:
       shell: bash
       run: scripts/validate-platform-sdks.sh
 
+  example-integration-tests:
+    name: Example Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          ${{ env.DOTNET_VERSION }}.x
+
+    # Packs the SDK packages to a local feed and builds the example projects under /examples
+    # against it: the demos must build (proving each SDK works end-to-end), the analyzer
+    # examples must fail with their specific KTSU diagnostic, and the platform SDKs must
+    # resolve the expected properties. Also covers the #12 editorconfig Has* regression.
+    - name: Run example integration tests
+      shell: bash
+      run: dotnet test test/Sdk.Examples.Tests/Sdk.Examples.Tests.csproj -c Release --logger "console;verbosity=normal"
+

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- KTSU0001: a non-test project that does NOT reference the required standard
+       packages (Microsoft.SourceLink.GitHub, Microsoft.SourceLink.AzureRepos.Git,
+       Polyfill). The analyzer reports one KTSU0001 error per missing package. -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+  </PropertyGroup>
+</Project>
