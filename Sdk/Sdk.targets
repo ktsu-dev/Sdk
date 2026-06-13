@@ -64,7 +64,116 @@
     <CompilerVisibleProperty Include="HasPolyfill" />
     <CompilerVisibleProperty Include="HasSystemMemory" />
     <CompilerVisibleProperty Include="HasSystemThreadingTasksExtensions" />
+    <CompilerVisibleProperty Include="ManagePackageVersionsCentrally" />
   </ItemGroup>
+
+  <!-- ================================================================= -->
+  <!-- KTSU0005 / KTSU0006: generate analyzer input files                -->
+  <!-- These targets gather package-graph facts that a per-project       -->
+  <!-- Roslyn analyzer cannot otherwise observe, and surface them as     -->
+  <!-- additional files (and the project/props XML the fixers edit).     -->
+  <!-- ================================================================= -->
+  <PropertyGroup>
+    <!-- Opt-out switches for the package-hygiene analyzers -->
+    <KtsuEnableOrphanedPackageVersionAnalysis Condition="'$(KtsuEnableOrphanedPackageVersionAnalysis)' == ''">true</KtsuEnableOrphanedPackageVersionAnalysis>
+    <KtsuEnableTransitivePackageAnalysis Condition="'$(KtsuEnableTransitivePackageAnalysis)' == ''">true</KtsuEnableTransitivePackageAnalysis>
+
+    <_KtsuOrphanedPackageVersionsFile>$(IntermediateOutputPath)ktsu.orphaned-packageversions.g.txt</_KtsuOrphanedPackageVersionsFile>
+    <_KtsuTransitivePackageMapFile>$(IntermediateOutputPath)ktsu.transitive-package-map.g.txt</_KtsuTransitivePackageMapFile>
+    <_KtsuDirectPackagesFile>$(IntermediateOutputPath)ktsu.direct-packages.g.txt</_KtsuDirectPackagesFile>
+  </PropertyGroup>
+
+  <!-- KTSU0005: compute solution-wide orphaned PackageVersion entries -->
+  <Target Name="_KtsuGenerateOrphanedPackageVersionInputs"
+          Condition="'$(KtsuEnableOrphanedPackageVersionAnalysis)' == 'true' And '$(IsTestProject)' != 'true' And '$(ManagePackageVersionsCentrally)' == 'true' And Exists('$(DirectoryPackagesPropsFilePath)')"
+          BeforeTargets="CoreCompile">
+
+    <!-- All package identifiers referenced by any project / Directory.Build file in the solution.
+         XmlPeek is used because sibling projects are not otherwise visible to this build. -->
+    <ItemGroup>
+      <_KtsuPackageDeclaringFile Include="$(SolutionDir)**\*.csproj" />
+      <_KtsuPackageDeclaringFile Include="$(SolutionDir)**\Directory.Build.props" />
+      <_KtsuPackageDeclaringFile Include="$(SolutionDir)**\Directory.Build.targets" />
+      <_KtsuPackageDeclaringFile Include="$(DirectoryPackagesPropsFilePath)" />
+    </ItemGroup>
+
+    <XmlPeek XmlInputPath="%(_KtsuPackageDeclaringFile.Identity)"
+             Query="//*[local-name()='PackageReference']/@Include"
+             Condition="Exists('%(_KtsuPackageDeclaringFile.Identity)')"
+             ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="Result" ItemName="_KtsuReferencedPackages" />
+    </XmlPeek>
+
+    <XmlPeek XmlInputPath="%(_KtsuPackageDeclaringFile.Identity)"
+             Query="//*[local-name()='GlobalPackageReference']/@Include"
+             Condition="Exists('%(_KtsuPackageDeclaringFile.Identity)')"
+             ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="Result" ItemName="_KtsuReferencedPackages" />
+    </XmlPeek>
+
+    <!-- Include the fully-evaluated references for the current project (covers SDK-injected refs). -->
+    <ItemGroup>
+      <_KtsuReferencedPackages Include="@(PackageReference)" />
+      <_KtsuReferencedPackages Include="@(GlobalPackageReference)" />
+    </ItemGroup>
+
+    <!-- All centrally-managed PackageVersion identifiers. -->
+    <XmlPeek XmlInputPath="$(DirectoryPackagesPropsFilePath)"
+             Query="//*[local-name()='PackageVersion']/@Include"
+             ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="Result" ItemName="_KtsuAllPackageVersions" />
+    </XmlPeek>
+
+    <!-- Orphans = declared versions not referenced anywhere (case-insensitive identity match). -->
+    <ItemGroup>
+      <_KtsuOrphanedPackageVersions Include="@(_KtsuAllPackageVersions)" Exclude="@(_KtsuReferencedPackages)" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(_KtsuOrphanedPackageVersionsFile)"
+                      Lines="@(_KtsuOrphanedPackageVersions)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+
+    <ItemGroup>
+      <FileWrites Include="$(_KtsuOrphanedPackageVersionsFile)" />
+      <AdditionalFiles Include="$(_KtsuOrphanedPackageVersionsFile)" />
+      <AdditionalFiles Include="$(DirectoryPackagesPropsFilePath)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- KTSU0006: map package-provided assemblies to their packages, and the direct reference set -->
+  <Target Name="_KtsuGenerateTransitivePackageInputs"
+          Condition="'$(KtsuEnableTransitivePackageAnalysis)' == 'true' And '$(IsTestProject)' != 'true'"
+          DependsOnTargets="ResolveReferences"
+          BeforeTargets="CoreCompile">
+
+    <ItemGroup>
+      <_KtsuPackageAssembly Include="@(ResolvedCompileFileDefinitions)"
+                            Condition="'%(ResolvedCompileFileDefinitions.NuGetPackageId)' != ''" />
+      <_KtsuAssemblyMapLine Include="@(_KtsuPackageAssembly->'%(FileName)|%(NuGetPackageId)|%(NuGetPackageVersion)')" />
+
+      <_KtsuDirectPackage Include="@(PackageReference)" />
+      <_KtsuDirectPackage Include="@(GlobalPackageReference)" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(_KtsuTransitivePackageMapFile)"
+                      Lines="@(_KtsuAssemblyMapLine)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+    <WriteLinesToFile File="$(_KtsuDirectPackagesFile)"
+                      Lines="@(_KtsuDirectPackage)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+
+    <ItemGroup>
+      <FileWrites Include="$(_KtsuTransitivePackageMapFile)" />
+      <FileWrites Include="$(_KtsuDirectPackagesFile)" />
+      <AdditionalFiles Include="$(_KtsuTransitivePackageMapFile)" />
+      <AdditionalFiles Include="$(_KtsuDirectPackagesFile)" />
+      <!-- The project file is supplied so the KTSU0006 fixer can add the PackageReference. -->
+      <AdditionalFiles Include="$(MSBuildProjectFullPath)" />
+    </ItemGroup>
+  </Target>
 
   <!-- Analyzer package - automatically included to enforce other requirements -->
   <ItemGroup>
