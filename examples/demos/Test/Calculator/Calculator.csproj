@@ -5,6 +5,10 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <TargetFrameworks></TargetFrameworks>
+    <!-- The MSTest PackageVersions are referenced only by the sibling Calculator.Test
+         project. The orphaned-PackageVersion check is solution-wide and cannot see those
+         references when this library is built on its own, so opt it out here. -->
+    <KtsuEnableOrphanedPackageVersionAnalysis>false</KtsuEnableOrphanedPackageVersionAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />

@@ -18,10 +18,10 @@ public sealed class PlatformSdkResolutionTests
     /// <param name="rids">Expected RuntimeIdentifiers.</param>
     /// <param name="flag">The project-type detection flag expected to be 'true'.</param>
     [TestMethod]
-    [DataRow("Windows", "Windows/Windows.csproj", "net10.0", "WinExe", "win-x64;win-x86;win-arm64", "IsWindowsProject", DisplayName = "ktsu.Sdk.Windows")]
-    [DataRow("macOS", "macOS/macOS.csproj", "net10.0", "Exe", "osx-x64;osx-arm64", "IsMacProject", DisplayName = "ktsu.Sdk.macOS")]
-    [DataRow("iOS", "iOS/iOS.csproj", "net10.0-ios", "Exe", "ios-arm64;iossimulator-x64;iossimulator-arm64", "IsIosProject", DisplayName = "ktsu.Sdk.iOS")]
-    [DataRow("Android", "Android/Android.csproj", "net10.0-android", "Exe", "", "IsAndroidProject", DisplayName = "ktsu.Sdk.Android")]
+    [DataRow("Windows", "Demo.Windows/Demo.Windows.csproj", "net10.0", "WinExe", "win-x64;win-x86;win-arm64", "IsWindowsProject", DisplayName = "ktsu.Sdk.Windows")]
+    [DataRow("macOS", "Demo.macOS/Demo.macOS.csproj", "net10.0", "Exe", "osx-x64;osx-arm64", "IsMacProject", DisplayName = "ktsu.Sdk.macOS")]
+    [DataRow("iOS", "Demo.iOS/Demo.iOS.csproj", "net10.0-ios", "Exe", "ios-arm64;iossimulator-x64;iossimulator-arm64", "IsIosProject", DisplayName = "ktsu.Sdk.iOS")]
+    [DataRow("Android", "Demo.Android/Demo.Android.csproj", "net10.0-android", "Exe", "", "IsAndroidProject", DisplayName = "ktsu.Sdk.Android")]
     public void PlatformSdk_ResolvesExpectedProperties(
         string demo, string project, string tfm, string outputType, string rids, string flag)
     {

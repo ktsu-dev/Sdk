@@ -1,9 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Windows desktop app (net10.0, WinExe, win RIDs). -->
+  <!-- Android app (net10.0-android; requires the android workload to build). Named {Solution}.Android so the core SDK detects the project type. -->
   <Sdk Name="ktsu.Sdk" />
-  <Sdk Name="ktsu.Sdk.Windows" />
-<ItemGroup>
-    <!-- Standard packages required by KTSU0001 for non-test projects. -->
+  <Sdk Name="ktsu.Sdk.Android" />
+  <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" PrivateAssets="all" />
     <PackageReference Include="Polyfill" PrivateAssets="all" />

@@ -232,8 +232,16 @@ jobs:
     # Packs the SDK packages to a local feed and builds the example projects under /examples
     # against it: the demos must build (proving each SDK works end-to-end), the analyzer
     # examples must fail with their specific KTSU diagnostic, and the platform SDKs must
-    # resolve the expected properties. Also covers the #12 editorconfig Has* regression.
+    # resolve the expected properties. Also covers the #12 KTSU0001 false-positive regression.
+    #
+    # KTSU_TOOLSET pins the Roslyn compiler the example builds use to the version
+    # ktsu.Sdk.Analyzers is built against (Microsoft.CodeAnalysis 5.3.0). Without a matching
+    # compiler the analyzer cannot load (CS9057) and the trigger tests would not see the
+    # diagnostics. Keep this in sync with the Microsoft.CodeAnalysis version in
+    # Sdk.Analyzers/Sdk.Analyzers.csproj.
     - name: Run example integration tests
       shell: bash
+      env:
+        KTSU_TOOLSET: '5.3.0'
       run: dotnet test test/Sdk.Examples.Tests/Sdk.Examples.Tests.csproj -c Release --logger "console;verbosity=normal"
 

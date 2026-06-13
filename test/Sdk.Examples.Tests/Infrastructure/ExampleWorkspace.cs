@@ -74,20 +74,6 @@ internal sealed class ExampleWorkspace : IDisposable
         return values;
     }
 
-    /// <summary>Reads the generated MSBuild editorconfig snapshot the analyzers consume.</summary>
-    public string ReadGeneratedEditorConfig(string projectDirRelative, string projectName)
-    {
-        string objDir = Path.Combine(root, projectDirRelative, "obj");
-        string? file = Directory.Exists(objDir)
-            ? Directory.GetFiles(objDir, projectName + ".GeneratedMSBuildEditorConfig.editorconfig", SearchOption.AllDirectories).FirstOrDefault()
-            : null;
-
-        return file is not null ? File.ReadAllText(file) : string.Empty;
-    }
-
-    /// <summary>The absolute path of a file inside the workspace.</summary>
-    public string PathOf(string relative) => Path.Combine(root, relative);
-
     /// <inheritdoc/>
     public void Dispose()
     {
