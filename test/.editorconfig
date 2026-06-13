@@ -1,0 +1,13 @@
+# The integration test harness is a plain Microsoft.NET.Sdk project and intentionally does
+# not inherit the SDK repository's strict analysis ruleset (test methods use underscores,
+# helpers catch broad exceptions for best-effort cleanup, etc.). root = true stops the parent
+# .editorconfig from applying here.
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+dotnet_sort_system_directives_first = true
+
+# Test naming conventions intentionally use underscores.
+dotnet_diagnostic.CA1707.severity = none

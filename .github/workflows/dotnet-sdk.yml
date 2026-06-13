@@ -217,3 +217,28 @@ jobs:
       shell: bash
       run: scripts/validate-platform-sdks.sh
 
+  example-integration-tests:
+    name: Example Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          ${{ env.DOTNET_VERSION }}.x
+
+    # Packs the SDK packages to a local feed and builds the example projects under /examples
+    # against it: the demos must build (proving each SDK works end-to-end), the analyzer
+    # examples must fail with their specific KTSU diagnostic, and the platform SDKs must
+    # resolve the expected properties. Also covers the #12 KTSU0001 false-positive regression.
+    #
+    # No KTSU_TOOLSET is set: the runner's .NET SDK ships a Roslyn (>= 5.6) at least as new as
+    # the one ktsu.Sdk.Analyzers is built against (Microsoft.CodeAnalysis 5.3.0), so the analyzer
+    # loads as-is. KTSU_TOOLSET is only needed locally on an SDK whose bundled Roslyn is OLDER
+    # than 5.3.0; pinning it on a newer runner breaks the SDK's own code-style analyzers (CS9057).
+    - name: Run example integration tests
+      shell: bash
+      run: dotnet test test/Sdk.Examples.Tests/Sdk.Examples.Tests.csproj -c Release --logger "console;verbosity=normal"
+

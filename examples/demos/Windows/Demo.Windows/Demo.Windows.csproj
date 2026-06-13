@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Windows desktop app (net10.0, WinExe, win RIDs). Named {Solution}.Windows so the core SDK detects the project type. -->
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Windows" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
