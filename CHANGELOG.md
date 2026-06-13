@@ -1,3 +1,8 @@
+## v2.9.0 (minor)
+
+Changes since v2.8.0:
+
+- Add KTSU0005/KTSU0006 package-hygiene analyzers and fixers ([@Claude](https://github.com/Claude))
 ## v2.8.1-pre.1 (prerelease)
 
 Changes since v2.8.0:
