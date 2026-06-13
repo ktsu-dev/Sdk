@@ -1,3 +1,12 @@
+## v2.10.0 (minor)
+
+Changes since v2.9.0:
+
+- [patch] Fix KTSU0001 false-positive from editorconfig target ordering ([@matt-edmondson](https://github.com/matt-edmondson))
+- Add SDK example projects and MSTest integration tests ([@Claude](https://github.com/Claude))
+- CI: don't pin KTSU_TOOLSET for example integration tests ([@Claude](https://github.com/Claude))
+- Fix example demos and tests after end-to-end validation ([@Claude](https://github.com/Claude))
+- Mark KTSU0005/KTSU0006 as shipped analyzer rules ([@Claude](https://github.com/Claude))
 ## v2.9.2 (patch)
 
 Changes since v2.9.1:
