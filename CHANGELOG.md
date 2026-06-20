@@ -1,3 +1,8 @@
+## v2.10.2 (patch)
+
+Changes since v2.10.1:
+
+- [patch] KTSU0005: ignore SDK-governed packages to stop false orphan errors ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.10.1 (patch)
 
 Changes since v2.10.0:
@@ -5,9 +10,7 @@ Changes since v2.10.0:
 - [patch] Fix false KTSU0005 orphan errors when SolutionDir lacks a trailing slash ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.10.1-pre.1 (prerelease)
 
-Changes since v2.10.0:
-
-- Sync examples\global.json ([@ktsu[bot]](https://github.com/ktsu[bot]))
+Incremental prerelease update.
 ## v2.10.0 (minor)
 
 Changes since v2.9.0:
