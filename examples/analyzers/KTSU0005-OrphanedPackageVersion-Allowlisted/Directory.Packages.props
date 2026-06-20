@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0" />
+    <PackageVersion Include="Polyfill" Version="7.0.0" />
+    <!-- KTSU0005 allowlist regression (ktsu-dev/Sdk): these have no PackageReference in any
+         project. They model SDK-governed / SDK-injected packages: System.Memory is a KTSU0001
+         standard package, and Microsoft.Testing.Extensions.* are injected by MSTest.Sdk into test
+         projects (which this scan skips). KTSU0005 must NOT flag them. -->
+    <PackageVersion Include="System.Memory" Version="4.6.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2" />
+  </ItemGroup>
+</Project>

@@ -57,6 +57,26 @@ public sealed class AnalyzerTriggerTests
     }
 
     /// <summary>
+    /// KTSU0005 must not fire for SDK-governed packages that carry a PackageVersion but no
+    /// PackageReference: the KTSU0001 standard packages (e.g. System.Memory) and the
+    /// Microsoft.Testing.Extensions.* runner family that MSTest.Sdk injects into test projects
+    /// (which this scan skips). These are covered by the ignore list in Sdk.targets.
+    /// </summary>
+    [TestMethod]
+    public void Analyzer_KTSU0005_DoesNotTrigger_For_AllowlistedPackages()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Analyzer("KTSU0005-OrphanedPackageVersion-Allowlisted"));
+
+        CliResult result = workspace.Build("Allowlisted/Allowlisted.csproj");
+
+        CollectionAssert.DoesNotContain(
+            result.KtsuDiagnostics().ToList(),
+            "KTSU0005",
+            $"KTSU0005 must not fire for ignore-listed packages (System.Memory, Microsoft.Testing.Extensions.*).{Environment.NewLine}{result.Output}");
+        Assert.IsTrue(result.Succeeded, $"Expected a clean build with no orphan diagnostic.{Environment.NewLine}{result.Output}");
+    }
+
+    /// <summary>
     /// KTSU0002 (missing InternalsVisibleTo) is a CompilationEnd diagnostic reported at a
     /// syntax-tree location. When it is the only diagnostic in an otherwise-clean compilation
     /// it can be masked by Roslyn analyzer-result caching (see ktsu-dev/Sdk#12 / #8 / #11), so a
