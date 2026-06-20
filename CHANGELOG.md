@@ -1,3 +1,8 @@
+## v2.10.1 (patch)
+
+Changes since v2.10.0:
+
+- [patch] Fix false KTSU0005 orphan errors when SolutionDir lacks a trailing slash ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.10.1-pre.1 (prerelease)
 
 Changes since v2.10.0:
