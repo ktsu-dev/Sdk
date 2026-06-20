@@ -59,6 +59,7 @@ One folder is the inverse — a regression guard that is **expected to build cle
 | Example | Guards against | Why it must pass |
 | --- | --- | --- |
 | `KTSU0005-OrphanedPackageVersion-CrossProject` | False KTSU0005 | A `PackageVersion` referenced only by a sibling project must not be reported as an orphan when another project is built on its own. |
+| `KTSU0005-OrphanedPackageVersion-Allowlisted` | False KTSU0005 | SDK-governed packages (KTSU0001 standard packages, `Microsoft.Testing.Extensions.*` runner family injected into test projects) must not be flagged even with no direct `PackageReference`. |
 
 ## Building an example by hand
 

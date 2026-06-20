@@ -88,6 +88,21 @@
     <_KtsuDirectPackagesFile>$(IntermediateOutputPath)ktsu.direct-packages.g.txt</_KtsuDirectPackagesFile>
   </PropertyGroup>
 
+  <!-- KTSU0005 ignore list: PackageVersion identifiers that must never be reported as orphans,
+       even when no project carries a matching PackageReference. These are SDK-governed build-time
+       packages (the SDK requires them via KTSU0001 and/or they are injected by another SDK into a
+       project this scan cannot observe - e.g. MSTest.Sdk injects the Microsoft.Testing.Extensions.*
+       runner packages into test projects, which KTSU0005 deliberately skips). Consumers can extend
+       this with <KtsuOrphanedPackageVersionIgnore Include="..." /> in their own project. The
+       Microsoft.Testing.Extensions.* runner family is matched by prefix below. -->
+  <ItemGroup>
+    <KtsuOrphanedPackageVersionIgnore Include="Microsoft.SourceLink.GitHub" />
+    <KtsuOrphanedPackageVersionIgnore Include="Microsoft.SourceLink.AzureRepos.Git" />
+    <KtsuOrphanedPackageVersionIgnore Include="Polyfill" />
+    <KtsuOrphanedPackageVersionIgnore Include="System.Memory" />
+    <KtsuOrphanedPackageVersionIgnore Include="System.Threading.Tasks.Extensions" />
+  </ItemGroup>
+
   <!-- KTSU0005: compute solution-wide orphaned PackageVersion entries -->
   <Target Name="_KtsuGenerateOrphanedPackageVersionInputs"
           Condition="'$(KtsuEnableOrphanedPackageVersionAnalysis)' == 'true' And '$(IsTestProject)' != 'true' And '$(ManagePackageVersionsCentrally)' == 'true' And Exists('$(DirectoryPackagesPropsFilePath)')"
@@ -137,9 +152,13 @@
       <Output TaskParameter="Result" ItemName="_KtsuAllPackageVersions" />
     </XmlPeek>
 
-    <!-- Orphans = declared versions not referenced anywhere (case-insensitive identity match). -->
+    <!-- Orphans = declared versions not referenced anywhere (case-insensitive identity match),
+         minus the SDK-governed ignore list (exact ids and family prefixes). -->
     <ItemGroup>
       <_KtsuOrphanedPackageVersions Include="@(_KtsuAllPackageVersions)" Exclude="@(_KtsuReferencedPackages)" />
+      <_KtsuOrphanedPackageVersions Remove="@(KtsuOrphanedPackageVersionIgnore)" />
+      <_KtsuOrphanedPackageVersions Remove="@(_KtsuOrphanedPackageVersions)"
+                                    Condition="$([System.String]::new('%(Identity)').StartsWith('Microsoft.Testing.Extensions.'))" />
     </ItemGroup>
 
     <WriteLinesToFile File="$(_KtsuOrphanedPackageVersionsFile)"
