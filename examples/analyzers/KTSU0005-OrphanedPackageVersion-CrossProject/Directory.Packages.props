@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0" />
+    <PackageVersion Include="Polyfill" Version="7.0.0" />
+    <!-- KTSU0005 regression (ktsu-dev/Sdk): this PackageVersion is referenced ONLY by the
+         sibling Producer project. Building Consumer must NOT report it as an orphan, which
+         requires solution-wide discovery of sibling .csproj files to actually work. -->
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+</Project>

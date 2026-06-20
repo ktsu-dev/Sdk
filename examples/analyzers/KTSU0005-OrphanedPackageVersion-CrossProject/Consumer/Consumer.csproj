@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The project the regression test builds. It does NOT reference Newtonsoft.Json. Before the
+       solution-discovery fix, building this project in isolation could not see the sibling
+       Producer's reference and falsely raised KTSU0005 for Newtonsoft.Json. -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

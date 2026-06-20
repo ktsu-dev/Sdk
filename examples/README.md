@@ -54,6 +54,12 @@ Each folder is an isolated solution that triggers a single diagnostic:
 These projects are **expected to fail to build** — that is the point. They are deliberately
 kept out of `Sdk.sln` so a normal `dotnet build` of the repository does not see them.
 
+One folder is the inverse — a regression guard that is **expected to build cleanly**:
+
+| Example | Guards against | Why it must pass |
+| --- | --- | --- |
+| `KTSU0005-OrphanedPackageVersion-CrossProject` | False KTSU0005 | A `PackageVersion` referenced only by a sibling project must not be reported as an orphan when another project is built on its own. |
+
 ## Building an example by hand
 
 The examples consume the SDK via the documented `Microsoft.NET.Sdk` + `<Sdk Name="…" />`
