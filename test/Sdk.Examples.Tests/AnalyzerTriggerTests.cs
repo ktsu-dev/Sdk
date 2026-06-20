@@ -34,6 +34,29 @@ public sealed class AnalyzerTriggerTests
     }
 
     /// <summary>
+    /// KTSU0005 must not fire for a PackageVersion that is referenced only by a sibling project.
+    /// The orphan scan reconstructs the solution-wide reference set by globbing sibling .csproj
+    /// files under the discovered solution directory. When the SDK computes that directory itself
+    /// (as in a CI `dotnet build` of a bare project) the value has no trailing separator, which
+    /// previously turned the glob into a malformed pattern that matched nothing — so every
+    /// sibling-only reference was falsely reported as an orphan. Building Consumer, which does not
+    /// reference Newtonsoft.Json, must succeed because sibling Producer does reference it.
+    /// </summary>
+    [TestMethod]
+    public void Analyzer_KTSU0005_DoesNotTrigger_For_SiblingOnlyReference()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Analyzer("KTSU0005-OrphanedPackageVersion-CrossProject"));
+
+        CliResult result = workspace.Build("Consumer/Consumer.csproj");
+
+        CollectionAssert.DoesNotContain(
+            result.KtsuDiagnostics().ToList(),
+            "KTSU0005",
+            $"KTSU0005 must not fire for Newtonsoft.Json, which the sibling Producer references.{Environment.NewLine}{result.Output}");
+        Assert.IsTrue(result.Succeeded, $"Expected a clean build with no orphan diagnostic.{Environment.NewLine}{result.Output}");
+    }
+
+    /// <summary>
     /// KTSU0002 (missing InternalsVisibleTo) is a CompilationEnd diagnostic reported at a
     /// syntax-tree location. When it is the only diagnostic in an otherwise-clean compilation
     /// it can be masked by Roslyn analyzer-result caching (see ktsu-dev/Sdk#12 / #8 / #11), so a

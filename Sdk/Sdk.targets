@@ -95,10 +95,18 @@
 
     <!-- All package identifiers referenced by any project / Directory.Build file in the solution.
          XmlPeek is used because sibling projects are not otherwise visible to this build. -->
+    <!-- EnsureTrailingSlash: when the SDK computes SolutionDir itself (e.g. a CI `dotnet build`
+         of a bare project, where MSBuild does not provide a slash-terminated SolutionDir) the value
+         has no trailing separator. Without it `$(SolutionDir)**\*.csproj` is a malformed glob that
+         matches nothing, so sibling projects go unseen and their referenced packages are falsely
+         reported as orphans. -->
+    <PropertyGroup>
+      <_KtsuSolutionDirSlash>$([MSBuild]::EnsureTrailingSlash('$(SolutionDir)'))</_KtsuSolutionDirSlash>
+    </PropertyGroup>
     <ItemGroup>
-      <_KtsuPackageDeclaringFile Include="$(SolutionDir)**\*.csproj" />
-      <_KtsuPackageDeclaringFile Include="$(SolutionDir)**\Directory.Build.props" />
-      <_KtsuPackageDeclaringFile Include="$(SolutionDir)**\Directory.Build.targets" />
+      <_KtsuPackageDeclaringFile Include="$(_KtsuSolutionDirSlash)**\*.csproj" />
+      <_KtsuPackageDeclaringFile Include="$(_KtsuSolutionDirSlash)**\Directory.Build.props" />
+      <_KtsuPackageDeclaringFile Include="$(_KtsuSolutionDirSlash)**\Directory.Build.targets" />
       <_KtsuPackageDeclaringFile Include="$(DirectoryPackagesPropsFilePath)" />
     </ItemGroup>
 
