@@ -1,3 +1,10 @@
+## v2.11.0 (minor)
+
+Changes since v2.10.0:
+
+- [minor] Remove SourceLink packages from SDK because they are automatically included by the dotnet sdk since dotnet 8 ([@matt-edmondson](https://github.com/matt-edmondson))
+- [patch] Fix false KTSU0005 orphan errors when SolutionDir lacks a trailing slash ([@matt-edmondson](https://github.com/matt-edmondson))
+- [patch] KTSU0005: ignore SDK-governed packages to stop false orphan errors ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.10.2 (patch)
 
 Changes since v2.10.1:
