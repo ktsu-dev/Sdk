@@ -3,8 +3,6 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0" />
     <PackageVersion Include="Polyfill" Version="7.0.0" />
     <!-- Direct dependency. It pulls in Microsoft.Extensions.Logging.Abstractions transitively. -->
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.0" />

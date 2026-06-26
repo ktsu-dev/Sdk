@@ -23,7 +23,7 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 
 	private static readonly LocalizableString Title = "Missing required package reference";
 	private static readonly LocalizableString MessageFormat = "Project must reference package '{0}'. Add '<PackageReference Include=\"{0}\" />' to your .csproj file.";
-	private static readonly LocalizableString Description = "Projects should include required standard packages for SourceLink, polyfills, and framework compatibility.";
+	private static readonly LocalizableString Description = "Projects should include required standard packages for polyfills, and framework compatibility.";
 
 	private static readonly DiagnosticDescriptor Rule = new(
 		DiagnosticId,
@@ -58,19 +58,9 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 
 		// Get package reference properties (passed from MSBuild)
 
-		options.TryGetValue("build_property.HasSourceLinkGitHub", out string? hasSourceLinkGitHub);
-		options.TryGetValue("build_property.HasSourceLinkAzureRepos", out string? hasSourceLinkAzureRepos);
 		options.TryGetValue("build_property.HasPolyfill", out string? hasPolyfill);
 		options.TryGetValue("build_property.HasSystemMemory", out string? hasSystemMemory);
 		options.TryGetValue("build_property.HasSystemThreadingTasksExtensions", out string? hasSystemThreadingTasksExtensions);
-
-		// Check for Microsoft.SourceLink.GitHub (build-time-only package)
-
-		CheckPackageProperty(context, "Microsoft.SourceLink.GitHub", hasSourceLinkGitHub);
-
-		// Check for Microsoft.SourceLink.AzureRepos.Git (build-time-only package)
-
-		CheckPackageProperty(context, "Microsoft.SourceLink.AzureRepos.Git", hasSourceLinkAzureRepos);
 
 		// Check for Polyfill (build-time-only package, non-test projects only)
 

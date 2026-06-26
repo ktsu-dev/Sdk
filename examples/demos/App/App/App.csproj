@@ -4,8 +4,6 @@
   <Sdk Name="ktsu.Sdk.App" />
 <ItemGroup>
     <!-- Standard packages required by KTSU0001 for non-test projects. -->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" PrivateAssets="all" />
     <PackageReference Include="Polyfill" PrivateAssets="all" />
   </ItemGroup>
 </Project>

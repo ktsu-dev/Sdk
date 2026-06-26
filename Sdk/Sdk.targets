@@ -33,19 +33,11 @@
        already executed, so the Has* values would still be empty at snapshot time. -->
   <Target Name="SetPackageReferenceProperties" BeforeTargets="GenerateMSBuildEditorConfigFileCore">
     <ItemGroup>
-      <_SourceLinkGitHub Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.SourceLink.GitHub'" />
-      <_SourceLinkAzureRepos Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.SourceLink.AzureRepos.Git'" />
       <_Polyfill Include="@(PackageReference)" Condition="'%(Identity)' == 'Polyfill'" />
       <_SystemMemory Include="@(PackageReference)" Condition="'%(Identity)' == 'System.Memory'" />
       <_SystemThreadingTasksExtensions Include="@(PackageReference)" Condition="'%(Identity)' == 'System.Threading.Tasks.Extensions'" />
     </ItemGroup>
     <PropertyGroup>
-      <HasSourceLinkGitHub Condition="'@(_SourceLinkGitHub)' != ''">true</HasSourceLinkGitHub>
-      <HasSourceLinkGitHub Condition="'@(_SourceLinkGitHub)' == ''">false</HasSourceLinkGitHub>
-
-      <HasSourceLinkAzureRepos Condition="'@(_SourceLinkAzureRepos)' != ''">true</HasSourceLinkAzureRepos>
-      <HasSourceLinkAzureRepos Condition="'@(_SourceLinkAzureRepos)' == ''">false</HasSourceLinkAzureRepos>
-
       <HasPolyfill Condition="'@(_Polyfill)' != ''">true</HasPolyfill>
       <HasPolyfill Condition="'@(_Polyfill)' == ''">false</HasPolyfill>
 
@@ -64,8 +56,6 @@
     <CompilerVisibleProperty Include="TestProjectNamespace" />
     <CompilerVisibleProperty Include="TargetFramework" />
     <CompilerVisibleProperty Include="TargetFrameworkIdentifier" />
-    <CompilerVisibleProperty Include="HasSourceLinkGitHub" />
-    <CompilerVisibleProperty Include="HasSourceLinkAzureRepos" />
     <CompilerVisibleProperty Include="HasPolyfill" />
     <CompilerVisibleProperty Include="HasSystemMemory" />
     <CompilerVisibleProperty Include="HasSystemThreadingTasksExtensions" />
@@ -96,8 +86,6 @@
        this with <KtsuOrphanedPackageVersionIgnore Include="..." /> in their own project. The
        Microsoft.Testing.Extensions.* runner family is matched by prefix below. -->
   <ItemGroup>
-    <KtsuOrphanedPackageVersionIgnore Include="Microsoft.SourceLink.GitHub" />
-    <KtsuOrphanedPackageVersionIgnore Include="Microsoft.SourceLink.AzureRepos.Git" />
     <KtsuOrphanedPackageVersionIgnore Include="Polyfill" />
     <KtsuOrphanedPackageVersionIgnore Include="System.Memory" />
     <KtsuOrphanedPackageVersionIgnore Include="System.Threading.Tasks.Extensions" />

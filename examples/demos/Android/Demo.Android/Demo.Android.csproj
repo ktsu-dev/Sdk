@@ -3,8 +3,6 @@
   <Sdk Name="ktsu.Sdk" />
   <Sdk Name="ktsu.Sdk.Android" />
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" PrivateAssets="all" />
     <PackageReference Include="Polyfill" PrivateAssets="all" />
   </ItemGroup>
 </Project>

@@ -271,7 +271,6 @@ This enables the SDK to work with any nested project structure without configura
 The SDK automatically includes the `ktsu.Sdk.Analyzers` package (with version synchronization) that enforces proper project configuration with helpful diagnostics and code fixers:
 
 **KTSU0001 (Error)**: Projects must include required standard packages
-- Enforces SourceLink packages (GitHub, Azure Repos)
 - Enforces Polyfill package for non-test projects
 - Enforces compatibility packages (System.Memory, System.Threading.Tasks.Extensions) based on target framework
 - Diagnostic message includes package name and version number
@@ -388,11 +387,6 @@ Projects are configured with multiple runtime identifiers:
 ## Automatic Package References
 
 The SDK enforces (via analyzers) that projects include these NuGet packages:
-
-### Source Link Support (All Projects)
-
-- **Microsoft.SourceLink.GitHub** - GitHub source linking for debugging
-- **Microsoft.SourceLink.AzureRepos.Git** - Azure Repos source linking
 
 ### Polyfills (Non-Test Projects)
 

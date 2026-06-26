@@ -38,7 +38,7 @@ Each folder is an isolated solution that triggers a single diagnostic:
 
 | Example | Diagnostic | How it triggers |
 | --- | --- | --- |
-| `KTSU0001-MissingStandardPackages` | KTSU0001 | Omits the required SourceLink / Polyfill packages. |
+| `KTSU0001-MissingStandardPackages` | KTSU0001 | Omits the required Polyfill packages. |
 | `KTSU0002-MissingInternalsVisibleTo` | KTSU0002 | A non-test project with a sibling test project but no `InternalsVisibleTo`. |
 | `KTSU0003-PreferEnsureNotNull` | KTSU0003 | Calls `ArgumentNullException.ThrowIfNull`. |
 | `KTSU0004-ManualNullCheck` | KTSU0004 | Manual `if (x is null) throw new ArgumentNullException(...)`. |

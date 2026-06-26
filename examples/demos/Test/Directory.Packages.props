@@ -4,8 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Required by KTSU0001 for the (non-test) library project. -->
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.SourceLink.AzureRepos.Git" Version="8.0.0" />
     <PackageVersion Include="Polyfill" Version="7.0.0" />
     <!-- Test stack for the MSTest project (test projects are exempt from the standard-package rule). -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
