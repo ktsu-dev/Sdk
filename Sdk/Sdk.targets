@@ -223,4 +223,43 @@
     <None Include="$(VersionFilePath)" Condition="Exists('$(VersionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(VersionFileName)" />
     <None Include="$(IconFilePath)" Condition="Exists('$(IconFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(IconFileName)" />
   </ItemGroup>
+
+  <!-- ================================================================= -->
+  <!-- Silence the spurious "Source control information is not available" -->
+  <!-- warning caused by a transitively-leaked SourceLink reference.      -->
+  <!--                                                                    -->
+  <!-- Since .NET 8 the SDK bundles SourceLink and imports it implicitly  -->
+  <!-- (no package reference), which tells the SourceLink/Git tasks to    -->
+  <!-- stay quiet when source control info is unavailable - the warning   -->
+  <!-- is gated on Pkg<id> being empty (the "imported from an SDK without -->
+  <!-- a package reference" case). Older ktsu.* libraries (built before   -->
+  <!-- ktsu.Sdk v2.11.0 removed SourceLink) referenced                    -->
+  <!-- Microsoft.SourceLink.GitHub / .AzureRepos.Git WITHOUT              -->
+  <!-- PrivateAssets="all", so SourceLink leaks transitively into every   -->
+  <!-- downstream consumer. The leak sets PkgMicrosoft_SourceLink_Common  -->
+  <!-- (via the newer packages' buildTransitive props), which both        -->
+  <!-- disables the bundled SDK's graceful silence AND re-arms the        -->
+  <!-- warning for any build where git info isn't resolved.               -->
+  <!--                                                                    -->
+  <!-- We clear those Pkg<id> properties immediately before the tasks     -->
+  <!-- read them, restoring the bundled-SDK "no-warn" behaviour. The      -->
+  <!-- SourceLink task assemblies are resolved statically at import time  -->
+  <!-- (via *AssemblyFile properties), so emptying these here only flips  -->
+  <!-- the NoWarnOnMissing* gate - SourceLink still generates a source    -->
+  <!-- link whenever source control IS available (e.g. in CI).            -->
+  <!--                                                                    -->
+  <!-- Opt out with <KtsuSuppressLeakedSourceLinkWarning>false</...>.     -->
+  <!-- ================================================================= -->
+  <PropertyGroup>
+    <KtsuSuppressLeakedSourceLinkWarning Condition="'$(KtsuSuppressLeakedSourceLinkWarning)' == ''">true</KtsuSuppressLeakedSourceLinkWarning>
+  </PropertyGroup>
+
+  <Target Name="_KtsuSuppressLeakedSourceLinkWarning"
+          Condition="'$(KtsuSuppressLeakedSourceLinkWarning)' == 'true'"
+          BeforeTargets="InitializeSourceControlInformationFromSourceControlManager;_GenerateSourceLinkFile">
+    <PropertyGroup>
+      <PkgMicrosoft_Build_Tasks_Git />
+      <PkgMicrosoft_SourceLink_Common />
+    </PropertyGroup>
+  </Target>
 </Project>
