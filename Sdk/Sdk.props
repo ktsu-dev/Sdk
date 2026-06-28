@@ -519,13 +519,17 @@
 
     <!-- C# Compiler Options to report errors and warnings -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>CA1724;CA1034;CA1000;CA2260;CA1515;</NoWarn>
+    <NoWarn>CA1724;CA1034;CA1000;CA2260;CA1515;IDE0370;</NoWarn>
     <!-- CA1724: Type names should not match namespaces -->
     <!-- CA1034: Nested types should not be visible -->
     <!-- CA1000: Do not declare static members on generic types -->
     <!-- CA2260: Implement ISerializable correctly -->
     <!-- CA1812: Avoid uninstantiated internal classes -->
     <!-- CA1515: Override methods should call base methods -->
+    <!-- IDE0370: Unnecessary suppression operator. Conflicts with multi-targeting: a null-forgiving '!'
+         (e.g. on object.ToString()) is required on modern TFMs where the API is nullable-annotated but is
+         flagged redundant on netstandard2.0/2.1 where the same API is oblivious. No single source edit
+         satisfies all target frameworks, so the rule cannot be enforced on multi-targeted libraries. -->
 
     <!-- JsonSerializer properties -->
     <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
