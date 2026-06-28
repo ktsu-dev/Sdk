@@ -1,3 +1,8 @@
+## v2.12.0 (minor)
+
+Changes since v2.11.0:
+
+- [minor] Suppress spurious SourceLink "source control information is not available" warning from leaked transitive references ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.11.0 (minor)
 
 Changes since v2.10.0:
