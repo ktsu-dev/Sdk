@@ -1,3 +1,9 @@
+## v2.13.1-pre.1 (prerelease)
+
+Changes since v2.13.0:
+
+- Merge remote-tracking branch 'refs/remotes/origin/main' ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync examples\global.json ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v2.13.0 (minor)
 
 Changes since v2.12.0:
