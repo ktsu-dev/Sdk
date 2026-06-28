@@ -1,3 +1,8 @@
+## v2.13.0 (minor)
+
+Changes since v2.12.0:
+
+- chore: suppress IDE0370 for multi-targeted projects ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.12.0 (minor)
 
 Changes since v2.11.0:
