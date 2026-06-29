@@ -16,27 +16,54 @@
     <_SearchDir4>$([System.IO.Path]::GetDirectoryName($(_SearchDir3)))</_SearchDir4>
     <_SearchDir5>$([System.IO.Path]::GetDirectoryName($(_SearchDir4)))</_SearchDir5>
 
-    <!-- Check each directory level for solution files -->
-    <_SolutionFiles0 Condition="'$(_SearchDir0)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir0)", "*$(SolutionExt)"))</_SolutionFiles0>
-    <_SolutionFiles1 Condition="'$(_SearchDir1)' != '' And '$(_SolutionFiles0)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir1)", "*$(SolutionExt)"))</_SolutionFiles1>
-    <_SolutionFiles2 Condition="'$(_SearchDir2)' != '' And '$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir2)", "*$(SolutionExt)"))</_SolutionFiles2>
-    <_SolutionFiles3 Condition="'$(_SearchDir3)' != '' And '$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir3)", "*$(SolutionExt)"))</_SolutionFiles3>
-    <_SolutionFiles4 Condition="'$(_SearchDir4)' != '' And '$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir4)", "*$(SolutionExt)"))</_SolutionFiles4>
-    <_SolutionFiles5 Condition="'$(_SearchDir5)' != '' And '$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == '' And '$(_SolutionFiles4)' == ''">$([System.IO.Directory]::GetFiles("$(_SearchDir5)", "*$(SolutionExt)"))</_SolutionFiles5>
+    <!-- Check each directory level for a solution file. Match both classic .sln and XML .slnx.
+         NOTE: a single Directory.GetFiles assigned to its OWN property renders matched paths as a
+         ';'-joined string, but an empty result (and any two GetFiles concatenated inline) renders
+         as the literal "System.String[]". So give each pattern its own property and test it with
+         .Contains: a real ".sln"/".slnx" path contains that substring, "System.String[]" does not. -->
+    <_SlnFiles0 Condition="'$(_SearchDir0)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir0)", "*.sln"))</_SlnFiles0>
+    <_SlnxFiles0 Condition="'$(_SearchDir0)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir0)", "*.slnx"))</_SlnxFiles0>
+    <_SlnFiles1 Condition="'$(_SearchDir1)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir1)", "*.sln"))</_SlnFiles1>
+    <_SlnxFiles1 Condition="'$(_SearchDir1)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir1)", "*.slnx"))</_SlnxFiles1>
+    <_SlnFiles2 Condition="'$(_SearchDir2)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir2)", "*.sln"))</_SlnFiles2>
+    <_SlnxFiles2 Condition="'$(_SearchDir2)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir2)", "*.slnx"))</_SlnxFiles2>
+    <_SlnFiles3 Condition="'$(_SearchDir3)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir3)", "*.sln"))</_SlnFiles3>
+    <_SlnxFiles3 Condition="'$(_SearchDir3)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir3)", "*.slnx"))</_SlnxFiles3>
+    <_SlnFiles4 Condition="'$(_SearchDir4)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir4)", "*.sln"))</_SlnFiles4>
+    <_SlnxFiles4 Condition="'$(_SearchDir4)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir4)", "*.slnx"))</_SlnxFiles4>
+    <_SlnFiles5 Condition="'$(_SearchDir5)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir5)", "*.sln"))</_SlnFiles5>
+    <_SlnxFiles5 Condition="'$(_SearchDir5)' != ''">$([System.IO.Directory]::GetFiles("$(_SearchDir5)", "*.slnx"))</_SlnxFiles5>
 
-    <!-- Set SolutionDir to the first directory that contains solution files -->
-    <SolutionDir Condition="'$(_SolutionFiles0)' != ''">$(_SearchDir0)</SolutionDir>
-    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' != ''">$(_SearchDir1)</SolutionDir>
-    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' != ''">$(_SearchDir2)</SolutionDir>
-    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' != ''">$(_SearchDir3)</SolutionDir>
-    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == '' And '$(_SolutionFiles4)' != ''">$(_SearchDir4)</SolutionDir>
-    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == '' And '$(_SolutionFiles4)' == '' And '$(_SolutionFiles5)' != ''">$(_SearchDir5)</SolutionDir>
+    <!-- True/false per level: does this directory contain a .sln or .slnx? -->
+    <_HasSolution0>false</_HasSolution0>
+    <_HasSolution0 Condition="$(_SlnFiles0.Contains('.sln')) Or $(_SlnxFiles0.Contains('.slnx'))">true</_HasSolution0>
+    <_HasSolution1>false</_HasSolution1>
+    <_HasSolution1 Condition="$(_SlnFiles1.Contains('.sln')) Or $(_SlnxFiles1.Contains('.slnx'))">true</_HasSolution1>
+    <_HasSolution2>false</_HasSolution2>
+    <_HasSolution2 Condition="$(_SlnFiles2.Contains('.sln')) Or $(_SlnxFiles2.Contains('.slnx'))">true</_HasSolution2>
+    <_HasSolution3>false</_HasSolution3>
+    <_HasSolution3 Condition="$(_SlnFiles3.Contains('.sln')) Or $(_SlnxFiles3.Contains('.slnx'))">true</_HasSolution3>
+    <_HasSolution4>false</_HasSolution4>
+    <_HasSolution4 Condition="$(_SlnFiles4.Contains('.sln')) Or $(_SlnxFiles4.Contains('.slnx'))">true</_HasSolution4>
+    <_HasSolution5>false</_HasSolution5>
+    <_HasSolution5 Condition="$(_SlnFiles5.Contains('.sln')) Or $(_SlnxFiles5.Contains('.slnx'))">true</_HasSolution5>
+
+    <!-- Set SolutionDir to the nearest ancestor (including self) that contains a solution file -->
+    <SolutionDir Condition="'$(_HasSolution0)' == 'true'">$(_SearchDir0)</SolutionDir>
+    <SolutionDir Condition="'$(_HasSolution0)' != 'true' And '$(_HasSolution1)' == 'true'">$(_SearchDir1)</SolutionDir>
+    <SolutionDir Condition="'$(_HasSolution0)' != 'true' And '$(_HasSolution1)' != 'true' And '$(_HasSolution2)' == 'true'">$(_SearchDir2)</SolutionDir>
+    <SolutionDir Condition="'$(_HasSolution0)' != 'true' And '$(_HasSolution1)' != 'true' And '$(_HasSolution2)' != 'true' And '$(_HasSolution3)' == 'true'">$(_SearchDir3)</SolutionDir>
+    <SolutionDir Condition="'$(_HasSolution0)' != 'true' And '$(_HasSolution1)' != 'true' And '$(_HasSolution2)' != 'true' And '$(_HasSolution3)' != 'true' And '$(_HasSolution4)' == 'true'">$(_SearchDir4)</SolutionDir>
+    <SolutionDir Condition="'$(_HasSolution0)' != 'true' And '$(_HasSolution1)' != 'true' And '$(_HasSolution2)' != 'true' And '$(_HasSolution3)' != 'true' And '$(_HasSolution4)' != 'true' And '$(_HasSolution5)' == 'true'">$(_SearchDir5)</SolutionDir>
 
     <!-- Fallback to parent directory if no solution found within 5 levels -->
-    <SolutionDir Condition="'$(_SolutionFiles0)' == '' And '$(_SolutionFiles1)' == '' And '$(_SolutionFiles2)' == '' And '$(_SolutionFiles3)' == '' And '$(_SolutionFiles4)' == '' And '$(_SolutionFiles5)' == ''">$([System.IO.Path]::Combine($(MSBuildProjectDirectory), `..`))</SolutionDir>
+    <SolutionDir Condition="'$(_HasSolution0)' != 'true' And '$(_HasSolution1)' != 'true' And '$(_HasSolution2)' != 'true' And '$(_HasSolution3)' != 'true' And '$(_HasSolution4)' != 'true' And '$(_HasSolution5)' != 'true'">$([System.IO.Path]::Combine($(MSBuildProjectDirectory), `..`))</SolutionDir>
 
-    <!-- Find solution file safely - only set if solution files exist -->
-    <_SolutionFiles>$([System.IO.Directory]::GetFiles("$(SolutionDir)", "*$(SolutionExt)"))</_SolutionFiles>
+    <!-- Find solution file safely - only set if solution files exist. Prefer .slnx, then .sln. -->
+    <_SolutionFilesSlnx>$([System.IO.Directory]::GetFiles("$(SolutionDir)", "*.slnx"))</_SolutionFilesSlnx>
+    <_SolutionFilesSln>$([System.IO.Directory]::GetFiles("$(SolutionDir)", "*.sln"))</_SolutionFilesSln>
+    <_SolutionFiles>$(_SolutionFilesSlnx)</_SolutionFiles>
+    <_SolutionFiles Condition="'$(_SolutionFilesSlnx)' == '' Or $(_SolutionFilesSlnx.StartsWith('System.String[]'))">$(_SolutionFilesSln)</_SolutionFiles>
     <SolutionPath Condition="'$(SolutionPath)' == '' And '$(_SolutionFiles)' != '' And !$(_SolutionFiles.StartsWith('System.String[]'))">$([MSBuild]::NormalizePath($([System.IO.Path]::GetFullPath($(_SolutionFiles.Split(';')[0])))))</SolutionPath>
     <SolutionFileName Condition="'$(SolutionFileName)' == ''">$([System.IO.Path]::GetFileName($(SolutionPath)))</SolutionFileName>
     <SolutionName Condition="'$(SolutionName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(SolutionPath)))</SolutionName>

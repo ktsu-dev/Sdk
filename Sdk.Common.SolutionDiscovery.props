@@ -4,25 +4,32 @@
     Searches up to 5 directory levels for a solution file
   -->
   <PropertyGroup>
+    <!-- Match both classic .sln and XML .slnx solutions. GetFiles(...).Length is 0 when none
+         exist, so a level matches when either pattern's count is non-zero. -->
     <!-- Level 1: Current directory -->
     <_SolutionFileExists_Level1 Condition="'$(SolutionDir)' == ''">$([System.IO.Directory]::GetFiles('$(MSBuildProjectDirectory)', '*.sln').Length)</_SolutionFileExists_Level1>
-    <SolutionDir Condition="'$(SolutionDir)' == '' And '$(_SolutionFileExists_Level1)' != '0'">$(MSBuildProjectDirectory)</SolutionDir>
+    <_SolutionFileExistsSlnx_Level1 Condition="'$(SolutionDir)' == ''">$([System.IO.Directory]::GetFiles('$(MSBuildProjectDirectory)', '*.slnx').Length)</_SolutionFileExistsSlnx_Level1>
+    <SolutionDir Condition="'$(SolutionDir)' == '' And ('$(_SolutionFileExists_Level1)' != '0' Or '$(_SolutionFileExistsSlnx_Level1)' != '0')">$(MSBuildProjectDirectory)</SolutionDir>
 
     <!-- Level 2: Parent directory -->
     <_SolutionFileExists_Level2 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..'))','*.sln').Length)</_SolutionFileExists_Level2>
-    <SolutionDir Condition="'$(SolutionDir)' == '' And '$(_SolutionFileExists_Level2)' != '0'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..'))</SolutionDir>
+    <_SolutionFileExistsSlnx_Level2 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..'))','*.slnx').Length)</_SolutionFileExistsSlnx_Level2>
+    <SolutionDir Condition="'$(SolutionDir)' == '' And ('$(_SolutionFileExists_Level2)' != '0' Or '$(_SolutionFileExistsSlnx_Level2)' != '0')">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..'))</SolutionDir>
 
     <!-- Level 3: Grandparent directory -->
     <_SolutionFileExists_Level3 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..'))','*.sln').Length)</_SolutionFileExists_Level3>
-    <SolutionDir Condition="'$(SolutionDir)' == '' And '$(_SolutionFileExists_Level3)' != '0'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..'))</SolutionDir>
+    <_SolutionFileExistsSlnx_Level3 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..'))','*.slnx').Length)</_SolutionFileExistsSlnx_Level3>
+    <SolutionDir Condition="'$(SolutionDir)' == '' And ('$(_SolutionFileExists_Level3)' != '0' Or '$(_SolutionFileExistsSlnx_Level3)' != '0')">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..'))</SolutionDir>
 
     <!-- Level 4: Great-grandparent directory -->
     <_SolutionFileExists_Level4 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..\..\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..'))','*.sln').Length)</_SolutionFileExists_Level4>
-    <SolutionDir Condition="'$(SolutionDir)' == '' And '$(_SolutionFileExists_Level4)' != '0'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..'))</SolutionDir>
+    <_SolutionFileExistsSlnx_Level4 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..\..\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..'))','*.slnx').Length)</_SolutionFileExistsSlnx_Level4>
+    <SolutionDir Condition="'$(SolutionDir)' == '' And ('$(_SolutionFileExists_Level4)' != '0' Or '$(_SolutionFileExistsSlnx_Level4)' != '0')">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..'))</SolutionDir>
 
     <!-- Level 5: Great-great-grandparent directory -->
     <_SolutionFileExists_Level5 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..\..\..\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..\'))','*.sln').Length)</_SolutionFileExists_Level5>
-    <SolutionDir Condition="'$(SolutionDir)' == '' And '$(_SolutionFileExists_Level5)' != '0'">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..'))</SolutionDir>
+    <_SolutionFileExistsSlnx_Level5 Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildProjectDirectory)\..\..\..\..')">$([System.IO.Directory]::GetFiles('$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..\'))','*.slnx').Length)</_SolutionFileExistsSlnx_Level5>
+    <SolutionDir Condition="'$(SolutionDir)' == '' And ('$(_SolutionFileExists_Level5)' != '0' Or '$(_SolutionFileExistsSlnx_Level5)' != '0')">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..'))</SolutionDir>
 
     <!-- Fallback to MSBuildProjectDirectory if no solution found -->
     <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildProjectDirectory)</SolutionDir>
