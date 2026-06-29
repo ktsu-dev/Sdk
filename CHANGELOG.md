@@ -1,3 +1,8 @@
+## v2.13.1 (patch)
+
+Changes since v2.13.0:
+
+- [patch] fix(solution-discovery): recognize .slnx solutions when inferring SolutionDir ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.13.1-pre.1 (prerelease)
 
 Changes since v2.13.0:
