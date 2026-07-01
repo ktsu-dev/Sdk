@@ -160,7 +160,8 @@ Individual SDK sub-projects (ConsoleApp, App) override `TargetFrameworks` to tar
 ### Package Validation
 - `EnablePackageValidation=true`
 - `ApiCompatValidateAssemblies=true`
-- `EnableStrictModeForBaselineValidation=true`
+- `EnableStrictModeForBaselineValidation=true` — real breaking changes vs a published baseline are caught
+- `EnableStrictModeForCompatibleFrameworksInPackage=false` and `EnableStrictModeForCompatibleTfms=false` — strict cross-TFM validation is intentionally off. This SDK mandates Polyfill + broad multi-targeting, and Polyfill source-embeds framework shim types whose shape legitimately differs per TFM; strict mode reports those as false-positive breaking changes (CP0002/CP0014/CP0015/CP0016). Baseline validation stays on, and package consumers are unaffected (validation is producer-side only). Repos capture any residual non-strict compatible-framework diffs in a regenerable `CompatibilitySuppressions.xml` (`dotnet pack -p:ApiCompatGenerateSuppressionFile=true`).
 
 ### Runtime Identifiers
 Default RIDs: `win-x64;win-x86;win-arm64;osx-x64;linux-x64;osx-arm64;linux-arm64`

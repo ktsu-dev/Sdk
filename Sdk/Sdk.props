@@ -443,8 +443,19 @@
     <!-- <ApiCompatRespectInternals>true</ApiCompatRespectInternals> -->
     <EnablePackageValidation>true</EnablePackageValidation>
     <EnableStrictModeForBaselineValidation>true</EnableStrictModeForBaselineValidation>
-    <EnableStrictModeForCompatibleFrameworksInPackage>true</EnableStrictModeForCompatibleFrameworksInPackage>
-    <EnableStrictModeForCompatibleTfms>true</EnableStrictModeForCompatibleTfms>
+    <!--
+      Strict cross-target-framework validation is disabled: this SDK mandates Polyfill and broad
+      multi-targeting, and Polyfill source-embeds framework shim types (e.g. DefaultInterpolatedStringHandler,
+      ExperimentalAttribute, NullabilityInfo, DynamicallyAccessedMemberTypes) whose shape legitimately differs
+      per TFM because each framework's BCL provides a different baseline. Strict mode reports those by-design
+      differences as breaking changes (CP0002/CP0014/CP0015/CP0016), which are false positives for the
+      library's own API. Baseline validation (EnableStrictModeForBaselineValidation) stays on, so real
+      breaking changes vs a published version are still caught. Package consumers are unaffected either way -
+      package validation is a producer-side, pack-time gate only. Residual non-strict compatible-framework
+      diffs can be captured per-repo via a regenerable CompatibilitySuppressions.xml.
+    -->
+    <EnableStrictModeForCompatibleFrameworksInPackage>false</EnableStrictModeForCompatibleFrameworksInPackage>
+    <EnableStrictModeForCompatibleTfms>false</EnableStrictModeForCompatibleTfms>
 
     <!-- Publish-related properties -->
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
