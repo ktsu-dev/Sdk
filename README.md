@@ -11,22 +11,24 @@ Add the SDK to your global.json (recommended):
 ```json
 {
   "sdk": {
-    "version": "10.0.0",
+    "version": "10.0.100",
     "rollForward": "latestMinor"
   },
   "msbuild-sdks": {
-    "ktsu.Sdk": "2.2.0",
-    "ktsu.Sdk.ConsoleApp": "2.2.0",
-    "ktsu.Sdk.App": "2.2.0"
+    "MSTest.Sdk": "4.3.2",
+    "ktsu.Sdk": "2.13.2",
+    "ktsu.Sdk.ConsoleApp": "2.13.2",
+    "ktsu.Sdk.App": "2.13.2"
   }
 }
 ```
 
-Or reference directly in your project file:
+And reference in your project file:
 
 ```xml
-<Project Sdk="Microsoft.NET.Sdk">
-  <Sdk Name="ktsu.Sdk" Version="2.2.0" />
+<Project>
+  <Sdk Name="Microsoft.NET.Sdk" />
+  <Sdk Name="ktsu.Sdk" />
 
   <PropertyGroup>
     <!-- Your project-specific properties -->
