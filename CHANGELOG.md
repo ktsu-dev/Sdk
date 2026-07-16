@@ -1,3 +1,9 @@
+## v2.13.3-pre.2 (prerelease)
+
+Changes since v2.13.3-pre.1:
+
+- Modify SDK settings and add ktsu SDKs in README ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update SDK versions and project file reference ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.13.3-pre.1 (prerelease)
 
 Changes since v2.13.2:
