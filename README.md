@@ -12,13 +12,21 @@ Add the SDK to your global.json (recommended):
 {
   "sdk": {
     "version": "10.0.100",
-    "rollForward": "latestMinor"
+    "rollForward": "latestFeature"
   },
   "msbuild-sdks": {
     "MSTest.Sdk": "4.3.2",
     "ktsu.Sdk": "2.13.2",
     "ktsu.Sdk.ConsoleApp": "2.13.2",
-    "ktsu.Sdk.App": "2.13.2"
+    "ktsu.Sdk.App": "2.13.2",
+    "ktsu.Sdk.Windows": "2.13.2",
+    "ktsu.Sdk.Linux": "2.13.2",
+    "ktsu.Sdk.macOS": "2.13.2",
+    "ktsu.Sdk.iOS": "2.13.2",
+    "ktsu.Sdk.Android": "2.13.2"
+  },
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
   }
 }
 ```
