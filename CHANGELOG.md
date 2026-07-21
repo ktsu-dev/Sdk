@@ -1,3 +1,10 @@
+## v2.14.0 (minor)
+
+Changes since v2.13.0:
+
+- [patch] fix(package-validation): disable strict cross-TFM ApiCompat ([@matt-edmondson](https://github.com/matt-edmondson))
+- [patch] fix(solution-discovery): recognize .slnx solutions when inferring SolutionDir ([@matt-edmondson](https://github.com/matt-edmondson))
+- Update IsPackable condition to include PackAsTool ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.13.3-pre.2 (prerelease)
 
 Changes since v2.13.3-pre.1:
