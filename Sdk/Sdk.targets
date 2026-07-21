@@ -11,7 +11,7 @@
     <IsLibrary Condition="$(OutputType) == 'Library' And !$(IsTestProject)">true</IsLibrary>
 
     <IsPublishable Condition="$(IsExecutable)">true</IsPublishable>
-    <IsPackable Condition="$(IsLibrary) Or $(PackAsTool)">true</IsPackable>
+    <IsPackable Condition="'$(IsLibrary)' == 'true' Or '$(PackAsTool)' == 'true'">true</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(IsTestProject) == 'true'">
