@@ -1,3 +1,8 @@
+## v2.15.0 (minor)
+
+Changes since v2.14.0:
+
+- Update IsPackable condition to use explicit string comparison ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.14.0 (minor)
 
 Changes since v2.13.0:
