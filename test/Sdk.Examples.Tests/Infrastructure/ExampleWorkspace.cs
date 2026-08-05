@@ -1,5 +1,6 @@
 namespace Sdk.Examples.Tests.Infrastructure;
 
+using System.IO.Compression;
 using System.Text.Json;
 
 /// <summary>
@@ -44,6 +45,35 @@ internal sealed class ExampleWorkspace : IDisposable
         return Cli.Dotnet(root, [.. args]);
     }
 
+    /// <summary>Runs <c>dotnet pack</c> on a project and returns the result plus the output directory.</summary>
+    public (CliResult Result, string OutputDir) Pack(string projectRelativePath, params string[] extraArgs)
+    {
+        string outputDir = Path.Combine(root, "pack-output");
+
+        List<string> args = ["pack", projectRelativePath, "-c", "Release", "--nologo", "-o", outputDir];
+        args.AddRange(extraArgs);
+
+        return (Cli.Dotnet(root, [.. args]), outputDir);
+    }
+
+    /// <summary>The relative paths of every entry in a .nupkg, using forward slashes.</summary>
+    public static IReadOnlyList<string> NupkgEntries(string nupkgPath)
+    {
+        using ZipArchive archive = ZipFile.OpenRead(nupkgPath);
+        return [.. archive.Entries.Select(e => e.FullName)];
+    }
+
+    /// <summary>Reads a single entry out of a .nupkg as text.</summary>
+    public static string ReadNupkgEntry(string nupkgPath, string entryName)
+    {
+        using ZipArchive archive = ZipFile.OpenRead(nupkgPath);
+        ZipArchiveEntry entry = archive.GetEntry(entryName)
+            ?? throw new InvalidOperationException($"'{entryName}' is not present in '{nupkgPath}'.");
+
+        using StreamReader reader = new(entry.Open());
+        return reader.ReadToEnd();
+    }
+
     /// <summary>Evaluates the given MSBuild properties on a project (no build/restore of outputs).</summary>
     public IReadOnlyDictionary<string, string> Evaluate(string projectRelativePath, params string[] properties)
     {
@@ -84,7 +114,7 @@ internal sealed class ExampleWorkspace : IDisposable
     {
         string[] sdks =
         [
-            "ktsu.Sdk", "ktsu.Sdk.ConsoleApp", "ktsu.Sdk.App",
+            "ktsu.Sdk", "ktsu.Sdk.ConsoleApp", "ktsu.Sdk.App", "ktsu.Sdk.Tool",
             "ktsu.Sdk.Windows", "ktsu.Sdk.Linux", "ktsu.Sdk.macOS",
             "ktsu.Sdk.iOS", "ktsu.Sdk.Android",
         ];

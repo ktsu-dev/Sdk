@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Dotnet tool (net10.0, Exe, PackAsTool). Named {Solution}.Tool so the core SDK detects the
+       project type. Installs as `dotnet tool install ktsu.Demo.Tool` and runs as `demo`. -->
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Tool" />
+  <ItemGroup>
+    <!-- Standard packages required by KTSU0001 for non-test projects. -->
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

@@ -20,6 +20,7 @@ feed and builds each example against it. That project runs in CI via the
 | `Library` | `ktsu.Sdk` | A packable library builds and satisfies the analyzer requirements. |
 | `ConsoleApp` | `ktsu.Sdk` + `ktsu.Sdk.ConsoleApp` | `net10.0` console executable. |
 | `App` | `ktsu.Sdk` + `ktsu.Sdk.App` | GUI/ImGui-style app (`WinExe` on Windows, `Exe` elsewhere). |
+| `Tool` | `ktsu.Sdk` + `ktsu.Sdk.Tool` | Packs as a `DotnetTool` package with a derived command name. Carries `LICENSE.md`/`README.md`/`icon.png` because it is the only demo that packs. |
 | `Windows` | `ktsu.Sdk` + `ktsu.Sdk.Windows` | `WinExe`, Windows RIDs. |
 | `Linux` | `ktsu.Sdk` + `ktsu.Sdk.Linux` | `Exe`, Linux RIDs. |
 | `macOS` | `ktsu.Sdk` + `ktsu.Sdk.macOS` | `Exe`, macOS RIDs. |
@@ -27,7 +28,7 @@ feed and builds each example against it. That project runs in CI via the
 | `Android` | `ktsu.Sdk` + `ktsu.Sdk.Android` | `net10.0-android` (requires the `android` workload to build). |
 | `Test` | `ktsu.Sdk` | Library + MSTest project: test-project detection and `InternalsVisibleTo`. |
 
-`Library`, `ConsoleApp`, `App`, `Linux` and `Test` build fully on a Linux runner. The
+`Library`, `ConsoleApp`, `App`, `Tool`, `Linux` and `Test` build fully on a Linux runner. The
 remaining platform SDKs need another OS or a workload, so CI verifies them by **property
 evaluation** (`TargetFramework`, `OutputType`, `RuntimeIdentifiers`, detection flag) instead
 of a full build.

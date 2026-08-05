@@ -18,6 +18,7 @@ public sealed class DemoBuildTests
     [DataRow("Library", "Library/Library.csproj", DisplayName = "ktsu.Sdk (library)")]
     [DataRow("ConsoleApp", "ConsoleApp/ConsoleApp.csproj", DisplayName = "ktsu.Sdk.ConsoleApp")]
     [DataRow("App", "App/App.csproj", DisplayName = "ktsu.Sdk.App")]
+    [DataRow("Tool", "Demo.Tool/Demo.Tool.csproj", DisplayName = "ktsu.Sdk.Tool")]
     [DataRow("Linux", "Linux/Linux.csproj", DisplayName = "ktsu.Sdk.Linux")]
     public void Demo_Builds(string demo, string project)
     {

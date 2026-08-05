@@ -19,6 +19,7 @@ Add the SDK to your global.json (recommended):
     "ktsu.Sdk": "2.13.2",
     "ktsu.Sdk.ConsoleApp": "2.13.2",
     "ktsu.Sdk.App": "2.13.2",
+    "ktsu.Sdk.Tool": "2.13.2",
     "ktsu.Sdk.Windows": "2.13.2",
     "ktsu.Sdk.Linux": "2.13.2",
     "ktsu.Sdk.macOS": "2.13.2",
@@ -69,6 +70,15 @@ For a GUI application:
 <Project Sdk="Microsoft.NET.Sdk">
   <Sdk Name="ktsu.Sdk" />
   <Sdk Name="ktsu.Sdk.App" />
+</Project>
+```
+
+For a .NET tool (distributed via `dotnet tool install`):
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Tool" />
 </Project>
 ```
 
@@ -152,6 +162,26 @@ Extension SDK for GUI applications (ImGui, WinForms, WPF, etc.). Adds:
 - `OutputType=Exe` on other platforms
 - Single target framework (net10.0)
 - Platform-specific runtime configurations
+
+### **ktsu.Sdk.Tool**
+
+Extension SDK for applications distributed as .NET tools. Adds:
+
+- `PackAsTool=true`, producing a `DotnetTool` package instead of an executable
+- Single target framework (net10.0), since a tool package cannot multi-target
+- `ToolCommandName` derived from the lowercased solution name — a solution named
+  `KtsuBuild` installs as `ktsubuild`. Set `ToolCommandName` explicitly to override,
+  which short or generic solution names should do.
+- `IsPublishable=false` and no runtime identifiers: a tool ships as one
+  RID-agnostic, framework-dependent package, so consumers need the .NET 10 runtime.
+  For a standalone binary, add a separate `ktsu.Sdk.ConsoleApp` project.
+
+A project named `{Solution}.Tool` or `{Solution}Tool` also sets `IsToolProject`.
+`{Solution}.CLI` deliberately does not — CLI projects stay console apps unless they
+reference this SDK.
+
+Note that packing any project requires the metadata files the SDK declares as package
+metadata (`LICENSE.md`, `README.md`, `icon.png`) to exist in the solution directory.
 
 ### Platform-Specific App SDKs
 
@@ -319,6 +349,7 @@ The SDK makes these properties available for conditional logic in your project f
 - `IsPrimaryProject` - True if this is the main library project
 - `IsCliProject` - True if this is a console application
 - `IsAppProject` - True if this is a GUI application
+- `IsToolProject` - True if this is a .NET tool project
 - `IsTestProject` - True if this is a test project
 
 **Project Type Existence:**
@@ -326,6 +357,7 @@ The SDK makes these properties available for conditional logic in your project f
 - `PrimaryProjectExists` - True if primary project was found
 - `CliProjectExists` - True if CLI project was found
 - `AppProjectExists` - True if app project was found
+- `ToolProjectExists` - True if tool project was found
 - `TestProjectExists` - True if test project was found
 
 **Project Paths:**
@@ -345,7 +377,7 @@ The SDK makes these properties available for conditional logic in your project f
 
 **Package Properties:**
 
-- `IsPackable` - True for library projects
+- `IsPackable` - True for library projects and projects with `PackAsTool`
 - `IsPublishable` - True for executable projects
 - `IsExecutable` - True if OutputType is Exe or WinExe
 - `IsLibrary` - True if OutputType is Library and not a test project

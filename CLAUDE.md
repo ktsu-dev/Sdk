@@ -61,6 +61,20 @@ The SDK consists of multiple sub-SDKs:
   - Sets `TargetFramework=net10.0`
   - Configures runtime identifiers for cross-platform GUI support
 
+- **Sdk.Tool/**: .NET tool SDK (`dotnet tool install`)
+  - Sets `PackAsTool=true`, `OutputType=Exe`, `TargetFramework=net10.0`
+  - Clears `RuntimeIdentifiers`: under `PackAsTool` the .NET 10 SDK turns each RID in the
+    inherited desktop list into a separate RID-specific tool package, so one `dotnet pack`
+    emits seven packages racing over a single intermediate output directory. Tools here are
+    framework-dependent and RID-agnostic — consumers need the .NET 10 runtime.
+  - Derives `ToolCommandName` from the lowercased solution name (stripping a trailing
+    `.tool`/`.cli`), because the default would be `AssemblyName`, which the core SDK forces to
+    the fully-qualified namespace (`ktsu.KtsuBuild.Tool`). Derived in `Sdk.props`, not
+    `Sdk.targets`, so the value is set before Microsoft.NET.Sdk defaults it.
+  - Sets `IsPublishable=false` (the core SDK marks any `OutputType=Exe` project publishable)
+    and disables package validation and `IncludeSource`, which are library-oriented
+  - Errors (KTSU1001) if `TargetFrameworks` is set: a tool package cannot multi-target
+
 - **Sdk.Windows/**, **Sdk.Linux/**, **Sdk.macOS/**: Desktop per-OS app SDKs
   - RID-based presets on the base `net10.0` runtime (no extra prerequisites)
   - Narrow `RuntimeIdentifiers` to the target OS and default `RuntimeIdentifier`
@@ -100,9 +114,10 @@ The SDK automatically detects project types based on naming conventions:
 - **Windows Projects**: `{SolutionName}.Windows`, `{SolutionName}Windows`, `{SolutionName}.Win`
 - **Linux Projects**: `{SolutionName}.Linux`, `{SolutionName}Linux`
 - **macOS Projects**: `{SolutionName}.macOS`, `{SolutionName}.MacOS`, `{SolutionName}.Mac`
+- **Tool Projects**: `{SolutionName}.Tool`, `{SolutionName}Tool` — deliberately *not* `.CLI`, so no existing console project silently starts publishing itself as a tool package
 - **Test Projects**: `{SolutionName}.Test`, `{SolutionName}.Tests`, `{SolutionName}Test`, `{SolutionName}Tests`
 
-Properties set based on detection: `IsPrimaryProject`, `IsCliProject`, `IsAppProject`, `IsIosProject`, `IsAndroidProject`, `IsWindowsProject`, `IsLinuxProject`, `IsMacProject`, `IsTestProject`
+Properties set based on detection: `IsPrimaryProject`, `IsCliProject`, `IsAppProject`, `IsToolProject`, `IsIosProject`, `IsAndroidProject`, `IsWindowsProject`, `IsLinuxProject`, `IsMacProject`, `IsTestProject`
 
 ### Analyzer-Enforced Requirements
 
