@@ -1,3 +1,10 @@
+## v2.15.1-pre.1 (prerelease)
+
+Changes since v2.15.0:
+
+- Sync .gitattributes ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync .github\workflows\dependabot-merge.yml ([@ktsu[bot]](https://github.com/ktsu[bot]))
+- Sync examples\global.json ([@ktsu[bot]](https://github.com/ktsu[bot]))
 ## v2.15.0 (minor)
 
 Changes since v2.14.0:
