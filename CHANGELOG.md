@@ -1,3 +1,8 @@
+## v2.15.1 (patch)
+
+Changes since v2.15.0:
+
+- docs: plan for distributing applications as dotnet tools ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.15.1-pre.1 (prerelease)
 
 Changes since v2.15.0:
