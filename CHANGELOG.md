@@ -1,3 +1,15 @@
+## v2.16.2-pre.2 (prerelease)
+
+Changes since v2.16.2-pre.1:
+
+- Add .runsettings to SDK package sync files ([@copilot-swe-agent[bot]](https://github.com/copilot-swe-agent[bot]))
+- Auto-sync consumer style files with opt-out switch ([@copilot-swe-agent[bot]](https://github.com/copilot-swe-agent[bot]))
+- Initial plan ([@copilot-swe-agent[bot]](https://github.com/copilot-swe-agent[bot]))
+- Package SDK style config files and cover with test ([@copilot-swe-agent[bot]](https://github.com/copilot-swe-agent[bot]))
+- Plan auto-sync style config opt-out feature ([@copilot-swe-agent[bot]](https://github.com/copilot-swe-agent[bot]))
+- Update COPYRIGHT.md with rights and license lines ([@copilot-swe-agent[bot]](https://github.com/copilot-swe-agent[bot]))
+- Use consumer copyright for synced editorconfig header ([@copilot-swe-agent[bot]](https://github.com/copilot-swe-agent[bot]))
+- Use COPYRIGHT.md content for editorconfig header template ([@copilot-swe-agent[bot]](https://github.com/copilot-swe-agent[bot]))
 ## v2.16.2-pre.1 (prerelease)
 
 Changes since v2.16.1:
