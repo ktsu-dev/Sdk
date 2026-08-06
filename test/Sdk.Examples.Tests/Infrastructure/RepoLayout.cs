@@ -30,6 +30,7 @@ internal static class RepoLayout
         "Sdk.Analyzers",
         "Sdk.ConsoleApp",
         "Sdk.App",
+        "Sdk.Tool",
         "Sdk.Windows",
         "Sdk.Linux",
         "Sdk.macOS",

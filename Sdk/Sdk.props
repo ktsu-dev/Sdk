@@ -238,6 +238,20 @@
     <MacProjectPath Condition="$(MacProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(MacProjectName)\$(MacProjectFileName)"))</MacProjectPath>
     <MacProjectExists Condition="$(MacProjectExists) == 'false' And Exists($(MacProjectPath))">true</MacProjectExists>
 
+    <!-- Tool Project properties. Only the .Tool conventions are recognised: a project named
+         {Solution}.CLI stays a console app, so no existing CLI project silently starts
+         publishing itself as a dotnet tool package. -->
+    <ToolProjectName>$(SolutionName).Tool</ToolProjectName>
+    <ToolProjectFileName>$(ToolProjectName).csproj</ToolProjectFileName>
+    <ToolProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ToolProjectName)\$(ToolProjectFileName)"))</ToolProjectPath>
+    <ToolProjectExists>false</ToolProjectExists>
+    <ToolProjectExists Condition="Exists($(ToolProjectPath))">true</ToolProjectExists>
+
+    <ToolProjectName Condition="$(ToolProjectExists) == 'false'">$(SolutionName)Tool</ToolProjectName>
+    <ToolProjectFileName Condition="$(ToolProjectExists) == 'false'">$(ToolProjectName).csproj</ToolProjectFileName>
+    <ToolProjectPath Condition="$(ToolProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(ToolProjectName)\$(ToolProjectFileName)"))</ToolProjectPath>
+    <ToolProjectExists Condition="$(ToolProjectExists) == 'false' And Exists($(ToolProjectPath))">true</ToolProjectExists>
+
     <TestProjectName>$(SolutionName).Test</TestProjectName>
     <TestProjectFileName>$(TestProjectName).csproj</TestProjectFileName>
     <TestProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(TestProjectName)\$(TestProjectFileName)"))</TestProjectPath>
@@ -300,6 +314,8 @@
     <IsLinuxProject Condition="$(MSBuildProjectName) == $(LinuxProjectName)">true</IsLinuxProject>
     <IsMacProject>false</IsMacProject>
     <IsMacProject Condition="$(MSBuildProjectName) == $(MacProjectName)">true</IsMacProject>
+    <IsToolProject>false</IsToolProject>
+    <IsToolProject Condition="$(MSBuildProjectName) == $(ToolProjectName)">true</IsToolProject>
     <IsTestProject>false</IsTestProject>
     <IsTestProject Condition="$(MSBuildProjectName) == $(TestProjectName)">true</IsTestProject>
 

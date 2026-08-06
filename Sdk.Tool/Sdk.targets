@@ -1,0 +1,19 @@
+<!-- ktsu.Sdk.Tool/Sdk.targets -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Runs after Sdk/Sdk.targets: <Sdk Name="..." /> elements import targets in declaration
+       order, so a consumer listing ktsu.Sdk before ktsu.Sdk.Tool gets this file last. -->
+  <PropertyGroup>
+    <!-- The core SDK sets IsPublishable=true for anything with OutputType=Exe. A tool ships as
+         a package, so there is nothing to publish and nothing for CI to zip. -->
+    <IsPublishable>false</IsPublishable>
+  </PropertyGroup>
+
+  <!-- Catches a consumer re-declaring TargetFrameworks in their own PropertyGroup, which wins
+       over Sdk.props and would silently produce a package with no usable tools/ payload. -->
+  <Target Name="_KtsuValidateToolTargetFramework" BeforeTargets="Build;Pack">
+    <Error Condition="'$(TargetFrameworks)' != ''"
+           Code="KTSU1001"
+           Text="ktsu.Sdk.Tool requires a single TargetFramework, but TargetFrameworks is set to '$(TargetFrameworks)'. A dotnet tool package cannot multi-target. Remove TargetFrameworks, or set TargetFramework to override the default." />
+  </Target>
+</Project>

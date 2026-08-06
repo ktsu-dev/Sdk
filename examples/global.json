@@ -7,6 +7,7 @@
     "MSTest.Sdk": "4.3.3",
     "ktsu.Sdk": "2.15.0",
     "ktsu.Sdk.ConsoleApp": "2.15.0",
+    "ktsu.Sdk.Tool": "2.15.0",
     "ktsu.Sdk.App": "2.15.0",
     "ktsu.Sdk.Windows": "2.15.0",
     "ktsu.Sdk.Linux": "2.15.0",

@@ -183,6 +183,28 @@ Tests in `test/Sdk.Examples.Tests`:
 - Standalone binary distribution for tool projects; that remains the job of a
   separate `ktsu.Sdk.ConsoleApp` project.
 
+## Implementation Notes
+
+Two things the design did not anticipate, found while building it:
+
+**RID-specific tool packages are opt-out, not opt-in.** The core SDK sets a seven-entry
+`RuntimeIdentifiers` list (`Sdk/Sdk.props:474`). Under `PackAsTool` the .NET 10 SDK turns each
+entry into a separate RID-specific tool package, so one `dotnet pack` emitted
+`Demo.Tool.win-x64…`, `Demo.Tool.linux-x64…` and five more — building concurrently into a single
+intermediate output directory, which also produced MSB4018 file-contention failures. Since this
+plan chose RID-agnostic packages, `ktsu.Sdk.Tool` clears `RuntimeIdentifiers`.
+
+**`ToolCommandName` must be derived in `Sdk.props`, not `Sdk.targets`.** Microsoft.NET.Sdk
+defaults it to `AssemblyName` in its targets, so a conditional assignment in a `.targets` file is
+too late. (When iterating on SDK content locally without bumping the version, the extracted
+package in the global packages folder is stale — clear `~/.nuget/packages/ktsu.sdk.tool` between
+runs or the old behaviour persists.)
+
+Packing also requires the metadata files the SDK declares (`LICENSE.md`, `README.md`, `icon.png`)
+to exist in the solution directory, or pack fails NU5030/NU5039/NU5046. This is pre-existing
+behaviour for every packable project, not tool-specific; the tool demo carries those files
+because it is the only demo that packs.
+
 ## Risks
 
 | Risk | Mitigation |

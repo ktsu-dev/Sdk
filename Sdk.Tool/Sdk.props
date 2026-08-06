@@ -1,0 +1,47 @@
+<!-- ktsu.Sdk.Tool/Sdk.props -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- A dotnet tool package carries a single framework-dependent build; it cannot multi-target. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+    <OutputType>Exe</OutputType>
+
+    <!-- Drives PackageType=DotnetTool and the tools/ payload. The core SDK's IsPackable
+         derivation (Sdk/Sdk.targets) already honours this. -->
+    <PackAsTool>true</PackAsTool>
+
+    <!-- Clear the core SDK's desktop RID list (Sdk/Sdk.props). Under PackAsTool the .NET 10 SDK
+         turns each entry into a separate RID-specific tool package, so a single `dotnet pack`
+         emits seven packages that race each other over one intermediate output directory. These
+         tools are framework-dependent and RID-agnostic: one package, .NET 10 runtime required. -->
+    <RuntimeIdentifiers></RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <!-- ToolCommandName: the command users actually type. Derived in props, not targets, so the
+       value is in place before Microsoft.NET.Sdk defaults it to AssemblyName - which the core SDK
+       forces to the fully-qualified namespace (e.g. ktsu.KtsuBuild.Tool).
+
+       Derive the lowercased solution name, falling back to the project name, and strip a trailing
+       .tool/.cli. Lowercasing first keeps the suffix match case-insensitive without relying on
+       StringComparison overloads in MSBuild. A consuming project's own PropertyGroup is evaluated
+       after this import, so an explicit ToolCommandName still wins. -->
+  <PropertyGroup Condition="'$(ToolCommandName)' == ''">
+    <_KtsuToolCommand Condition="'$(SolutionName)' != ''">$(SolutionName)</_KtsuToolCommand>
+    <_KtsuToolCommand Condition="'$(_KtsuToolCommand)' == ''">$(MSBuildProjectName)</_KtsuToolCommand>
+    <_KtsuToolCommand>$(_KtsuToolCommand.Replace(' ', '').ToLowerInvariant())</_KtsuToolCommand>
+    <_KtsuToolCommand Condition="$(_KtsuToolCommand.EndsWith('.tool'))">$(_KtsuToolCommand.Remove($(_KtsuToolCommand.LastIndexOf('.'))))</_KtsuToolCommand>
+    <_KtsuToolCommand Condition="$(_KtsuToolCommand.EndsWith('.cli'))">$(_KtsuToolCommand.Remove($(_KtsuToolCommand.LastIndexOf('.'))))</_KtsuToolCommand>
+
+    <ToolCommandName>$(_KtsuToolCommand)</ToolCommandName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- A DotnetTool package has no public API surface to validate and carries its whole
+         dependency closure under tools/, so the library-oriented pack defaults inherited from
+         the core SDK are noise here. -->
+    <EnablePackageValidation>false</EnablePackageValidation>
+    <ApiCompatValidateAssemblies>false</ApiCompatValidateAssemblies>
+    <IncludeSource>false</IncludeSource>
+  </PropertyGroup>
+</Project>
