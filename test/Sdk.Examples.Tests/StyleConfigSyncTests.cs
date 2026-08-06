@@ -48,13 +48,13 @@ public sealed class StyleConfigSyncTests
     }
 
     [TestMethod]
-    public void Build_UsesConsumerCopyrightInEditorConfigHeader()
+    public void Build_UsesConsumerCopyrightFileContentInEditorConfigHeader()
     {
         using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Library"));
         string solutionDir = workspace.Evaluate(Project, "SolutionDir")["SolutionDir"];
 
         SeedConsumerStyleFiles(solutionDir);
-        const string consumerCopyright = "Copyright (c) 2020-2030 Contoso contributors";
+        const string consumerCopyright = "Copyright (c) 2020-2030 Contoso contributors\nAll rights reserved.\nLicensed under the Apache-2.0 license.";
         File.WriteAllText(Path.Combine(solutionDir, "COPYRIGHT.md"), consumerCopyright);
         File.WriteAllText(Path.Combine(solutionDir, ".editorconfig"), "stale editorconfig");
         Assert.AreEqual(consumerCopyright, workspace.Evaluate(Project, "Copyright")["Copyright"]);
@@ -63,7 +63,10 @@ public sealed class StyleConfigSyncTests
         Assert.IsTrue(result.Succeeded, $"Expected demo build to succeed.{Environment.NewLine}{result.Output}");
 
         string expectedEditorConfig = File.ReadAllText(Path.Combine(RepoLayout.Root, ".editorconfig"))
-            .Replace("Copyright (c) ktsu.dev", consumerCopyright, StringComparison.Ordinal);
+            .Replace(
+                "file_header_template = Copyright (c) ktsu.dev\\nAll rights reserved.\\nLicensed under the MIT license.",
+                $"file_header_template = {ToEditorConfigValue(consumerCopyright)}",
+                StringComparison.Ordinal);
 
         Assert.AreEqual(
             NormalizeEditorConfig(expectedEditorConfig),
@@ -113,4 +116,10 @@ public sealed class StyleConfigSyncTests
 
         return normalized.ToString();
     }
+
+    private static string ToEditorConfigValue(string content) =>
+        content
+            .Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace("\r", "\n", StringComparison.Ordinal)
+            .Replace("\n", "\\n", StringComparison.Ordinal);
 }

@@ -270,7 +270,7 @@ By default, `ktsu.Sdk` syncs these files from the SDK package into the solution 
 The sync updates files that already exist in the solution root.
 
 When `COPYRIGHT.md` exists in the consumer solution root, `.editorconfig` is still synced but its
-`file_header_template` line is rewritten to use the consumer copyright text.
+`file_header_template` line is rewritten from the full contents of `COPYRIGHT.md`.
 
 To opt out:
 

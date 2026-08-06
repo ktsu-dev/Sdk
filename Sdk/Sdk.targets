@@ -18,7 +18,11 @@ if (!File.Exists(EditorConfigFile) || string.IsNullOrWhiteSpace(CopyrightText))
 
 const string defaultHeader = "file_header_template = Copyright (c) ktsu.dev\\nAll rights reserved.\\nLicensed under the MIT license.";
 const string defaultHeaderWithSlash = "file_header_template = Copyright (c) ktsu.dev/nAll rights reserved./nLicensed under the MIT license.";
-string consumerHeader = $"file_header_template = {CopyrightText}\\nAll rights reserved.\\nLicensed under the MIT license.";
+string normalizedCopyright = CopyrightText
+    .Replace("\r\n", "\n")
+    .Replace("\r", "\n")
+    .Replace("\n", "\\n");
+string consumerHeader = $"file_header_template = {normalizedCopyright}";
 
 string original = File.ReadAllText(EditorConfigFile);
 string rewritten = original
