@@ -1,3 +1,8 @@
+## v2.16.1 (patch)
+
+Changes since v2.16.0:
+
+- [patch] Fix ktsu.Sdk.Tool producing tool packages with no payload ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.16.0 (minor)
 
 Changes since v2.15.0:
