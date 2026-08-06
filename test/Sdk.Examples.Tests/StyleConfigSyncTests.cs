@@ -1,5 +1,6 @@
 namespace Sdk.Examples.Tests;
 
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdk.Examples.Tests.Infrastructure;
 
@@ -44,6 +45,31 @@ public sealed class StyleConfigSyncTests
         Assert.AreEqual(gitIgnoreBefore, File.ReadAllText(Path.Combine(solutionDir, ".gitignore")));
     }
 
+    [TestMethod]
+    public void Build_UsesConsumerCopyrightInEditorConfigHeader()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Library"));
+        string solutionDir = workspace.Evaluate(Project, "SolutionDir")["SolutionDir"];
+
+        SeedConsumerStyleFiles(solutionDir);
+        const string consumerCopyright = "Copyright (c) 2020-2030 Contoso contributors";
+        File.WriteAllText(Path.Combine(solutionDir, "COPYRIGHT.md"), consumerCopyright);
+        File.WriteAllText(Path.Combine(solutionDir, ".editorconfig"), "stale editorconfig");
+        Assert.AreEqual(consumerCopyright, workspace.Evaluate(Project, "Copyright")["Copyright"]);
+
+        CliResult result = workspace.Build(Project, "-p:EnforceCodeStyleInBuild=false");
+        Assert.IsTrue(result.Succeeded, $"Expected demo build to succeed.{Environment.NewLine}{result.Output}");
+
+        string expectedEditorConfig = File.ReadAllText(Path.Combine(RepoLayout.Root, ".editorconfig"))
+            .Replace("Copyright (c) ktsu.dev", consumerCopyright, StringComparison.Ordinal);
+
+        Assert.AreEqual(
+            NormalizeEditorConfig(expectedEditorConfig),
+            NormalizeEditorConfig(File.ReadAllText(Path.Combine(solutionDir, ".editorconfig"))));
+        Assert.AreEqual(File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitattributes")), File.ReadAllText(Path.Combine(solutionDir, ".gitattributes")));
+        Assert.AreEqual(File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitignore")), File.ReadAllText(Path.Combine(solutionDir, ".gitignore")));
+    }
+
     private static void SeedConsumerStyleFiles(string solutionDir)
     {
         File.WriteAllText(Path.Combine(solutionDir, ".editorconfig"), "stale editorconfig");
@@ -57,8 +83,28 @@ public sealed class StyleConfigSyncTests
         string expectedGitAttributes = File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitattributes"));
         string expectedGitIgnore = File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitignore"));
 
-        Assert.AreEqual(expectedEditorConfig, File.ReadAllText(Path.Combine(solutionDir, ".editorconfig")));
+        Assert.AreEqual(
+            NormalizeEditorConfig(expectedEditorConfig),
+            NormalizeEditorConfig(File.ReadAllText(Path.Combine(solutionDir, ".editorconfig"))));
         Assert.AreEqual(expectedGitAttributes, File.ReadAllText(Path.Combine(solutionDir, ".gitattributes")));
         Assert.AreEqual(expectedGitIgnore, File.ReadAllText(Path.Combine(solutionDir, ".gitignore")));
+    }
+
+    private static string NormalizeEditorConfig(string content)
+    {
+        StringBuilder normalized = new();
+        string[] lines = content.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
+        foreach (string line in lines)
+        {
+            if (line.Length == 0)
+            {
+                continue;
+            }
+
+            string canonicalLine = line.Replace("/n", "\\n", StringComparison.Ordinal);
+            _ = normalized.AppendLine(canonicalLine);
+        }
+
+        return normalized.ToString();
     }
 }
