@@ -16,6 +16,17 @@
          emits seven packages that race each other over one intermediate output directory. These
          tools are framework-dependent and RID-agnostic: one package, .NET 10 runtime required. -->
     <RuntimeIdentifiers></RuntimeIdentifiers>
+
+    <!-- PackAsTool builds the tools/ payload from a publish, so the publish must be enabled or the
+         package ends up containing only DotnetToolSettings.xml and none of the assemblies it points
+         at - it installs, then fails at run time.
+
+         It has to be set here, in props. The core SDK defaults IsPublishable to false and flips it
+         true for OutputType=Exe in its *targets*, which is too late: Microsoft.NET.Sdk's targets
+         are evaluated before the <Sdk Name="..." /> element targets, so pack has already decided by
+         then. Tool projects are kept out of CI's RID zip publishing by project *selection*
+         (KtsuBuild's IsExecutableProject scans the csproj text), not by this property. -->
+    <IsPublishable>true</IsPublishable>
   </PropertyGroup>
 
   <!-- ToolCommandName: the command users actually type. Derived in props, not targets, so the

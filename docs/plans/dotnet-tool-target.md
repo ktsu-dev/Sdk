@@ -158,10 +158,10 @@ Tests in `test/Sdk.Examples.Tests`:
    `PackAsTool=true`, `ToolCommandName` equals the lowercased solution name,
    `IsPackable=true`, `IsPublishable=false`, `TargetFrameworks` empty.
 2. **Build**, via the existing `DemoBuildTests.cs` mechanism.
-3. **Pack** — pack the demo and assert the produced `.nupkg` contains
-   `tools/net10.0/any/DotnetToolSettings.xml` naming the expected command. This
-   is the only assertion that proves the package actually works as a tool; the
-   property checks alone pass against a broken package.
+3. **Pack** — over both pack paths (plain and `--no-build`, the one CI uses): assert the produced
+   `.nupkg` contains `tools/net10.0/any/` with `DotnetToolSettings.xml` naming the expected command,
+   the entry-point assembly, and the runtimeconfig; then **install the tool and run it**. Manifest
+   presence alone is not proof — a package whose publish was suppressed still has the manifest.
 4. **RID-publish exclusion** — assert the demo csproj text contains no literal
    `<OutputType>` and no `Sdk="….App/"`, pinning the KtsuBuild
    `IsExecutableProject` behaviour that keeps tools out of the zip publish path.
@@ -199,6 +199,26 @@ defaults it to `AssemblyName` in its targets, so a conditional assignment in a `
 too late. (When iterating on SDK content locally without bumping the version, the extracted
 package in the global packages folder is stale — clear `~/.nuget/packages/ktsu.sdk.tool` between
 runs or the old behaviour persists.)
+
+**`IsPublishable` must be `true`, and must be set in props** (found while converting the first real
+consumer, after the broken 2.16.0 shipped). `PackAsTool` builds the `tools/` payload from a publish,
+which is gated on `IsPublishable`. Setting it false — as this plan specified, to keep CI from
+zipping tool projects — produced a package containing only `DotnetToolSettings.xml` and none of the
+assemblies it points at: it installs, then fails at run time. Tool projects are kept out of RID zip
+publishing by project *selection* instead, which was always the actual mechanism (§4).
+
+Simply removing the `false` is not enough. The core SDK defaults `IsPublishable` to false in
+`Sdk/Sdk.props` and flips it true for `OutputType=Exe` in `Sdk/Sdk.targets`, and that flip is too
+late — pack has already decided by then, the same import-ordering trap as `ToolCommandName`. The
+Tool SDK sets `IsPublishable=true` in its own `Sdk.props`.
+
+The test hole mattered as much as the bug: asserting `DotnetToolSettings.xml` exists passes against
+a package with no payload at all. §5.3 now asserts the entry-point assembly and runtimeconfig are
+present **and installs the tool and runs it**, over both pack paths.
+
+**`dotnet pack --no-build` is fine.** The question flagged in §4 is resolved: with the publish
+enabled, packing a previously-built tool project with `--no-build` produces a complete payload, so
+KtsuBuild's `PackAsync` needs no change. The test covers both pack paths.
 
 Packing also requires the metadata files the SDK declares (`LICENSE.md`, `README.md`, `icon.png`)
 to exist in the solution directory, or pack fails NU5030/NU5039/NU5046. This is pre-existing

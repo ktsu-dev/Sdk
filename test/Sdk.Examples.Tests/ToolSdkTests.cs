@@ -36,39 +36,79 @@ public sealed class ToolSdkTests
         Assert.AreEqual("true", props["PackAsTool"], "PackAsTool");
         Assert.AreEqual(ExpectedCommand, props["ToolCommandName"], "ToolCommandName");
         Assert.AreEqual("true", props["IsPackable"], "IsPackable");
-        Assert.AreEqual("false", props["IsPublishable"], "IsPublishable");
         Assert.AreEqual("true", props["IsToolProject"], "IsToolProject");
+
+        // IsPublishable must stay true: PackAsTool builds the tools/ payload from a publish, and
+        // Microsoft.NET.Sdk gates the Publish target on it. See ToolSdk_PacksDotnetToolPayload.
+        Assert.AreEqual("true", props["IsPublishable"], "IsPublishable");
     }
 
     /// <summary>
-    /// The only assertion that proves the package actually works as a tool: property checks alone
-    /// pass against a package with no tools/ payload at all.
+    /// Proves the package actually works as a tool. Asserting only that DotnetToolSettings.xml
+    /// exists is not enough: a package whose publish was suppressed still contains that file, but
+    /// none of the assemblies it points at, so it installs and then fails at run time.
     /// </summary>
+    /// <param name="noBuild">
+    /// Whether to pack with <c>--no-build</c>, which is the path KtsuBuild's release pipeline uses.
+    /// </param>
     [TestMethod]
-    public void ToolSdk_PacksDotnetToolPayload()
+    [DataRow(false, DisplayName = "dotnet pack")]
+    [DataRow(true, DisplayName = "dotnet pack --no-build (the CI path)")]
+    public void ToolSdk_PacksDotnetToolPayload(bool noBuild)
     {
         using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Tool"));
 
-        (CliResult result, string outputDir) = workspace.Pack(Project);
+        if (noBuild)
+        {
+            CliResult build = workspace.Build(Project);
+            Assert.IsTrue(build.Succeeded, $"Expected the tool demo to build.{Environment.NewLine}{build.Output}");
+        }
+
+        (CliResult result, string outputDir) = workspace.Pack(Project, noBuild ? ["--no-build"] : []);
 
         Assert.IsTrue(result.Succeeded, $"Expected the tool demo to pack successfully.{Environment.NewLine}{result.Output}");
 
         string nupkg = Directory.GetFiles(outputDir, "*.nupkg")
             .Single(f => !f.EndsWith(".symbols.nupkg", StringComparison.OrdinalIgnoreCase));
 
-        IReadOnlyList<string> entries = ExampleWorkspace.NupkgEntries(nupkg);
+        List<string> entries = [.. ExampleWorkspace.NupkgEntries(nupkg)];
+        string listing = string.Join(Environment.NewLine, entries);
 
-        const string settingsPath = "tools/net10.0/any/DotnetToolSettings.xml";
-        CollectionAssert.Contains(
-            entries.ToList(),
-            settingsPath,
-            $"Expected a DotnetTool payload.{Environment.NewLine}Entries:{Environment.NewLine}{string.Join(Environment.NewLine, entries)}");
+        // The runnable payload, not just the manifest: the entry-point assembly and the
+        // runtimeconfig the shim needs to launch it.
+        const string toolsDir = "tools/net10.0/any/";
+        foreach (string required in new[]
+                 {
+                     toolsDir + "DotnetToolSettings.xml",
+                     toolsDir + "Demo.Tool.dll",
+                     toolsDir + "Demo.Tool.runtimeconfig.json",
+                 })
+        {
+            CollectionAssert.Contains(entries, required, $"Missing '{required}'.{Environment.NewLine}Entries:{Environment.NewLine}{listing}");
+        }
 
-        string settings = ExampleWorkspace.ReadNupkgEntry(nupkg, settingsPath);
+        string settings = ExampleWorkspace.ReadNupkgEntry(nupkg, toolsDir + "DotnetToolSettings.xml");
         StringAssert.Contains(
             settings,
             $"Name=\"{ExpectedCommand}\"",
             $"Expected the derived command name in DotnetToolSettings.xml.{Environment.NewLine}{settings}");
+
+        // The manifest's EntryPoint must actually be in the package - the exact pairing that a
+        // suppressed publish breaks.
+        StringAssert.Contains(
+            settings,
+            "EntryPoint=\"Demo.Tool.dll\"",
+            $"Unexpected entry point.{Environment.NewLine}{settings}");
+
+        // Install it and run it. Package contents can look right and still not work; this is the
+        // only assertion that exercises what a user actually does.
+        CliResult run = workspace.InstallAndRunTool(outputDir, "Demo.Tool", "1.0.0", ExpectedCommand);
+
+        Assert.IsTrue(run.Succeeded, $"Expected `{ExpectedCommand}` to install and run.{Environment.NewLine}{run.Output}");
+        StringAssert.Contains(
+            run.Output,
+            "Hello from Demo.Tool",
+            $"Expected the tool to produce its output.{Environment.NewLine}{run.Output}");
     }
 
     /// <summary>

@@ -172,9 +172,9 @@ Extension SDK for applications distributed as .NET tools. Adds:
 - `ToolCommandName` derived from the lowercased solution name — a solution named
   `KtsuBuild` installs as `ktsubuild`. Set `ToolCommandName` explicitly to override,
   which short or generic solution names should do.
-- `IsPublishable=false` and no runtime identifiers: a tool ships as one
-  RID-agnostic, framework-dependent package, so consumers need the .NET 10 runtime.
-  For a standalone binary, add a separate `ktsu.Sdk.ConsoleApp` project.
+- No runtime identifiers: a tool ships as one RID-agnostic, framework-dependent
+  package, so consumers need the .NET 10 runtime. For a standalone binary, add a
+  separate `ktsu.Sdk.ConsoleApp` project.
 
 A project named `{Solution}.Tool` or `{Solution}Tool` also sets `IsToolProject`.
 `{Solution}.CLI` deliberately does not — CLI projects stay console apps unless they

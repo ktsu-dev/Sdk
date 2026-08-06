@@ -71,8 +71,14 @@ The SDK consists of multiple sub-SDKs:
     `.tool`/`.cli`), because the default would be `AssemblyName`, which the core SDK forces to
     the fully-qualified namespace (`ktsu.KtsuBuild.Tool`). Derived in `Sdk.props`, not
     `Sdk.targets`, so the value is set before Microsoft.NET.Sdk defaults it.
-  - Sets `IsPublishable=false` (the core SDK marks any `OutputType=Exe` project publishable)
-    and disables package validation and `IncludeSource`, which are library-oriented
+  - Disables package validation and `IncludeSource`, which are library-oriented
+  - Sets `IsPublishable=true` **in `Sdk.props`**. `PackAsTool` builds the `tools/` payload from a
+    publish, which is gated on `IsPublishable`; without it the package contains only
+    `DotnetToolSettings.xml` and none of the assemblies it points at — it installs, then fails at
+    run time. The core SDK's `Sdk.targets` flip (false in props, true for `OutputType=Exe` in
+    targets) is too late, for the same import-ordering reason as `ToolCommandName`. Tool projects
+    stay out of CI's RID zip publishing by project *selection* (KtsuBuild scans the csproj text),
+    not by this property.
   - Errors (KTSU1001) if `TargetFrameworks` is set: a tool package cannot multi-target
 
 - **Sdk.Windows/**, **Sdk.Linux/**, **Sdk.macOS/**: Desktop per-OS app SDKs
