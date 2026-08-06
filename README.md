@@ -258,6 +258,24 @@ The SDK provides sensible defaults, but you can override any property:
 </Project>
 ```
 
+#### Style/config file sync
+
+By default, `ktsu.Sdk` syncs these files from the SDK package into the solution root during build:
+
+- `.editorconfig`
+- `.gitattributes`
+- `.gitignore`
+
+The sync updates files that already exist in the solution root.
+
+To opt out:
+
+```xml
+<PropertyGroup>
+  <KtsuSyncStyleConfigFiles>false</KtsuSyncStyleConfigFiles>
+</PropertyGroup>
+```
+
 ### Project Type Detection
 
 The SDK automatically detects different project types in your solution:

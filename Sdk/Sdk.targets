@@ -210,6 +210,33 @@
     <PolyStringInterpolation>true</PolyStringInterpolation>
   </PropertyGroup>
 
+  <!-- Keep consumer repository style/config files aligned with the SDK package defaults.
+       Opt out with <KtsuSyncStyleConfigFiles>false</KtsuSyncStyleConfigFiles>. -->
+  <PropertyGroup>
+    <KtsuSyncStyleConfigFiles Condition="'$(KtsuSyncStyleConfigFiles)' == ''">true</KtsuSyncStyleConfigFiles>
+    <_KtsuPackageDataDir>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..\_PackageData'))</_KtsuPackageDataDir>
+  </PropertyGroup>
+
+  <Target Name="_KtsuSyncStyleConfigFiles"
+          Condition="'$(KtsuSyncStyleConfigFiles)' == 'true' And '$(DesignTimeBuild)' != 'true' And Exists('$(_KtsuPackageDataDir)')"
+          BeforeTargets="PrepareForBuild">
+    <ItemGroup>
+      <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\editorconfig" Condition="Exists('$(_KtsuPackageDataDir)\editorconfig') And Exists('$(SolutionDir)\.editorconfig')">
+        <Destination>$(SolutionDir)\.editorconfig</Destination>
+      </_KtsuStyleConfigFile>
+      <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\gitattributes" Condition="Exists('$(_KtsuPackageDataDir)\gitattributes') And Exists('$(SolutionDir)\.gitattributes')">
+        <Destination>$(SolutionDir)\.gitattributes</Destination>
+      </_KtsuStyleConfigFile>
+      <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\gitignore" Condition="Exists('$(_KtsuPackageDataDir)\gitignore') And Exists('$(SolutionDir)\.gitignore')">
+        <Destination>$(SolutionDir)\.gitignore</Destination>
+      </_KtsuStyleConfigFile>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_KtsuStyleConfigFile)"
+          DestinationFiles="@(_KtsuStyleConfigFile->'%(Destination)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+
   <!-- Add package data to the package -->
   <ItemGroup Condition="$(IsTestProject) == 'false'">
     <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" />
