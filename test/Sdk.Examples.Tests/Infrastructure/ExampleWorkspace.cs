@@ -50,10 +50,57 @@ internal sealed class ExampleWorkspace : IDisposable
     {
         string outputDir = Path.Combine(root, "pack-output");
 
-        List<string> args = ["pack", projectRelativePath, "-c", "Release", "--nologo", "-o", outputDir];
+        // UseAppHost mirrors Build(): packing a tool runs a publish, and with --no-build that
+        // publish reuses the earlier build's intermediate output. If the two disagree the publish
+        // fails looking for an apphost the build was told not to produce. A tool package never
+        // contains an apphost - the shim is generated at install time.
+        List<string> args =
+        [
+            "pack", projectRelativePath, "-c", "Release", "--nologo", "-o", outputDir,
+            "-p:UseAppHost=false",
+        ];
         args.AddRange(extraArgs);
 
         return (Cli.Dotnet(root, [.. args]), outputDir);
+    }
+
+    /// <summary>
+    /// Installs a packed tool from <paramref name="nupkgDir"/> into an isolated tool path and runs
+    /// its command. This is the only check that exercises what a user actually does, and the only
+    /// one that fails when a tool package is well-formed but has no runnable payload.
+    /// </summary>
+    /// <remarks>
+    /// The install uses its own nuget.config with <c>&lt;clear /&gt;</c> rather than
+    /// <c>--add-source</c>, which the CLI rejects outright when the ambient NuGet configuration
+    /// happens to use package source mapping.
+    /// </remarks>
+    public CliResult InstallAndRunTool(string nupkgDir, string packageId, string version, string command)
+    {
+        string installRoot = Path.Combine(root, "tool-install");
+        string toolPath = Path.Combine(installRoot, "bin");
+        Directory.CreateDirectory(installRoot);
+
+        File.WriteAllText(Path.Combine(installRoot, "nuget.config"),
+            $"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <packageSources>
+                <clear />
+                <add key="packed-tool" value="{nupkgDir}" />
+              </packageSources>
+            </configuration>
+            """);
+
+        CliResult install = Cli.Dotnet(installRoot, "tool", "install", packageId, "--version", version, "--tool-path", toolPath);
+        if (!install.Succeeded)
+        {
+            return install;
+        }
+
+        string executable = Path.Combine(toolPath, OperatingSystem.IsWindows() ? command + ".exe" : command);
+        return !File.Exists(executable)
+            ? new CliResult(1, $"The installed tool path '{executable}' does not exist.{Environment.NewLine}{install.Output}")
+            : Cli.Run(executable, installRoot);
     }
 
     /// <summary>The relative paths of every entry in a .nupkg, using forward slashes.</summary>

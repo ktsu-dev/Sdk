@@ -31,11 +31,15 @@ internal static class Cli
     private static readonly TimeSpan Timeout = TimeSpan.FromMinutes(10);
 
     /// <summary>Runs <c>dotnet</c> with the given arguments in <paramref name="workingDirectory"/>.</summary>
-    public static CliResult Dotnet(string workingDirectory, params string[] arguments)
+    public static CliResult Dotnet(string workingDirectory, params string[] arguments) =>
+        Run("dotnet", workingDirectory, arguments);
+
+    /// <summary>Runs an arbitrary executable in <paramref name="workingDirectory"/>.</summary>
+    public static CliResult Run(string fileName, string workingDirectory, params string[] arguments)
     {
         ProcessStartInfo psi = new()
         {
-            FileName = "dotnet",
+            FileName = fileName,
             WorkingDirectory = workingDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -64,7 +68,7 @@ internal static class Cli
         if (!process.WaitForExit((int)Timeout.TotalMilliseconds))
         {
             try { process.Kill(entireProcessTree: true); } catch { /* best effort */ }
-            throw new TimeoutException($"dotnet {string.Join(' ', arguments)} timed out after {Timeout}.");
+            throw new TimeoutException($"{fileName} {string.Join(' ', arguments)} timed out after {Timeout}.");
         }
 
         // Ensure async output handlers have flushed.
