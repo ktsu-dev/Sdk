@@ -263,6 +263,9 @@ return true;
       <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\gitignore" Condition="Exists('$(_KtsuPackageDataDir)\gitignore') And Exists('$(SolutionDir)\.gitignore')">
         <Destination>$(SolutionDir)\.gitignore</Destination>
       </_KtsuStyleConfigFile>
+      <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\runsettings" Condition="Exists('$(_KtsuPackageDataDir)\runsettings') And Exists('$(SolutionDir)\.runsettings')">
+        <Destination>$(SolutionDir)\.runsettings</Destination>
+      </_KtsuStyleConfigFile>
     </ItemGroup>
 
     <Copy SourceFiles="@(_KtsuStyleConfigFile)"

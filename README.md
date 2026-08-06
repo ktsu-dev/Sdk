@@ -265,6 +265,7 @@ By default, `ktsu.Sdk` syncs these files from the SDK package into the solution 
 - `.editorconfig`
 - `.gitattributes`
 - `.gitignore`
+- `.runsettings`
 
 The sync updates files that already exist in the solution root.
 

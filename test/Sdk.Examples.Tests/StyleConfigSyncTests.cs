@@ -36,6 +36,7 @@ public sealed class StyleConfigSyncTests
         string editorConfigBefore = File.ReadAllText(Path.Combine(solutionDir, ".editorconfig"));
         string gitAttributesBefore = File.ReadAllText(Path.Combine(solutionDir, ".gitattributes"));
         string gitIgnoreBefore = File.ReadAllText(Path.Combine(solutionDir, ".gitignore"));
+        string runSettingsBefore = File.ReadAllText(Path.Combine(solutionDir, ".runsettings"));
 
         CliResult result = workspace.Build(Project, "-p:EnforceCodeStyleInBuild=false", "-p:KtsuSyncStyleConfigFiles=false");
         Assert.IsTrue(result.Succeeded, $"Expected demo build to succeed.{Environment.NewLine}{result.Output}");
@@ -43,6 +44,7 @@ public sealed class StyleConfigSyncTests
         Assert.AreEqual(editorConfigBefore, File.ReadAllText(Path.Combine(solutionDir, ".editorconfig")));
         Assert.AreEqual(gitAttributesBefore, File.ReadAllText(Path.Combine(solutionDir, ".gitattributes")));
         Assert.AreEqual(gitIgnoreBefore, File.ReadAllText(Path.Combine(solutionDir, ".gitignore")));
+        Assert.AreEqual(runSettingsBefore, File.ReadAllText(Path.Combine(solutionDir, ".runsettings")));
     }
 
     [TestMethod]
@@ -68,6 +70,7 @@ public sealed class StyleConfigSyncTests
             NormalizeEditorConfig(File.ReadAllText(Path.Combine(solutionDir, ".editorconfig"))));
         Assert.AreEqual(File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitattributes")), File.ReadAllText(Path.Combine(solutionDir, ".gitattributes")));
         Assert.AreEqual(File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitignore")), File.ReadAllText(Path.Combine(solutionDir, ".gitignore")));
+        Assert.AreEqual(File.ReadAllText(Path.Combine(RepoLayout.Root, ".runsettings")), File.ReadAllText(Path.Combine(solutionDir, ".runsettings")));
     }
 
     private static void SeedConsumerStyleFiles(string solutionDir)
@@ -75,6 +78,7 @@ public sealed class StyleConfigSyncTests
         File.WriteAllText(Path.Combine(solutionDir, ".editorconfig"), "stale editorconfig");
         File.WriteAllText(Path.Combine(solutionDir, ".gitattributes"), "stale gitattributes");
         File.WriteAllText(Path.Combine(solutionDir, ".gitignore"), "stale gitignore");
+        File.WriteAllText(Path.Combine(solutionDir, ".runsettings"), "stale runsettings");
     }
 
     private static void AssertStyleConfigFilesMatchSdkDefaults(string solutionDir)
@@ -82,12 +86,14 @@ public sealed class StyleConfigSyncTests
         string expectedEditorConfig = File.ReadAllText(Path.Combine(RepoLayout.Root, ".editorconfig"));
         string expectedGitAttributes = File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitattributes"));
         string expectedGitIgnore = File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitignore"));
+        string expectedRunSettings = File.ReadAllText(Path.Combine(RepoLayout.Root, ".runsettings"));
 
         Assert.AreEqual(
             NormalizeEditorConfig(expectedEditorConfig),
             NormalizeEditorConfig(File.ReadAllText(Path.Combine(solutionDir, ".editorconfig"))));
         Assert.AreEqual(expectedGitAttributes, File.ReadAllText(Path.Combine(solutionDir, ".gitattributes")));
         Assert.AreEqual(expectedGitIgnore, File.ReadAllText(Path.Combine(solutionDir, ".gitignore")));
+        Assert.AreEqual(expectedRunSettings, File.ReadAllText(Path.Combine(solutionDir, ".runsettings")));
     }
 
     private static string NormalizeEditorConfig(string content)
