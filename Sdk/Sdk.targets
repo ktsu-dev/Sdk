@@ -1,5 +1,42 @@
 <!-- ktsu.Sdk/Sdk.targets -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="KtsuRewriteEditorConfigHeader"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <EditorConfigFile ParameterType="System.String" Required="true" />
+      <CopyrightText ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+if (!File.Exists(EditorConfigFile) || string.IsNullOrWhiteSpace(CopyrightText))
+{
+    return true;
+}
+
+const string defaultHeader = "file_header_template = Copyright (c) ktsu.dev\\nAll rights reserved.\\nLicensed under the MIT license.";
+const string defaultHeaderWithSlash = "file_header_template = Copyright (c) ktsu.dev/nAll rights reserved./nLicensed under the MIT license.";
+string normalizedCopyright = CopyrightText
+    .Replace("\r\n", "\n")
+    .Replace("\r", "\n")
+    .Replace("\n", "\\n");
+string consumerHeader = $"file_header_template = {normalizedCopyright}";
+
+string original = File.ReadAllText(EditorConfigFile);
+string rewritten = original
+    .Replace(defaultHeader, consumerHeader)
+    .Replace(defaultHeaderWithSlash, consumerHeader);
+if (!string.Equals(original, rewritten, StringComparison.Ordinal))
+{
+    File.WriteAllText(EditorConfigFile, rewritten);
+}
+return true;
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
   <PropertyGroup>
     <IsPrerelease>false</IsPrerelease>
     <IsPrerelease Condition="'$(Version)' != '' And $(Version.Contains('-'))">true</IsPrerelease>
@@ -209,6 +246,40 @@
     <PolyArgumentExceptions>true</PolyArgumentExceptions>
     <PolyStringInterpolation>true</PolyStringInterpolation>
   </PropertyGroup>
+
+  <!-- Keep consumer repository style/config files aligned with the SDK package defaults.
+       Opt out with <KtsuSyncStyleConfigFiles>false</KtsuSyncStyleConfigFiles>. -->
+  <PropertyGroup>
+    <KtsuSyncStyleConfigFiles Condition="'$(KtsuSyncStyleConfigFiles)' == ''">true</KtsuSyncStyleConfigFiles>
+    <_KtsuPackageDataDir>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..\_PackageData'))</_KtsuPackageDataDir>
+  </PropertyGroup>
+
+  <Target Name="_KtsuSyncStyleConfigFiles"
+          Condition="'$(KtsuSyncStyleConfigFiles)' == 'true' And '$(DesignTimeBuild)' != 'true' And Exists('$(_KtsuPackageDataDir)')"
+          BeforeTargets="PrepareForBuild">
+    <ItemGroup>
+      <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\editorconfig" Condition="Exists('$(_KtsuPackageDataDir)\editorconfig') And Exists('$(SolutionDir)\.editorconfig')">
+        <Destination>$(SolutionDir)\.editorconfig</Destination>
+      </_KtsuStyleConfigFile>
+      <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\gitattributes" Condition="Exists('$(_KtsuPackageDataDir)\gitattributes') And Exists('$(SolutionDir)\.gitattributes')">
+        <Destination>$(SolutionDir)\.gitattributes</Destination>
+      </_KtsuStyleConfigFile>
+      <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\gitignore" Condition="Exists('$(_KtsuPackageDataDir)\gitignore') And Exists('$(SolutionDir)\.gitignore')">
+        <Destination>$(SolutionDir)\.gitignore</Destination>
+      </_KtsuStyleConfigFile>
+      <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\runsettings" Condition="Exists('$(_KtsuPackageDataDir)\runsettings') And Exists('$(SolutionDir)\.runsettings')">
+        <Destination>$(SolutionDir)\.runsettings</Destination>
+      </_KtsuStyleConfigFile>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_KtsuStyleConfigFile)"
+          DestinationFiles="@(_KtsuStyleConfigFile->'%(Destination)')"
+          SkipUnchangedFiles="true" />
+
+    <KtsuRewriteEditorConfigHeader EditorConfigFile="$([MSBuild]::NormalizePath('$(SolutionDir)\.editorconfig'))"
+                                   CopyrightText="$(Copyright)"
+                                   Condition="Exists('$(SolutionDir)\.editorconfig') And '$(Copyright)' != ''" />
+  </Target>
 
   <!-- Add package data to the package -->
   <ItemGroup Condition="$(IsTestProject) == 'false'">

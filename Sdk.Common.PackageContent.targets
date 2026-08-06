@@ -15,4 +15,23 @@
     <None Include="$(VersionFilePath)" Condition="Exists('$(VersionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(VersionFileName)" />
     <None Include="$(IconFilePath)" Condition="Exists('$(IconFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(IconFileName)" />
   </ItemGroup>
+
+  <Target Name="_KtsuStageStyleConfigPackageFiles" BeforeTargets="_GetPackageFiles">
+    <PropertyGroup>
+      <_KtsuStyleConfigStagingDir>$(IntermediateOutputPath)ktsu.package-data\</_KtsuStyleConfigStagingDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(_KtsuStyleConfigStagingDir)" />
+    <Copy SourceFiles="$(SolutionDir)\.editorconfig" DestinationFiles="$(_KtsuStyleConfigStagingDir)editorconfig" Condition="Exists('$(SolutionDir)\.editorconfig')" />
+    <Copy SourceFiles="$(SolutionDir)\.gitattributes" DestinationFiles="$(_KtsuStyleConfigStagingDir)gitattributes" Condition="Exists('$(SolutionDir)\.gitattributes')" />
+    <Copy SourceFiles="$(SolutionDir)\.gitignore" DestinationFiles="$(_KtsuStyleConfigStagingDir)gitignore" Condition="Exists('$(SolutionDir)\.gitignore')" />
+    <Copy SourceFiles="$(SolutionDir)\.runsettings" DestinationFiles="$(_KtsuStyleConfigStagingDir)runsettings" Condition="Exists('$(SolutionDir)\.runsettings')" />
+
+    <ItemGroup>
+      <None Include="$(_KtsuStyleConfigStagingDir)editorconfig" Condition="Exists('$(_KtsuStyleConfigStagingDir)editorconfig')" Pack="true" PackagePath="_PackageData/" Link=".editorconfig" Visible="false" />
+      <None Include="$(_KtsuStyleConfigStagingDir)gitattributes" Condition="Exists('$(_KtsuStyleConfigStagingDir)gitattributes')" Pack="true" PackagePath="_PackageData/" Link=".gitattributes" Visible="false" />
+      <None Include="$(_KtsuStyleConfigStagingDir)gitignore" Condition="Exists('$(_KtsuStyleConfigStagingDir)gitignore')" Pack="true" PackagePath="_PackageData/" Link=".gitignore" Visible="false" />
+      <None Include="$(_KtsuStyleConfigStagingDir)runsettings" Condition="Exists('$(_KtsuStyleConfigStagingDir)runsettings')" Pack="true" PackagePath="_PackageData/" Link=".runsettings" Visible="false" />
+    </ItemGroup>
+  </Target>
 </Project>
