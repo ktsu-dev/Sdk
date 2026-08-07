@@ -1,3 +1,8 @@
+## v2.17.1 (patch)
+
+Changes since v2.17.0:
+
+- [patch] Stop style config sync from racing across parallel builds ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.17.0 (minor)
 
 Changes since v2.16.0:
