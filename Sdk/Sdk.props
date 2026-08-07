@@ -316,8 +316,6 @@
     <IsMacProject Condition="$(MSBuildProjectName) == $(MacProjectName)">true</IsMacProject>
     <IsToolProject>false</IsToolProject>
     <IsToolProject Condition="$(MSBuildProjectName) == $(ToolProjectName)">true</IsToolProject>
-    <IsTestProject>false</IsTestProject>
-    <IsTestProject Condition="$(MSBuildProjectName) == $(TestProjectName)">true</IsTestProject>
 
     <!-- Descriptive properties -->
     <ContributorsFileName>CONTRIBUTORS.md</ContributorsFileName>
@@ -560,7 +558,9 @@
 
     <!-- Test project–related properties -->
     <IsTestProject>false</IsTestProject>
+    <IsTestProject Condition="$(MSBuildProjectName) == $(TestProjectName)">true</IsTestProject>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+
     <!-- Hosting-related properties -->
     <!-- <AppHostDotNetSearch>Global</AppHostDotNetSearch> -->
     <!-- <AppHostRelativeDotNet>./relative/path/to/runtime</AppHostRelativeDotNet> -->
