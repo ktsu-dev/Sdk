@@ -1,3 +1,9 @@
+## v2.18.0 (minor)
+
+Changes since v2.17.0:
+
+- [patch] Stop style config sync from racing across parallel builds ([@matt-edmondson](https://github.com/matt-edmondson))
+- fix: restore IsTestProject condition for test project identification ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.17.1 (patch)
 
 Changes since v2.17.0:
