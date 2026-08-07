@@ -1,36 +1,162 @@
 <!-- ktsu.Sdk/Sdk.targets -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask TaskName="KtsuRewriteEditorConfigHeader"
+  <!-- Syncs consumer style/config files from the packaged SDK defaults.
+       The destinations live at the solution root, but this target runs once per inner
+       build (per TargetFramework) and per project, so many MSBuild nodes race for the
+       same handful of files. Two things keep that safe:
+         - The desired content is computed first and compared against what is already on
+           disk, so a synced file is never rewritten. Steady-state builds do reads only.
+         - The rare real write is serialized across processes by a named mutex scoped to
+           the solution directory, with a bounded retry as a fallback for hosts where a
+           named mutex cannot be created. -->
+  <UsingTask TaskName="KtsuSyncStyleConfigFiles"
              TaskFactory="RoslynCodeTaskFactory"
              AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
-      <EditorConfigFile ParameterType="System.String" Required="true" />
-      <CopyrightText ParameterType="System.String" Required="true" />
+      <SourceFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <SyncScope ParameterType="System.String" Required="true" />
+      <CopyrightText ParameterType="System.String" />
     </ParameterGroup>
     <Task>
       <Using Namespace="System" />
       <Using Namespace="System.IO" />
+      <Using Namespace="System.Text" />
+      <Using Namespace="System.Threading" />
+      <Using Namespace="Microsoft.Build.Framework" />
       <Code Type="Fragment" Language="cs"><![CDATA[
-if (!File.Exists(EditorConfigFile) || string.IsNullOrWhiteSpace(CopyrightText))
+const string headerKey = "file_header_template";
+
+string consumerHeader = null;
+if (!string.IsNullOrWhiteSpace(CopyrightText))
 {
-    return true;
+    consumerHeader = headerKey + " = " + CopyrightText
+        .Replace("\r\n", "\n")
+        .Replace("\r", "\n")
+        .Replace("\n", "\\n");
 }
 
-const string defaultHeader = "file_header_template = Copyright (c) ktsu.dev\\nAll rights reserved.\\nLicensed under the MIT license.";
-const string defaultHeaderWithSlash = "file_header_template = Copyright (c) ktsu.dev/nAll rights reserved./nLicensed under the MIT license.";
-string normalizedCopyright = CopyrightText
-    .Replace("\r\n", "\n")
-    .Replace("\r", "\n")
-    .Replace("\n", "\\n");
-string consumerHeader = $"file_header_template = {normalizedCopyright}";
-
-string original = File.ReadAllText(EditorConfigFile);
-string rewritten = original
-    .Replace(defaultHeader, consumerHeader)
-    .Replace(defaultHeaderWithSlash, consumerHeader);
-if (!string.Equals(original, rewritten, StringComparison.Ordinal))
+// A stable, path-derived mutex name. Distinct solutions get distinct locks; a
+// truncated collision would only over-serialize, which is harmless here.
+char[] scopeChars = (SyncScope ?? string.Empty).ToLowerInvariant().ToCharArray();
+for (int i = 0; i < scopeChars.Length; i++)
 {
-    File.WriteAllText(EditorConfigFile, rewritten);
+    if (!char.IsLetterOrDigit(scopeChars[i]))
+    {
+        scopeChars[i] = '_';
+    }
+}
+string scopeKey = new string(scopeChars);
+if (scopeKey.Length > 180)
+{
+    scopeKey = scopeKey.Substring(scopeKey.Length - 180);
+}
+
+UTF8Encoding encoding = new UTF8Encoding(false);
+Mutex mutex = null;
+bool held = false;
+try
+{
+    try
+    {
+        mutex = new Mutex(false, "Global\\ktsu-sdk-style-sync-" + scopeKey);
+        held = mutex.WaitOne(TimeSpan.FromSeconds(120));
+    }
+    catch (AbandonedMutexException)
+    {
+        // A node died holding the lock; the files are still consistent because every
+        // write is a whole-file write, so take ownership and carry on.
+        held = true;
+    }
+    catch (Exception lockException)
+    {
+        Log.LogMessage(MessageImportance.Low, "ktsu.Sdk: style config sync lock unavailable ({0}); relying on retries.", lockException.Message);
+    }
+
+    foreach (ITaskItem item in SourceFiles)
+    {
+        string source = item.GetMetadata("FullPath");
+        string destination = item.GetMetadata("Destination");
+        if (string.IsNullOrEmpty(destination) || !File.Exists(source) || !File.Exists(destination))
+        {
+            continue;
+        }
+
+        string desired = File.ReadAllText(source);
+        if (consumerHeader != null && string.Equals(item.GetMetadata("RewriteHeader"), "true", StringComparison.OrdinalIgnoreCase))
+        {
+            // Replace the whole file_header_template line wherever it appears, rather than
+            // matching a known default value: the packaged default is free to change, and a
+            // value-based match silently leaves a stale header behind when it does.
+            StringBuilder builder = new StringBuilder(desired.Length);
+            int cursor = 0;
+            while (cursor < desired.Length)
+            {
+                int lineFeed = desired.IndexOf('\n', cursor);
+                int next = lineFeed < 0 ? desired.Length : lineFeed + 1;
+                string line = desired.Substring(cursor, next - cursor);
+                cursor = next;
+
+                string body = line.TrimEnd('\r', '\n');
+                string terminator = line.Substring(body.Length);
+                string keyed = body.TrimStart();
+                string remainder = keyed.StartsWith(headerKey, StringComparison.OrdinalIgnoreCase)
+                    ? keyed.Substring(headerKey.Length).TrimStart()
+                    : null;
+
+                if (remainder != null && remainder.StartsWith("=", StringComparison.Ordinal))
+                {
+                    builder.Append(body.Substring(0, body.Length - keyed.Length)).Append(consumerHeader).Append(terminator);
+                }
+                else
+                {
+                    builder.Append(line);
+                }
+            }
+
+            desired = builder.ToString();
+        }
+
+        for (int attempt = 0; attempt < 5; attempt++)
+        {
+            try
+            {
+                if (string.Equals(File.ReadAllText(destination), desired, StringComparison.Ordinal))
+                {
+                    break;
+                }
+
+                File.WriteAllText(destination, desired, encoding);
+                Log.LogMessage(MessageImportance.Low, "ktsu.Sdk: synced {0} from SDK defaults.", destination);
+                break;
+            }
+            catch (IOException) when (attempt < 4)
+            {
+                Thread.Sleep(100 * (attempt + 1));
+            }
+            catch (UnauthorizedAccessException) when (attempt < 4)
+            {
+                Thread.Sleep(100 * (attempt + 1));
+            }
+            catch (Exception syncException)
+            {
+                // Never fail a build over a style file that another node is mid-write on.
+                Log.LogMessage(MessageImportance.Low, "ktsu.Sdk: could not sync {0} ({1}).", destination, syncException.Message);
+                break;
+            }
+        }
+    }
+}
+finally
+{
+    if (mutex != null)
+    {
+        if (held)
+        {
+            mutex.ReleaseMutex();
+        }
+
+        mutex.Dispose();
+    }
 }
 return true;
       ]]></Code>
@@ -234,7 +360,7 @@ return true;
 
   <!-- Analyzer package - automatically included to enforce other requirements -->
   <ItemGroup>
-    <PackageReference Include="ktsu.Sdk.Analyzers" VersionOverride="{version}" Condition="$(IsTestProject) == 'false'">
+    <PackageReference Include="ktsu.Sdk.Analyzers" VersionOverride="2.17.0" Condition="$(IsTestProject) == 'false'">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
@@ -260,6 +386,7 @@ return true;
     <ItemGroup>
       <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\editorconfig" Condition="Exists('$(_KtsuPackageDataDir)\editorconfig') And Exists('$(SolutionDir)\.editorconfig')">
         <Destination>$(SolutionDir)\.editorconfig</Destination>
+        <RewriteHeader>true</RewriteHeader>
       </_KtsuStyleConfigFile>
       <_KtsuStyleConfigFile Include="$(_KtsuPackageDataDir)\gitattributes" Condition="Exists('$(_KtsuPackageDataDir)\gitattributes') And Exists('$(SolutionDir)\.gitattributes')">
         <Destination>$(SolutionDir)\.gitattributes</Destination>
@@ -272,13 +399,10 @@ return true;
       </_KtsuStyleConfigFile>
     </ItemGroup>
 
-    <Copy SourceFiles="@(_KtsuStyleConfigFile)"
-          DestinationFiles="@(_KtsuStyleConfigFile->'%(Destination)')"
-          SkipUnchangedFiles="true" />
-
-    <KtsuRewriteEditorConfigHeader EditorConfigFile="$([MSBuild]::NormalizePath('$(SolutionDir)\.editorconfig'))"
-                                   CopyrightText="$(Copyright)"
-                                   Condition="Exists('$(SolutionDir)\.editorconfig') And '$(Copyright)' != ''" />
+    <KtsuSyncStyleConfigFiles SourceFiles="@(_KtsuStyleConfigFile)"
+                              SyncScope="$(SolutionDir)"
+                              CopyrightText="$(Copyright)"
+                              Condition="'@(_KtsuStyleConfigFile)' != ''" />
   </Target>
 
   <!-- Add package data to the package -->

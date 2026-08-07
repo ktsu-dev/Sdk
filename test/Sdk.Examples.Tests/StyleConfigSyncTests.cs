@@ -57,7 +57,11 @@ public sealed class StyleConfigSyncTests
         const string consumerCopyright = "Copyright (c) 2020-2030 Contoso contributors\nAll rights reserved.\nLicensed under the Apache-2.0 license.";
         File.WriteAllText(Path.Combine(solutionDir, "COPYRIGHT.md"), consumerCopyright);
         File.WriteAllText(Path.Combine(solutionDir, ".editorconfig"), "stale editorconfig");
-        Assert.AreEqual(consumerCopyright, workspace.Evaluate(Project, "Copyright")["Copyright"]);
+        // Cli joins captured output lines with Environment.NewLine, so a multi-line property
+        // value comes back CRLF-terminated on Windows regardless of what MSBuild evaluated.
+        Assert.AreEqual(
+            consumerCopyright,
+            workspace.Evaluate(Project, "Copyright")["Copyright"].Replace("\r\n", "\n", StringComparison.Ordinal));
 
         CliResult result = workspace.Build(Project, "-p:EnforceCodeStyleInBuild=false");
         Assert.IsTrue(result.Succeeded, $"Expected demo build to succeed.{Environment.NewLine}{result.Output}");
@@ -74,6 +78,82 @@ public sealed class StyleConfigSyncTests
         Assert.AreEqual(File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitattributes")), File.ReadAllText(Path.Combine(solutionDir, ".gitattributes")));
         Assert.AreEqual(File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitignore")), File.ReadAllText(Path.Combine(solutionDir, ".gitignore")));
         Assert.AreEqual(File.ReadAllText(Path.Combine(RepoLayout.Root, ".runsettings")), File.ReadAllText(Path.Combine(solutionDir, ".runsettings")));
+    }
+
+    /// <summary>
+    /// A file that already matches the SDK defaults must not be rewritten. Rewriting on every
+    /// build is what put concurrent MSBuild nodes in contention over the solution-root files.
+    /// </summary>
+    [TestMethod]
+    public void Build_DoesNotRewriteAlreadySyncedStyleConfigFiles()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Library"));
+        string solutionDir = workspace.Evaluate(Project, "SolutionDir")["SolutionDir"];
+
+        SeedConsumerStyleFiles(solutionDir);
+
+        CliResult first = workspace.Build(Project, "-p:EnforceCodeStyleInBuild=false");
+        Assert.IsTrue(first.Succeeded, $"Expected the first demo build to succeed.{Environment.NewLine}{first.Output}");
+
+        Dictionary<string, DateTime> writtenAt = SyncedFileNames
+            .ToDictionary(name => name, name => File.GetLastWriteTimeUtc(Path.Combine(solutionDir, name)));
+
+        CliResult second = workspace.Build(Project, "-p:EnforceCodeStyleInBuild=false");
+        Assert.IsTrue(second.Succeeded, $"Expected the second demo build to succeed.{Environment.NewLine}{second.Output}");
+
+        foreach (string name in SyncedFileNames)
+        {
+            Assert.AreEqual(
+                writtenAt[name],
+                File.GetLastWriteTimeUtc(Path.Combine(solutionDir, name)),
+                $"'{name}' was rewritten by a build even though it already matched the SDK defaults.");
+        }
+
+        AssertStyleConfigFilesMatchSdkDefaults(solutionDir);
+    }
+
+    /// <summary>
+    /// The sync target runs once per inner build, so a multi-targeting project has several
+    /// MSBuild nodes reaching for the same solution-root files at once.
+    /// </summary>
+    [TestMethod]
+    public void Build_SyncsStyleConfigFiles_WhenMultiTargetingInParallel()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Library"));
+        string solutionDir = workspace.Evaluate(Project, "SolutionDir")["SolutionDir"];
+
+        SeedConsumerStyleFiles(solutionDir);
+        MultiTargetDemoProject(solutionDir);
+
+        CliResult result = workspace.Build(Project, "-p:EnforceCodeStyleInBuild=false", "-m");
+
+        Assert.IsTrue(result.Succeeded, $"Expected the multi-targeting demo build to succeed.{Environment.NewLine}{result.Output}");
+        AssertStyleConfigFilesMatchSdkDefaults(solutionDir);
+    }
+
+    private static readonly string[] SyncedFileNames = [".editorconfig", ".gitattributes", ".gitignore", ".runsettings"];
+
+    /// <summary>
+    /// Switches the demo project from its pinned single framework to several, so the build
+    /// fans out into parallel inner builds. Editing the project file is the only way to do
+    /// this: a global <c>-p:TargetFrameworks</c> cannot clear the project's own
+    /// <c>TargetFramework</c>, and the SDK then rejects the combination (NETSDK1046).
+    /// </summary>
+    private static void MultiTargetDemoProject(string solutionDir)
+    {
+        string projectPath = Path.Combine(solutionDir, "Library", "Library.csproj");
+        string original = File.ReadAllText(projectPath);
+        string multiTargeted = original.Replace(
+            "<TargetFramework>net10.0</TargetFramework>",
+            "<TargetFramework></TargetFramework>",
+            StringComparison.Ordinal)
+            .Replace(
+                "<TargetFrameworks></TargetFrameworks>",
+                "<TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>",
+                StringComparison.Ordinal);
+
+        Assert.AreNotEqual(original, multiTargeted, "The demo project no longer has the expected framework properties.");
+        File.WriteAllText(projectPath, multiTargeted);
     }
 
     private static void SeedConsumerStyleFiles(string solutionDir)
