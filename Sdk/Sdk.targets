@@ -158,7 +158,10 @@ finally
         mutex.Dispose();
     }
 }
-return true;
+
+// No explicit return: RoslynCodeTaskFactory closes a Fragment with its own
+// `return !Log.HasLoggedErrors;`, so a `return true;` here would make that
+// generated statement unreachable (CS0162) in every consumer build.
       ]]></Code>
     </Task>
   </UsingTask>
