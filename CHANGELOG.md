@@ -1,3 +1,8 @@
+## v2.21.1 (patch)
+
+Changes since v2.21.0:
+
+- [patch] Stop the style config sync task emitting CS0162 ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.21.0 (minor)
 
 Changes since v2.20.0:
