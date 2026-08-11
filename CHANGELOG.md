@@ -1,3 +1,8 @@
+## v2.21.0 (minor)
+
+Changes since v2.20.0:
+
+- fix: standardize line endings and update .editorconfig and .gitattributes for consistency ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.20.0 (minor)
 
 Changes since v2.19.0:
