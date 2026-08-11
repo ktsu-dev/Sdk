@@ -4,6 +4,13 @@
 # .editorconfig from applying here.
 root = true
 
+# root = true also blocks the parent's line ending settings, so restate them here to stay
+# in step with the repository .editorconfig and the `* text=auto eol=lf` pin in .gitattributes.
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
 [*.cs]
 indent_style = space
 indent_size = 4

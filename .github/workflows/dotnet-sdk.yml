@@ -201,7 +201,12 @@ jobs:
     name: Validate Platform SDKs
     runs-on: ubuntu-latest
     steps:
+    # lfs: true is required because this job packs the platform SDKs, and icon.png is
+    # stored in Git LFS. Without it the checkout yields a pointer file and the packed
+    # PackageIcon is 130 bytes of text instead of an image.
     - uses: actions/checkout@v4
+      with:
+        lfs: true
 
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v4
@@ -221,7 +226,11 @@ jobs:
     name: Example Integration Tests
     runs-on: ubuntu-latest
     steps:
+    # lfs: true is required because this job packs the SDK packages to a local feed and
+    # builds the example demos, both of which consume icon.png as PackageIcon.
     - uses: actions/checkout@v4
+      with:
+        lfs: true
 
     - name: Setup .NET Core SDK
       uses: actions/setup-dotnet@v4
