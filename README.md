@@ -354,6 +354,28 @@ The SDK automatically includes the `ktsu.Sdk.Analyzers` package (with version sy
 - Detects patterns like `x ?? throw new ArgumentNullException(...)`
 - Code fixer automatically replaces with Ensure.NotNull
 
+**KTSU0005 (Error)**: Orphaned `PackageVersion` entry in `Directory.Packages.props`
+
+- Flags a centrally-managed version that no project in the solution references
+- Code fixer removes the entry
+- Disable with `<KtsuEnableOrphanedPackageVersionAnalysis>false</KtsuEnableOrphanedPackageVersionAnalysis>`
+
+**KTSU0006 (Error)**: Transitive package used directly
+
+- Flags use of a type or member that comes from a transitive dependency with no direct `PackageReference`
+- Code fixer adds the `PackageReference`, and a matching `PackageVersion` under Central Package Management
+- Disable with `<KtsuEnableTransitivePackageAnalysis>false</KtsuEnableTransitivePackageAnalysis>`
+
+**KTSU0007 (Error)**: Build-time package reference is not private
+
+- Requires `PrivateAssets="all"` on the Polyfill reference in non-test projects
+- Polyfill is a source-embedding, build-time-only package. NuGet only omits a dependency from the
+  produced package when every asset kind is private, so a partial `PrivateAssets` value still
+  leaks Polyfill to every downstream consumer
+- Code fixer sets the attribute on the `PackageReference`
+- The other standard packages are deliberately not covered: `System.Memory` and
+  `System.Threading.Tasks.Extensions` are genuine runtime dependencies that must flow transitively
+
 **Polyfill Configuration**: For non-test projects, the SDK automatically enables:
 - `PolyEnsure=true` - Enables ensure/guard clause polyfills
 - `PolyNullability=true` - Enables nullability-related polyfills

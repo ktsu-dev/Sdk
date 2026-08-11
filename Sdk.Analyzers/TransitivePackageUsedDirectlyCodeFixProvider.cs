@@ -65,7 +65,7 @@ public class TransitivePackageUsedDirectlyCodeFixProvider : CodeFixProvider
 
 		bool centrallyManaged = IsCentrallyManaged(project);
 
-		TextDocument? projectFile = FindProjectFile(project);
+		TextDocument? projectFile = AdditionalDocumentLookup.FindProjectFile(project);
 		if (projectFile is null)
 		{
 			return solution;
@@ -87,7 +87,7 @@ public class TransitivePackageUsedDirectlyCodeFixProvider : CodeFixProvider
 
 		if (centrallyManaged)
 		{
-			TextDocument? packagesProps = FindDirectoryPackagesProps(project);
+			TextDocument? packagesProps = AdditionalDocumentLookup.FindDirectoryPackagesProps(project);
 			SourceText? propsText = packagesProps is null ? null : await packagesProps.GetTextAsync(cancellationToken).ConfigureAwait(false);
 
 			if (packagesProps is not null && propsText is not null && !ContainsInclude(propsText, packageId))
@@ -108,19 +108,6 @@ public class TransitivePackageUsedDirectlyCodeFixProvider : CodeFixProvider
 		return options.TryGetValue("build_property.ManagePackageVersionsCentrally", out string? value)
 			&& string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
 	}
-
-	private static TextDocument? FindProjectFile(Project project) =>
-		project.AdditionalDocuments.FirstOrDefault(
-			d => !string.IsNullOrEmpty(project.FilePath) && string.Equals(d.FilePath, project.FilePath, StringComparison.OrdinalIgnoreCase))
-		?? project.AdditionalDocuments.FirstOrDefault(
-			d => d.FilePath is not null && d.FilePath.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase));
-
-	private static TextDocument? FindDirectoryPackagesProps(Project project) =>
-		project.AdditionalDocuments.FirstOrDefault(
-			d => d.FilePath is not null && string.Equals(
-				System.IO.Path.GetFileName(d.FilePath),
-				OrphanedPackageVersionAnalyzer.DirectoryPackagesPropsFileName,
-				StringComparison.OrdinalIgnoreCase));
 
 	private static string BuildPackageReference(string packageId, string? version) =>
 		version is { Length: > 0 }

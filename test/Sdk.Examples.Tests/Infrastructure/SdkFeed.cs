@@ -16,8 +16,19 @@ public static class SdkFeed
     public static string FeedDir => feedDir
         ?? throw new InvalidOperationException("The SDK feed has not been initialized.");
 
-    /// <summary>The packed SDK version (from VERSION.md).</summary>
-    public static string Version => RepoLayout.Version;
+    /// <summary>
+    /// The version the SDK packages are packed as: the repository version plus a run-unique
+    /// prerelease suffix.
+    /// </summary>
+    /// <remarks>
+    /// The suffix is load-bearing. Packing as the bare VERSION.md value collides with the
+    /// already-published package of that same version, and NuGet resolves <c>msbuild-sdks</c> from
+    /// the global packages folder before any configured source — so on a machine that has that
+    /// version cached the examples would silently build against the published SDK instead of the
+    /// working tree, and every assertion about local SDK changes would be meaningless.
+    /// </remarks>
+    public static string Version { get; } =
+        RepoLayout.Version + "-local" + Guid.NewGuid().ToString("N")[..8];
 
     /// <summary>Packs every SDK package to the temporary feed before any test runs.</summary>
     [AssemblyInitialize]
@@ -31,7 +42,7 @@ public static class SdkFeed
 
         // Substitute the {version} placeholder in the Sdk.targets files just for the duration of
         // packing, then restore the working tree so the test run leaves no diff behind.
-        Dictionary<string, string> originals = SubstituteVersionTokens(RepoLayout.Version);
+        Dictionary<string, string> originals = SubstituteVersionTokens(Version);
         try
         {
             foreach (string project in RepoLayout.SdkProjects)
@@ -42,6 +53,8 @@ public static class SdkFeed
                 [
                     "pack", csproj, "-c", "Release", "-o", feed, "--nologo", "-v", "quiet",
                     "-p:EnablePackageValidation=false",
+                    "-p:Version=" + Version,
+                    "-p:PackageVersion=" + Version,
                 ];
 
                 // An MSBuild SDK package's payload is its Sdk.props/Sdk.targets content, which is
@@ -71,7 +84,7 @@ public static class SdkFeed
             packages.Length >= RepoLayout.SdkProjects.Count,
             $"Expected at least {RepoLayout.SdkProjects.Count} packages in the feed but found {packages.Length}.");
 
-        context.WriteLine($"Packed ktsu.Sdk {RepoLayout.Version} ({packages.Length} packages) to {feed}");
+        context.WriteLine($"Packed ktsu.Sdk {Version} ({packages.Length} packages) to {feed}");
     }
 
     /// <summary>Removes the temporary feed when the run is finished.</summary>

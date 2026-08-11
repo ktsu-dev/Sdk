@@ -20,6 +20,7 @@ public sealed class AnalyzerTriggerTests
     [DataRow("KTSU0004-ManualNullCheck", "ManualNullCheck/ManualNullCheck.csproj", "KTSU0004", DisplayName = "KTSU0004 Manual null check")]
     [DataRow("KTSU0005-OrphanedPackageVersion", "OrphanedPackageVersion/OrphanedPackageVersion.csproj", "KTSU0005", DisplayName = "KTSU0005 Orphaned PackageVersion")]
     [DataRow("KTSU0006-TransitivePackageUsedDirectly", "TransitivePackageUsedDirectly/TransitivePackageUsedDirectly.csproj", "KTSU0006", DisplayName = "KTSU0006 Transitive package used directly")]
+    [DataRow("KTSU0007-NonPrivatePolyfill", "NonPrivatePolyfill/NonPrivatePolyfill.csproj", "KTSU0007", DisplayName = "KTSU0007 Polyfill reference is not private")]
     public void Analyzer_Triggers(string folder, string project, string diagnostic)
     {
         using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Analyzer(folder));
@@ -77,11 +78,12 @@ public sealed class AnalyzerTriggerTests
     }
 
     /// <summary>
-    /// KTSU0002 (missing InternalsVisibleTo) is a CompilationEnd diagnostic reported at a
-    /// syntax-tree location. When it is the only diagnostic in an otherwise-clean compilation
-    /// it can be masked by Roslyn analyzer-result caching (see ktsu-dev/Sdk#12 / #8 / #11), so a
-    /// negative result here is reported as inconclusive rather than failing the run. The example
-    /// itself is exercised either way.
+    /// KTSU0002 (missing InternalsVisibleTo) must fire as the sole diagnostic in an otherwise-clean
+    /// compilation. It previously appeared to be masked (ktsu-dev/Sdk#12 / #8 / #11): the diagnostic
+    /// was reported at the compilation's first syntax tree, which for any project referencing the
+    /// source-embedding Polyfill package is a Polyfill file marked as generated code, and diagnostics
+    /// in generated code are dropped under GeneratedCodeAnalysisFlags.None. The analyzer now anchors
+    /// the diagnostic to a project-owned source file, so a negative result here is a real failure.
     /// </summary>
     [TestMethod]
     public void Analyzer_KTSU0002_Triggers()
@@ -90,14 +92,10 @@ public sealed class AnalyzerTriggerTests
 
         CliResult result = workspace.Build("Service/Service.csproj");
 
-        if (!result.KtsuDiagnostics().Contains("KTSU0002"))
-        {
-            Assert.Inconclusive(
-                "KTSU0002 was not surfaced as the sole diagnostic. This is the CompilationEnd " +
-                "analyzer masking tracked in ktsu-dev/Sdk#12; the example is correct and triggers " +
-                $"when another diagnostic co-occurs.{Environment.NewLine}{result.Output}");
-        }
-
+        CollectionAssert.Contains(
+            result.KtsuDiagnostics().ToList(),
+            "KTSU0002",
+            $"Expected KTSU0002 in the build output.{Environment.NewLine}{result.Output}");
         Assert.IsFalse(result.Succeeded, $"Expected KTSU0002 to fail the build.{Environment.NewLine}{result.Output}");
     }
 }

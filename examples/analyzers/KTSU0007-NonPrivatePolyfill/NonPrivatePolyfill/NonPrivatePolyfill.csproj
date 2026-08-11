@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- KTSU0007: the Polyfill reference is present but not private, so the build-time-only
+       package would leak into the dependency graph of every consumer of this package. -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Polyfill" />
+  </ItemGroup>
+</Project>
