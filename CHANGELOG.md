@@ -1,3 +1,9 @@
+## v2.19.0 (minor)
+
+Changes since v2.18.0:
+
+- Sync examples\demos\Tool\icon.png ([@KtsuTools](https://github.com/KtsuTools))
+- Sync icon.png ([@KtsuTools](https://github.com/KtsuTools))
 ## v2.18.0 (minor)
 
 Changes since v2.17.0:
