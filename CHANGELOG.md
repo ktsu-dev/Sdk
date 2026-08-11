@@ -1,3 +1,8 @@
+## v2.20.0 (minor)
+
+Changes since v2.19.0:
+
+- fix: ensure package data files are copied to output directory ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.19.0 (minor)
 
 Changes since v2.18.0:
