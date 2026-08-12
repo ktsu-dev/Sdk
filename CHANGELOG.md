@@ -1,3 +1,8 @@
+## v2.23.0 (minor)
+
+Changes since v2.22.0:
+
+- [minor] Move IsTestProject properties and update TargetFramework for test projects ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.22.0 (minor)
 
 Changes since v2.21.0:
