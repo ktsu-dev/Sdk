@@ -1,3 +1,8 @@
+## v2.25.0 (minor)
+
+Changes since v2.24.0:
+
+- Add empty TargetFrameworks property to test projects ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.24.0 (minor)
 
 Changes since v2.23.0:
