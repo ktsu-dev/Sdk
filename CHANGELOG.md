@@ -1,3 +1,8 @@
+## v2.26.1 (patch)
+
+Changes since v2.26.0:
+
+- Sync COPYRIGHT.md ([@KtsuTools](https://github.com/KtsuTools))
 ## v2.26.0 (minor)
 
 Changes since v2.25.0:
