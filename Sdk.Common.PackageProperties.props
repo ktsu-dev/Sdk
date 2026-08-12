@@ -19,7 +19,21 @@
     <PackageIcon Condition="'$(PackageIcon)' == ''">$(IconFileName)</PackageIcon>
     <PackageReadmeFile Condition="'$(PackageReadmeFile)' == ''">$(ReadmeFileName)</PackageReadmeFile>
     <PackageLicenseFile Condition="'$(PackageLicenseFile)' == ''">$(LicenseFileName)</PackageLicenseFile>
+    <!--
+      Release notes: an explicit file wins over the full solution changelog. CI (Invoke-DotNetPack in
+      scripts/PSBuild.psm1) points PackageReleaseNotesFile at LATEST_CHANGELOG.md so a package carries
+      only the notes for the version being released rather than the entire history. A relative path is
+      resolved against the solution directory; an absolute path is used as given.
+    -->
+    <PackageReleaseNotesFilePath Condition="'$(PackageReleaseNotesFile)' != ''">$([MSBuild]::NormalizePath('$(SolutionDir)', '$(PackageReleaseNotesFile)'))</PackageReleaseNotesFilePath>
+    <PackageReleaseNotes Condition="'$(PackageReleaseNotes)' == '' And '$(PackageReleaseNotesFilePath)' != '' And Exists('$(PackageReleaseNotesFilePath)')">$([System.IO.File]::ReadAllText('$(PackageReleaseNotesFilePath)').Trim())</PackageReleaseNotes>
     <PackageReleaseNotes Condition="'$(PackageReleaseNotes)' == ''">$(Changelog)</PackageReleaseNotes>
+    <!--
+      nuget.org rejects a push with HTTP 400 once ReleaseNotes passes 35000 characters, so cap the
+      value at pack time instead of discovering the limit at publish time. The cap sits below the
+      limit to leave room for the truncation marker.
+    -->
+    <PackageReleaseNotes Condition="'$(PackageReleaseNotes)' != '' And $(PackageReleaseNotes.Length) > 34000">$(PackageReleaseNotes.Substring(0, 34000))... (truncated due to NuGet length limits)</PackageReleaseNotes>
     <PackageDescription Condition="'$(PackageDescription)' == ''">$(Description)</PackageDescription>
     <PackageTags Condition="'$(PackageTags)' == ''">$(Tags)</PackageTags>
     <PackageProjectUrl Condition="'$(PackageProjectUrl)' == ''">$(ProjectUrl)</PackageProjectUrl>

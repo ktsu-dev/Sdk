@@ -154,7 +154,7 @@ The SDK reads markdown files from the solution root and uses them to populate pa
 - `AUTHORS.md` → Authors, AuthorsNamespace
 - `VERSION.md` → Version, PackageVersion
 - `DESCRIPTION.md` → Description, PackageDescription (checked in project directory first, then solution directory)
-- `CHANGELOG.md` → PackageReleaseNotes (truncated at 35KB if needed)
+- `CHANGELOG.md` → PackageReleaseNotes (see below)
 - `TAGS.md` → Tags, PackageTags (checked in project directory first, then solution directory)
 - `LICENSE.md` → PackageLicenseFile
 - `README.md` → PackageReadmeFile (checked in project directory first, then solution directory)
@@ -164,6 +164,24 @@ The SDK reads markdown files from the solution root and uses them to populate pa
 - `icon.png` → PackageIcon
 
 All metadata files are automatically included in NuGet packages.
+
+### Release Notes
+
+`PackageReleaseNotes` is resolved in this order, in `Sdk/Sdk.props` for consuming projects and in
+`Sdk.Common.PackageProperties.props` for this repository's own SDK packages:
+
+1. A value the project already set wins.
+2. `PackageReleaseNotesFile`, if set and the file exists. A relative path resolves against the
+   solution directory. `Invoke-DotNetPack` in `scripts/PSBuild.psm1` points this at
+   `LATEST_CHANGELOG.md` so a package carries only the notes for the version being released.
+3. The full `CHANGELOG.md`.
+
+The result is capped at 34000 characters plus a truncation marker. nuget.org rejects a push with
+`400 (A nuget package's ReleaseNotes property may not be more than 35000 characters long.)`, and a
+repository only hits that at publish time, after the build, pack and release commit have all
+succeeded. The changelog grows with every release, so every project needs the cap. Because
+`CHANGELOG.md` is newest-first, truncation keeps the entries that matter. `ReleaseNotesTests` in
+`test/Sdk.Examples.Tests` covers both code paths.
 
 ## Important MSBuild Properties
 

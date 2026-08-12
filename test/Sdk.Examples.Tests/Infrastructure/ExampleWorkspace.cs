@@ -14,6 +14,9 @@ internal sealed class ExampleWorkspace : IDisposable
 
     private ExampleWorkspace(string root) => this.root = root;
 
+    /// <summary>The absolute path to the workspace root (the copied example's solution directory).</summary>
+    public string Root => root;
+
     /// <summary>Copies an example directory to a fresh temp workspace wired to the local SDK feed.</summary>
     public static ExampleWorkspace Create(string sourceDir)
     {
@@ -121,11 +124,27 @@ internal sealed class ExampleWorkspace : IDisposable
         return reader.ReadToEnd();
     }
 
+    /// <summary>Writes a file into the workspace, creating any missing directories.</summary>
+    public void WriteFile(string relativePath, string content)
+    {
+        string path = Path.Combine(root, relativePath);
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, content);
+    }
+
     /// <summary>Evaluates the given MSBuild properties on a project (no build/restore of outputs).</summary>
-    public IReadOnlyDictionary<string, string> Evaluate(string projectRelativePath, params string[] properties)
+    public IReadOnlyDictionary<string, string> Evaluate(string projectRelativePath, params string[] properties) =>
+        EvaluateWith(projectRelativePath, [], properties);
+
+    /// <summary>
+    /// Evaluates the given MSBuild properties on a project, passing <paramref name="extraArgs"/>
+    /// (for example <c>-p:Foo=bar</c>) to the evaluation.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> EvaluateWith(string projectRelativePath, string[] extraArgs, params string[] properties)
     {
         List<string> args = ["msbuild", projectRelativePath];
         args.AddRange(properties.Select(p => "-getProperty:" + p));
+        args.AddRange(extraArgs);
 
         CliResult result = Cli.Dotnet(root, [.. args]);
 
