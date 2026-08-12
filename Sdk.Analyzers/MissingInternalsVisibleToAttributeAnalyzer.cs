@@ -96,16 +96,64 @@ public class MissingInternalsVisibleToAttributeAnalyzer : KtsuAnalyzerBase
 
 		if (!hasTestReference)
 		{
-			// Report diagnostic at the first syntax tree location (project-level diagnostic)
-
-			Location location = context.Compilation.SyntaxTrees.FirstOrDefault()?.GetRoot().GetLocation() ?? Location.None;
-
 			Diagnostic diagnostic = Diagnostic.Create(
 				Rule,
-				location,
+				FindProjectSourceLocation(context, options),
 				testNamespace);
 
 			context.ReportDiagnostic(diagnostic);
 		}
+	}
+
+	/// <summary>
+	/// Picks a syntax tree the project itself owns, to carry this project-level diagnostic.
+	/// </summary>
+	/// <param name="context">The compilation analysis context.</param>
+	/// <param name="options">The global analyzer config options.</param>
+	/// <returns>A location in a project-owned file, or <see cref="Location.None"/> when there is none.</returns>
+	/// <remarks>
+	/// Simply taking the first syntax tree is wrong. Package compile items are prepended to the
+	/// compilation, so with a source-embedding package such as Polyfill the first tree is a file from
+	/// that package, carrying an <c>auto-generated</c> header. Diagnostics located in generated code
+	/// are dropped under <see cref="GeneratedCodeAnalysisFlags.None"/>, which is what made this rule
+	/// appear to fire only intermittently (ktsu-dev/Sdk#12 / #8 / #11). Restricting the choice to
+	/// files under the project directory, excluding the intermediate output, also guarantees the code
+	/// fix edits a file the user actually owns rather than one in the NuGet cache.
+	/// </remarks>
+	private static Location FindProjectSourceLocation(CompilationAnalysisContext context, AnalyzerConfigOptions options)
+	{
+		options.TryGetValue("build_property.ProjectDir", out string? projectDir);
+
+		SyntaxTree? tree = null;
+
+		if (!string.IsNullOrEmpty(projectDir))
+		{
+			tree = context.Compilation.SyntaxTrees.FirstOrDefault(t => IsProjectOwned(t.FilePath, projectDir!));
+		}
+
+		tree ??= context.Compilation.SyntaxTrees.FirstOrDefault();
+
+		return tree?.GetRoot().GetLocation() ?? Location.None;
+	}
+
+	/// <summary>
+	/// Determines whether a source file belongs to the project rather than to a package or the
+	/// intermediate output.
+	/// </summary>
+	/// <param name="filePath">The source file path.</param>
+	/// <param name="projectDir">The project directory, with a trailing separator.</param>
+	/// <returns><see langword="true"/> when the file is project-owned source.</returns>
+	private static bool IsProjectOwned(string filePath, string projectDir)
+	{
+		if (string.IsNullOrEmpty(filePath) ||
+			!filePath.StartsWith(projectDir, System.StringComparison.OrdinalIgnoreCase))
+		{
+			return false;
+		}
+
+		string relative = filePath.Substring(projectDir.Length);
+
+		return !relative.StartsWith("obj" + System.IO.Path.DirectorySeparatorChar, System.StringComparison.OrdinalIgnoreCase)
+			&& !relative.StartsWith("obj/", System.StringComparison.OrdinalIgnoreCase);
 	}
 }

@@ -212,6 +212,11 @@ finally
 
       <HasSystemThreadingTasksExtensions Condition="'@(_SystemThreadingTasksExtensions)' != ''">true</HasSystemThreadingTasksExtensions>
       <HasSystemThreadingTasksExtensions Condition="'@(_SystemThreadingTasksExtensions)' == ''">false</HasSystemThreadingTasksExtensions>
+
+      <!-- KTSU0007: the PrivateAssets metadata of the Polyfill reference. Metadata does not reach
+           the compilation references, so the analyzer reads the evaluated value from here. This
+           covers both the attribute and the child-element spelling. -->
+      <PolyfillPrivateAssets>@(_Polyfill->'%(PrivateAssets)')</PolyfillPrivateAssets>
     </PropertyGroup>
   </Target>
 
@@ -225,7 +230,15 @@ finally
     <CompilerVisibleProperty Include="HasPolyfill" />
     <CompilerVisibleProperty Include="HasSystemMemory" />
     <CompilerVisibleProperty Include="HasSystemThreadingTasksExtensions" />
+    <CompilerVisibleProperty Include="PolyfillPrivateAssets" />
     <CompilerVisibleProperty Include="ManagePackageVersionsCentrally" />
+  </ItemGroup>
+
+  <!-- The project file is supplied to analyzers so the KTSU0006 and KTSU0007 fixers can edit it.
+       It lives here rather than inside either analyzer's input target so that disabling one
+       analyzer does not take the other's code fix with it. -->
+  <ItemGroup Condition="'$(IsTestProject)' != 'true'">
+    <AdditionalFiles Include="$(MSBuildProjectFullPath)" />
   </ItemGroup>
 
   <!-- ================================================================= -->
@@ -356,14 +369,12 @@ finally
       <FileWrites Include="$(_KtsuDirectPackagesFile)" />
       <AdditionalFiles Include="$(_KtsuTransitivePackageMapFile)" />
       <AdditionalFiles Include="$(_KtsuDirectPackagesFile)" />
-      <!-- The project file is supplied so the KTSU0006 fixer can add the PackageReference. -->
-      <AdditionalFiles Include="$(MSBuildProjectFullPath)" />
     </ItemGroup>
   </Target>
 
   <!-- Analyzer package - automatically included to enforce other requirements -->
   <ItemGroup>
-    <PackageReference Include="ktsu.Sdk.Analyzers" VersionOverride="2.17.0" Condition="$(IsTestProject) == 'false'">
+    <PackageReference Include="ktsu.Sdk.Analyzers" VersionOverride="{version}" Condition="$(IsTestProject) == 'false'">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>

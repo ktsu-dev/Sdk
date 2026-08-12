@@ -45,12 +45,15 @@ Each folder is an isolated solution that triggers a single diagnostic:
 | `KTSU0004-ManualNullCheck` | KTSU0004 | Manual `if (x is null) throw new ArgumentNullException(...)`. |
 | `KTSU0005-OrphanedPackageVersion` | KTSU0005 | A `PackageVersion` no project references. |
 | `KTSU0006-TransitivePackageUsedDirectly` | KTSU0006 | Uses `ILogger` from a transitive package. |
+| `KTSU0007-NonPrivatePolyfill` | KTSU0007 | References `Polyfill` without `PrivateAssets="all"`. |
 
-> **Note on KTSU0002:** it is a `CompilationEnd` diagnostic reported at a syntax-tree
-> location, and Roslyn can mask it when it is the *only* diagnostic in an otherwise clean
-> compilation (see [#12](https://github.com/ktsu-dev/Sdk/issues/12) / #8 / #11). The example
-> is correct; the integration test reports an inconclusive result rather than failing if the
-> diagnostic is masked.
+> **Note on KTSU0002:** it used to surface only intermittently
+> (see [#12](https://github.com/ktsu-dev/Sdk/issues/12) / #8 / #11). The cause was the
+> diagnostic's location, not caching: it was anchored to the compilation's first syntax tree,
+> which for any project referencing the source-embedding Polyfill package is a Polyfill file
+> marked as generated code, and diagnostics in generated code are discarded under
+> `GeneratedCodeAnalysisFlags.None`. The analyzer now anchors to a project-owned source file,
+> and the integration test asserts the diagnostic outright.
 
 These projects are **expected to fail to build** — that is the point. They are deliberately
 kept out of `Sdk.sln` so a normal `dotnet build` of the repository does not see them.

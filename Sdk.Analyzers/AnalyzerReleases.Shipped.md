@@ -1,6 +1,14 @@
 ; Shipped analyzer releases
 ; https://github.com/dotnet/roslyn/blob/main/src/RoslynAnalyzers/Microsoft.CodeAnalysis.Analyzers/ReleaseTrackingAnalyzers.Help.md
 
+## Release {version}
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+KTSU0007 | ktsu.Sdk | Error | Build-time package reference is not private (missing PrivateAssets="all")
+
 ## Release 2.10.0
 
 ### New Rules
