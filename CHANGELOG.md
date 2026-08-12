@@ -1,3 +1,9 @@
+## v2.22.0 (minor)
+
+Changes since v2.21.0:
+
+- [minor] Add KTSU0007 requiring PrivateAssets="all" on Polyfill ([@matt-edmondson](https://github.com/matt-edmondson))
+- [patch] Stop the style config sync task emitting CS0162 ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.21.1 (patch)
 
 Changes since v2.21.0:
