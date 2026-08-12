@@ -181,6 +181,7 @@ finally
   </PropertyGroup>
 
   <PropertyGroup Condition="$(IsTestProject) == 'true'">
+    <TargetFrameworks></TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591;CA2225;IDE0022;IDE0058;CA1305;CA5394;CA1707;</NoWarn>
     <!-- CS1591: Missing XML comment for publicly visible type or member -->
     <!-- CA2225: Operator overloads have named alternates -->
