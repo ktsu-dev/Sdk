@@ -1,3 +1,8 @@
+## v2.26.0 (minor)
+
+Changes since v2.25.0:
+
+- Sync examples\global.json ([@KtsuTools](https://github.com/KtsuTools))
 ## v2.25.0 (minor)
 
 Changes since v2.24.0:
