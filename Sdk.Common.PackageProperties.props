@@ -20,10 +20,11 @@
     <PackageReadmeFile Condition="'$(PackageReadmeFile)' == ''">$(ReadmeFileName)</PackageReadmeFile>
     <PackageLicenseFile Condition="'$(PackageLicenseFile)' == ''">$(LicenseFileName)</PackageLicenseFile>
     <!--
-      Release notes: an explicit file wins over the full solution changelog. CI (Invoke-DotNetPack in
-      scripts/PSBuild.psm1) points PackageReleaseNotesFile at LATEST_CHANGELOG.md so a package carries
-      only the notes for the version being released rather than the entire history. A relative path is
-      resolved against the solution directory; an absolute path is used as given.
+      Release notes: an explicit file wins over the full solution changelog. KtsuBuild's pack step
+      (ktsu.KtsuBuild.Tool, which builds every consuming repository) points PackageReleaseNotesFile at
+      LATEST_CHANGELOG.md so a package carries only the notes for the version being released rather
+      than the entire history. This repository does not use KtsuBuild - its workflow calls dotnet pack
+      directly - so the SDK's own packages fall through to the capped CHANGELOG.md below.
     -->
     <PackageReleaseNotesFilePath Condition="'$(PackageReleaseNotesFile)' != ''">$([MSBuild]::NormalizePath('$(SolutionDir)', '$(PackageReleaseNotesFile)'))</PackageReleaseNotesFilePath>
     <PackageReleaseNotes Condition="'$(PackageReleaseNotes)' == '' And '$(PackageReleaseNotesFilePath)' != '' And Exists('$(PackageReleaseNotesFilePath)')">$([System.IO.File]::ReadAllText('$(PackageReleaseNotesFilePath)').Trim())</PackageReleaseNotes>
