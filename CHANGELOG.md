@@ -3,6 +3,9 @@
 Changes since v2.22.0:
 
 - [minor] Move IsTestProject properties and update TargetFramework for test projects ([@matt-edmondson](https://github.com/matt-edmondson))
+- [patch] Cap PackageReleaseNotes below NuGet's 35000 character limit ([@matt-edmondson](https://github.com/matt-edmondson))
+- [patch] Credit KtsuBuild, not the retired PSBuild module ([@matt-edmondson](https://github.com/matt-edmondson))
+- Remove update-winget-manifests.ps1 script as part of project restructuring ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.22.0 (minor)
 
 Changes since v2.21.0:
