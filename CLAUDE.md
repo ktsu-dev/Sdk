@@ -30,7 +30,8 @@ dotnet publish <project>.csproj --no-build --configuration Release --framework n
 
 ## Version Management
 
-Version management is handled through PowerShell scripts in the `scripts/` directory using the PSBuild module:
+Version management for this repository is handled by standalone PowerShell scripts in `scripts/`, each
+invoked directly from `.github/workflows/dotnet-sdk.yml`:
 
 - **make-version.ps1**: Calculates semantic version from git history
 - **make-license.ps1**: Generates LICENSE.md from template
@@ -39,11 +40,18 @@ Version management is handled through PowerShell scripts in the `scripts/` direc
 
 Version calculation rules:
 - `[major]` tag in commit: major version increment (breaking changes)
-- `[minor]` tag or public API changes: minor version increment
-- `[patch]` tag or code changes: patch version increment
-- `[pre]` tag or minimal changes: prerelease increment
+- `[minor]` tag or source file changes: minor version increment
+- `[patch]` tag or docs/metadata/CI-only changes: patch version increment
+- `[pre]` tag or no qualifying commits: prerelease increment
 
-The PSBuild module automatically detects public API changes by analyzing diffs for modifications to public classes, interfaces, methods, properties, etc.
+With no marker present, `make-version.ps1` picks the increment from *which* files changed in the
+commit range rather than from the content of the diff: any commit touching files outside the
+markdown, text, solution, project, url, build, PowerShell and CI exclusion lists gives a minor bump,
+any other qualifying commit gives a patch, and neither gives a prerelease bump.
+
+The PSBuild PowerShell module that used to drive all of this has been removed. This repository uses
+the standalone scripts above, and consuming repositories build with `ktsu.KtsuBuild.Tool`
+(`ktsubuild`), which replaced the module.
 
 ## Project Structure
 
@@ -154,7 +162,7 @@ The SDK reads markdown files from the solution root and uses them to populate pa
 - `AUTHORS.md` → Authors, AuthorsNamespace
 - `VERSION.md` → Version, PackageVersion
 - `DESCRIPTION.md` → Description, PackageDescription (checked in project directory first, then solution directory)
-- `CHANGELOG.md` → PackageReleaseNotes (truncated at 35KB if needed)
+- `CHANGELOG.md` → PackageReleaseNotes (see below)
 - `TAGS.md` → Tags, PackageTags (checked in project directory first, then solution directory)
 - `LICENSE.md` → PackageLicenseFile
 - `README.md` → PackageReadmeFile (checked in project directory first, then solution directory)
@@ -164,6 +172,33 @@ The SDK reads markdown files from the solution root and uses them to populate pa
 - `icon.png` → PackageIcon
 
 All metadata files are automatically included in NuGet packages.
+
+### Release Notes
+
+`PackageReleaseNotes` is resolved in this order, in `Sdk/Sdk.props` for consuming projects and in
+`Sdk.Common.PackageProperties.props` for this repository's own SDK packages:
+
+1. A value the project already set wins.
+2. `PackageReleaseNotesFile`, if set and the file exists. A relative path resolves against the
+   solution directory; an absolute path is used as given. KtsuBuild's pack step
+   (`DotNetService.PackAsync` in `ktsu.KtsuBuild.Tool`) points this at the `LATEST_CHANGELOG.md` it
+   generates, so a package carries only the notes for the version being released. The property is not
+   an MSBuild or NuGet built-in, and the SDK is the only thing that gives it meaning, so the two sides
+   have to stay in step.
+3. The full `CHANGELOG.md`.
+
+The result is capped at 34000 characters plus a truncation marker. nuget.org rejects a push with
+`400 (A nuget package's ReleaseNotes property may not be more than 35000 characters long.)`, and a
+repository only hits that at publish time, after the build, pack and release commit have all
+succeeded. The changelog grows with every release, so every project needs the cap. Because
+`CHANGELOG.md` is newest-first, truncation keeps the entries that matter. `ReleaseNotesTests` in
+`test/Sdk.Examples.Tests` covers both code paths.
+
+This repository is not built by KtsuBuild - its workflow runs `scripts/make-changelog.ps1` and
+`dotnet pack` directly, and nothing generates a `LATEST_CHANGELOG.md` - so the SDK's own packages
+always take the third path and carry a capped `CHANGELOG.md`. KtsuBuild also truncates the file it
+writes, at 35000, so for consuming repositories the cap here is a second line of defense rather than
+the only one.
 
 ## Important MSBuild Properties
 
