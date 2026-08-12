@@ -316,6 +316,8 @@
     <IsMacProject Condition="$(MSBuildProjectName) == $(MacProjectName)">true</IsMacProject>
     <IsToolProject>false</IsToolProject>
     <IsToolProject Condition="$(MSBuildProjectName) == $(ToolProjectName)">true</IsToolProject>
+    <IsTestProject>false</IsTestProject>
+    <IsTestProject Condition="$(MSBuildProjectName) == $(TestProjectName)">true</IsTestProject>
 
     <!-- Descriptive properties -->
     <ContributorsFileName>CONTRIBUTORS.md</ContributorsFileName>
@@ -427,7 +429,10 @@
 
     <!-- Framework properties -->
     <TargetFramework></TargetFramework>
+    <TargetFramework Condition="$(IsTestProject) == 'true'">net10.0</TargetFramework>
+
     <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks Condition="$(IsTestProject) == 'true'"></TargetFrameworks>
 
     <!-- Package properties -->
     <PackageId>$(AssemblyName)</PackageId>
@@ -557,8 +562,6 @@
     <!-- <SdkAnalysisLevel>8.0.400</SdkAnalysisLevel> -->
 
     <!-- Test project–related properties -->
-    <IsTestProject>false</IsTestProject>
-    <IsTestProject Condition="$(MSBuildProjectName) == $(TestProjectName)">true</IsTestProject>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
 
     <!-- Hosting-related properties -->
