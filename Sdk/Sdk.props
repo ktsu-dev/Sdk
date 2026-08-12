@@ -432,7 +432,7 @@
     <TargetFramework Condition="$(IsTestProject) == 'true'">net10.0</TargetFramework>
 
     <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
-    <TargetFrameworks Condition="$(IsTestProject) == 'true'"></TargetFrameworks>
+    <TargetFrameworks Condition="$(IsTestProject) == 'true'">net10.0</TargetFrameworks>
 
     <!-- Package properties -->
     <PackageId>$(AssemblyName)</PackageId>
