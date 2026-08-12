@@ -1,3 +1,8 @@
+## v2.24.0 (minor)
+
+Changes since v2.23.0:
+
+- Fix TargetFrameworks property for test projects to include net10.0 ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.23.0 (minor)
 
 Changes since v2.22.0:
