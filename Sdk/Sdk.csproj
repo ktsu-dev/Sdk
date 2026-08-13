@@ -7,14 +7,48 @@
   <!-- Import SDK props after our defaults are set -->
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
+  <!-- Single-TFM, no-lib packaging shared by every MSBuild SDK package in this repository -->
+  <Import Project="..\Sdk.Common.MSBuildSdkPackage.props" />
+
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
-    <!-- Override default package type for MSBuild SDK -->
-    <PackageType>MSBuildSdk</PackageType>
+    <!-- NU5100: assembly outside lib/. Intentional - tasks/ktsu.Sdk.Tasks.dll is loaded by MSBuild
+         via UsingTask, not referenced by consumers' compilations. Moving it to lib/ would be wrong. -->
+    <NoWarn>$(NoWarn);NU5100</NoWarn>
   </PropertyGroup>
+
+  <!--
+    The custom MSBuild tasks that Sdk/Sdk.targets loads. ReferenceOutputAssembly is false because
+    this package has no compilation to reference it from; the ProjectReference exists purely to
+    order the build so the assembly is on disk by the time _KtsuResolveTaskAssembly below runs.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\Sdk.Tasks\Sdk.Tasks.csproj"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
+  </ItemGroup>
 
   <!-- Import SDK targets before our custom targets -->
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <!--
+    Pack the task assembly at tasks/ktsu.Sdk.Tasks.dll. Sdk/Sdk.targets resolves it relative to
+    itself as $(MSBuildThisFileDirectory)../tasks/, so this path and that one have to move together.
+    Resolved from the referenced project's actual TargetPath rather than a guessed bin path, so an
+    output-path change cannot silently pack nothing.
+  -->
+  <Target Name="_KtsuResolveTaskAssembly" BeforeTargets="_GetPackageFiles;GenerateNuspec">
+    <MSBuild Projects="..\Sdk.Tasks\Sdk.Tasks.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" PropertyName="_KtsuTaskAssemblyPath" />
+    </MSBuild>
+
+    <Error Condition="!Exists('$(_KtsuTaskAssemblyPath)')"
+           Code="KTSU1002"
+           Text="The ktsu.Sdk task assembly was not found at '$(_KtsuTaskAssemblyPath)'. Packing without it produces an SDK whose style-config sync target fails at task resolution in every consumer build." />
+
+    <ItemGroup>
+      <None Include="$(_KtsuTaskAssemblyPath)" Pack="true" PackagePath="tasks" Visible="false" />
+    </ItemGroup>
+  </Target>
 
   <!-- Import modular shared targets -->
   <Import Project="..\Sdk.Common.SdkContent.targets" />

@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Custom MSBuild tasks used by the ktsu.Sdk targets.
+
+    This is a build-time helper assembly, not a package of its own: it is compiled here and packed
+    *into* ktsu.Sdk under tasks/, which Sdk/Sdk.targets then loads with a UsingTask AssemblyFile.
+    It replaces an inline RoslynCodeTaskFactory fragment, which the compiler had to rebuild in every
+    MSBuild node of every consumer build and which could not be unit tested or analyzed.
+
+    Two constraints govern this project, and both are easy to break by accident:
+
+    1. netstandard2.0 is mandatory. An MSBuild task assembly is loaded by whichever MSBuild is
+       running: .NET Framework MSBuild inside Visual Studio, or .NET MSBuild under `dotnet build`.
+       netstandard2.0 is the one target framework both hosts can load, so a single DLL serves both.
+       Retargeting this to net10.0 would make the task fail to load in Visual Studio.
+
+    2. No runtime dependencies. MSBuild does not resolve NuGet dependencies for task assemblies, so
+       anything this assembly needs at run time has to already be in the host. That is why
+       Microsoft.Build.Utilities.Core is referenced with ExcludeAssets="runtime" - it is used to
+       compile against, and satisfied at run time by the host's own copy - and why the task code
+       stays on the BCL. Adding an ordinary PackageReference here would produce a task that throws
+       FileNotFoundException in consumer builds.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>ktsu.Sdk.Tasks</AssemblyName>
+    <RootNamespace>ktsu.Sdk.Tasks</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Shipped inside ktsu.Sdk, never as its own package. -->
+    <IsPackable>false</IsPackable>
+    <IsPublishable>false</IsPublishable>
+
+    <!-- Test projects need to reach the pure helpers to cover them without an MSBuild host. -->
+    <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compile-time only: the host supplies these at run time. Pinned low deliberately - a task
+         assembly must not require a newer MSBuild than the oldest host it has to load in. -->
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.3.2" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sdk.Examples.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -78,6 +78,34 @@ public sealed class AnalyzerTriggerTests
     }
 
     /// <summary>
+    /// KTSU0001 must still fire for a standard package that is missing while Polyfill is present.
+    /// </summary>
+    /// <remarks>
+    /// This is the generated-code drop that KTSU0002 and KTSU0007 were each fixed for in turn.
+    /// KTSU0001 anchored its diagnostic at the compilation's first syntax tree, which - once
+    /// Polyfill is referenced and source-embeds its shims - is a file marked as generated code, and
+    /// a diagnostic located in generated code is discarded under GeneratedCodeAnalysisFlags.None.
+    /// So the netstandard2.0 System.Memory / System.Threading.Tasks.Extensions requirements were
+    /// silently unenforced on exactly the frameworks that need them. The sibling
+    /// <c>KTSU0001-MissingStandardPackages</c> example could not catch it: dropping Polyfill also
+    /// drops the generated-code tree, leaving user code first.
+    /// </remarks>
+    [TestMethod]
+    public void Analyzer_KTSU0001_Triggers_ForMissingPackage_WhenPolyfillIsPresent()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(
+            RepoLayout.Analyzer("KTSU0001-MissingStandardPackages-WithPolyfill"));
+
+        CliResult result = workspace.Build("MissingSystemMemory/MissingSystemMemory.csproj");
+
+        CollectionAssert.Contains(
+            result.KtsuDiagnostics().ToList(),
+            "KTSU0001",
+            $"Expected KTSU0001 for the missing netstandard2.0 standard packages.{Environment.NewLine}{result.Output}");
+        Assert.IsFalse(result.Succeeded, $"Expected KTSU0001 to fail the build.{Environment.NewLine}{result.Output}");
+    }
+
+    /// <summary>
     /// KTSU0002 (missing InternalsVisibleTo) must fire as the sole diagnostic in an otherwise-clean
     /// compilation. It previously appeared to be masked (ktsu-dev/Sdk#12 / #8 / #11): the diagnostic
     /// was reported at the compilation's first syntax tree, which for any project referencing the

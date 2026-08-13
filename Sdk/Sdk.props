@@ -298,31 +298,39 @@
     <PrimaryProjectPath Condition="$(PrimaryProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(PrimaryProjectName)\$(PrimaryProjectFileName)"))</PrimaryProjectPath>
     <PrimaryProjectExists Condition="$(PrimaryProjectExists) == 'false' And Exists($(PrimaryProjectPath))">true</PrimaryProjectExists>
 
+    <!-- Both sides are quoted: an unquoted comparison is an MSBuild evaluation error when either
+         operand is empty (no solution found) or contains a space (a project name with a space in
+         it), which would fail the build outright rather than simply not matching. -->
     <IsPrimaryProject>false</IsPrimaryProject>
-    <IsPrimaryProject Condition="$(MSBuildProjectName) == $(PrimaryProjectName)">true</IsPrimaryProject>
+    <IsPrimaryProject Condition="'$(MSBuildProjectName)' == '$(PrimaryProjectName)'">true</IsPrimaryProject>
     <IsCliProject>false</IsCliProject>
-    <IsCliProject Condition="$(MSBuildProjectName) == $(CliProjectName)">true</IsCliProject>
+    <IsCliProject Condition="'$(MSBuildProjectName)' == '$(CliProjectName)'">true</IsCliProject>
     <IsAppProject>false</IsAppProject>
-    <IsAppProject Condition="$(MSBuildProjectName) == $(AppProjectName)">true</IsAppProject>
+    <IsAppProject Condition="'$(MSBuildProjectName)' == '$(AppProjectName)'">true</IsAppProject>
     <IsIosProject>false</IsIosProject>
-    <IsIosProject Condition="$(MSBuildProjectName) == $(IosProjectName)">true</IsIosProject>
+    <IsIosProject Condition="'$(MSBuildProjectName)' == '$(IosProjectName)'">true</IsIosProject>
     <IsAndroidProject>false</IsAndroidProject>
-    <IsAndroidProject Condition="$(MSBuildProjectName) == $(AndroidProjectName)">true</IsAndroidProject>
+    <IsAndroidProject Condition="'$(MSBuildProjectName)' == '$(AndroidProjectName)'">true</IsAndroidProject>
     <IsWindowsProject>false</IsWindowsProject>
-    <IsWindowsProject Condition="$(MSBuildProjectName) == $(WindowsProjectName)">true</IsWindowsProject>
+    <IsWindowsProject Condition="'$(MSBuildProjectName)' == '$(WindowsProjectName)'">true</IsWindowsProject>
     <IsLinuxProject>false</IsLinuxProject>
-    <IsLinuxProject Condition="$(MSBuildProjectName) == $(LinuxProjectName)">true</IsLinuxProject>
+    <IsLinuxProject Condition="'$(MSBuildProjectName)' == '$(LinuxProjectName)'">true</IsLinuxProject>
     <IsMacProject>false</IsMacProject>
-    <IsMacProject Condition="$(MSBuildProjectName) == $(MacProjectName)">true</IsMacProject>
+    <IsMacProject Condition="'$(MSBuildProjectName)' == '$(MacProjectName)'">true</IsMacProject>
     <IsToolProject>false</IsToolProject>
-    <IsToolProject Condition="$(MSBuildProjectName) == $(ToolProjectName)">true</IsToolProject>
+    <IsToolProject Condition="'$(MSBuildProjectName)' == '$(ToolProjectName)'">true</IsToolProject>
     <IsTestProject>false</IsTestProject>
-    <IsTestProject Condition="$(MSBuildProjectName) == $(TestProjectName)">true</IsTestProject>
+    <IsTestProject Condition="'$(MSBuildProjectName)' == '$(TestProjectName)'">true</IsTestProject>
 
-    <!-- Descriptive properties -->
+    <!-- Descriptive properties.
+         Only file contents that something actually consumes are read. Every property in this file
+         is evaluated once per project, per inner build, and on every IDE design-time build, so a
+         ReadAllText here is paid constantly - README.md alone is tens of kilobytes in a typical
+         repository. CONTRIBUTORS.md, README.md and LICENSE.md were read in full and never used;
+         only their paths are needed, to pack them. CHANGELOG.md is still read here because
+         PackageReleaseNotes has to resolve during evaluation (see below). -->
     <ContributorsFileName>CONTRIBUTORS.md</ContributorsFileName>
     <ContributorsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ContributorsFileName)"))</ContributorsFilePath>
-    <Contributors Condition="Exists($(ContributorsFilePath))">$([System.IO.File]::ReadAllText($(ContributorsFilePath)).Trim())</Contributors>
 
     <ChangelogFileName>CHANGELOG.md</ChangelogFileName>
     <ChangelogFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ChangelogFileName)"))</ChangelogFilePath>
@@ -334,11 +342,9 @@
     <ReadmeFilePathSolution>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ReadmeFileName)"))</ReadmeFilePathSolution>
     <ReadmeFilePath Condition="Exists($(ReadmeFilePathProject))">$(ReadmeFilePathProject)</ReadmeFilePath>
     <ReadmeFilePath Condition="!Exists($(ReadmeFilePathProject)) And Exists($(ReadmeFilePathSolution))">$(ReadmeFilePathSolution)</ReadmeFilePath>
-    <Readme Condition="Exists($(ReadmeFilePath))">$([System.IO.File]::ReadAllText($(ReadmeFilePath)).Trim())</Readme>
 
     <LicenseFileName>LICENSE.md</LicenseFileName>
     <LicenseFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(LicenseFileName)"))</LicenseFilePath>
-    <License Condition="Exists($(LicenseFilePath))">$([System.IO.File]::ReadAllText($(LicenseFilePath)).Trim())</License>
 
     <AuthorsFileName>AUTHORS.md</AuthorsFileName>
     <AuthorsFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(AuthorsFileName)"))</AuthorsFilePath>
@@ -348,8 +354,14 @@
     <AuthorsUrlFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(AuthorsUrlFileName)"))</AuthorsUrlFilePath>
     <AuthorsUrl Condition="Exists($(AuthorsUrlFilePath))">$([System.IO.File]::ReadAllText($(AuthorsUrlFilePath)).Trim())</AuthorsUrl>
 
+    <!-- Project URL. Two names are in circulation: PROJECT.url is the documented one, but
+         scripts/make-license.ps1 (and KtsuBuild, which builds every consuming repository) writes
+         PROJECT_URL.url. Reading only the first left PackageProjectUrl empty in every package.
+         Accept both, preferring PROJECT.url. -->
     <ProjectUrlFileName>PROJECT.url</ProjectUrlFileName>
     <ProjectUrlFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ProjectUrlFileName)"))</ProjectUrlFilePath>
+    <ProjectUrlFileName Condition="!Exists($(ProjectUrlFilePath))">PROJECT_URL.url</ProjectUrlFileName>
+    <ProjectUrlFilePath Condition="!Exists($(ProjectUrlFilePath))">$([MSBuild]::NormalizePath("$(SolutionDir)\$(ProjectUrlFileName)"))</ProjectUrlFilePath>
     <ProjectUrl Condition="Exists($(ProjectUrlFilePath))">$([System.IO.File]::ReadAllText($(ProjectUrlFilePath)).Trim())</ProjectUrl>
 
     <CopyrightFileName>COPYRIGHT.md</CopyrightFileName>
@@ -419,8 +431,12 @@
     <TestProjectNamespace Condition="'$(AuthorsNamespace)' == '' And '$(TestProjectName)' != ''">$(TestProjectName)</TestProjectNamespace>
     <TestProjectNamespace Condition="'$(TestProjectName)' == ''">$(RootNamespace).Test</TestProjectNamespace>
 
-    <!-- Assembly validation properties -->
-    <ApiCompatStrictMode>true</ApiCompatStrictMode>
+    <!-- Assembly validation properties.
+         ApiCompatStrictMode is deliberately NOT set: it is the blanket strict switch, and turning
+         it on here contradicts the reasoning below (see EnableStrictModeForCompatibleFrameworks-
+         InPackage) for why strict cross-target-framework validation has to stay off in an SDK that
+         mandates Polyfill plus broad multi-targeting. Baseline validation remains strict via
+         EnableStrictModeForBaselineValidation, which is the check that catches real breaks. -->
     <ApiCompatValidateAssemblies>true</ApiCompatValidateAssemblies>
 
     <!-- Assembly attribute properties -->
@@ -501,7 +517,14 @@
     <PublishReferencesDocumentationFiles>true</PublishReferencesDocumentationFiles>
     <PublishRelease>true</PublishRelease>
     <RollForward>LatestMinor</RollForward>
-    <RuntimeFrameworkVersion>10.0.0</RuntimeFrameworkVersion>
+    <!--
+      RuntimeFrameworkVersion is deliberately NOT set. It pins the Microsoft.NETCore.App version in
+      the generated runtimeconfig.json, and a single global value is wrong for every target
+      framework but one: a net8.0 executable built with RuntimeFrameworkVersion=10.0.0 produces
+      "framework": { "name": "Microsoft.NETCore.App", "version": "10.0.0" }, builds with zero
+      warnings, and then refuses to start on a .NET 8 machine. Let the SDK pick the version that
+      matches the TFM; RollForward above already covers running on a newer runtime.
+    -->
     <!-- <RuntimeIdentifier>win-x64</RuntimeIdentifier> -->
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64;osx-x64;linux-x64;osx-arm64;linux-arm64</RuntimeIdentifiers>
     <!-- <SatelliteResourceLanguages>en-US;de-DE</SatelliteResourceLanguages> -->
@@ -532,8 +555,15 @@
     <EnableDefaultEmbeddedResourceItems>true</EnableDefaultEmbeddedResourceItems>
     <EnableDefaultNoneItems>true</EnableDefaultNoneItems>
 
-    <!-- Code analysis properties -->
-    <AnalysisLevel>latest-all</AnalysisLevel>
+    <!-- Code analysis properties.
+         AnalysisLevel is pinned rather than set to 'latest-all'. With TreatWarningsAsErrors and
+         CodeAnalysisTreatWarningsAsErrors both on below, 'latest' means every new rule that ships
+         in a .NET SDK update becomes a build-breaking error in every consuming repository at once,
+         on the day the runner image updates - with no change on their side and nothing they can do
+         but pin the SDK. Pinning moves that to a deliberate, reviewable bump here. Consumers who
+         want the newest rules immediately can still set <AnalysisLevel>latest-all</AnalysisLevel>
+         in their own project. -->
+    <AnalysisLevel>10.0-all</AnalysisLevel>
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>

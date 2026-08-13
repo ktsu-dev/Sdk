@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdk.Android", "Sdk.Android\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdk.Tool", "Sdk.Tool\Sdk.Tool.csproj", "{7DEBEFAD-A2F4-4C40-BF90-B28956A95AA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sdk.Tasks", "Sdk.Tasks\Sdk.Tasks.csproj", "{24B32512-B280-4014-A69C-1A5FA0A5752A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -153,6 +155,18 @@ Global
 		{7DEBEFAD-A2F4-4C40-BF90-B28956A95AA3}.Release|x64.Build.0 = Release|Any CPU
 		{7DEBEFAD-A2F4-4C40-BF90-B28956A95AA3}.Release|x86.ActiveCfg = Release|Any CPU
 		{7DEBEFAD-A2F4-4C40-BF90-B28956A95AA3}.Release|x86.Build.0 = Release|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Debug|x64.Build.0 = Debug|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Debug|x86.Build.0 = Debug|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Release|x64.ActiveCfg = Release|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Release|x64.Build.0 = Release|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Release|x86.ActiveCfg = Release|Any CPU
+		{24B32512-B280-4014-A69C-1A5FA0A5752A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -16,15 +16,15 @@ Add the SDK to your global.json (recommended):
   },
   "msbuild-sdks": {
     "MSTest.Sdk": "4.3.2",
-    "ktsu.Sdk": "2.13.2",
-    "ktsu.Sdk.ConsoleApp": "2.13.2",
-    "ktsu.Sdk.App": "2.13.2",
-    "ktsu.Sdk.Tool": "2.13.2",
-    "ktsu.Sdk.Windows": "2.13.2",
-    "ktsu.Sdk.Linux": "2.13.2",
-    "ktsu.Sdk.macOS": "2.13.2",
-    "ktsu.Sdk.iOS": "2.13.2",
-    "ktsu.Sdk.Android": "2.13.2"
+    "ktsu.Sdk": "2.26.1",
+    "ktsu.Sdk.ConsoleApp": "2.26.1",
+    "ktsu.Sdk.App": "2.26.1",
+    "ktsu.Sdk.Tool": "2.26.1",
+    "ktsu.Sdk.Windows": "2.26.1",
+    "ktsu.Sdk.Linux": "2.26.1",
+    "ktsu.Sdk.macOS": "2.26.1",
+    "ktsu.Sdk.iOS": "2.26.1",
+    "ktsu.Sdk.Android": "2.26.1"
   },
   "test": {
     "runner": "Microsoft.Testing.Platform"
@@ -230,7 +230,7 @@ the corresponding .NET workload.
    - `TAGS.md` - NuGet package tags (checked in project directory first, then solution directory for multi-package support)
    - `README.md` - Package documentation (checked in project directory first, then solution directory for multi-package support)
    - `AUTHORS.url` - URL to author/organization
-   - `PROJECT.url` - URL to project repository
+   - `PROJECT.url` - URL to project repository (`PROJECT_URL.url` is also accepted)
 
 2. **icon.png**: Optional package icon at solution root
 
@@ -500,7 +500,7 @@ The SDK enforces strict code quality standards by default:
 
 ### Code Analysis
 
-- **AnalysisLevel**: `latest-all` - All latest analyzer rules enabled
+- **AnalysisLevel**: `10.0-all` - All .NET 10 analyzer rules enabled. Pinned rather than `latest-all` so a .NET SDK update cannot turn newly-added rules into build errors (`TreatWarningsAsErrors` is on). Override with `<AnalysisLevel>latest-all</AnalysisLevel>` to track the newest rules.
 - **EnableNETAnalyzers**: `true` - .NET code analyzers enabled
 - **EnforceCodeStyleInBuild**: `true` - Code style rules enforced during build
 

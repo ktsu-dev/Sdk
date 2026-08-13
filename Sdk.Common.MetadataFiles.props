@@ -58,9 +58,13 @@
     <AuthorsUrlFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(AuthorsUrlFileName)"))</AuthorsUrlFilePath>
     <AuthorsUrl Condition="Exists($(AuthorsUrlFilePath))">$([System.IO.File]::ReadAllText($(AuthorsUrlFilePath)).Trim())</AuthorsUrl>
 
-    <!-- Project URL -->
+    <!-- Project URL. Two names are in circulation: PROJECT.url is the documented one, but
+         scripts/make-license.ps1 writes PROJECT_URL.url - which is what this repository has, so
+         reading only PROJECT.url left <projectUrl> out of every ktsu.Sdk package. Accept both. -->
     <ProjectUrlFileName>PROJECT.url</ProjectUrlFileName>
     <ProjectUrlFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ProjectUrlFileName)"))</ProjectUrlFilePath>
+    <ProjectUrlFileName Condition="!Exists($(ProjectUrlFilePath))">PROJECT_URL.url</ProjectUrlFileName>
+    <ProjectUrlFilePath Condition="!Exists($(ProjectUrlFilePath))">$([MSBuild]::NormalizePath("$(SolutionDir)\$(ProjectUrlFileName)"))</ProjectUrlFilePath>
     <ProjectUrl Condition="Exists($(ProjectUrlFilePath))">$([System.IO.File]::ReadAllText($(ProjectUrlFilePath)).Trim())</ProjectUrl>
 
     <!-- Copyright -->
