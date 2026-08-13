@@ -1,3 +1,9 @@
+## v2.27.0 (minor)
+
+Changes since v2.26.0:
+
+- [minor] Fix SDK review findings and extract MSBuild task to a compiled project ([@matt-edmondson](https://github.com/matt-edmondson))
+- Sync COPYRIGHT.md ([@KtsuTools](https://github.com/KtsuTools))
 ## v2.26.1 (patch)
 
 Changes since v2.26.0:
