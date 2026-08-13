@@ -5,10 +5,18 @@ param (
 
 Set-PSDebug -Trace 1
 
-git config versionsort.suffix "-alpha"
-git config versionsort.suffix "-beta"
-git config versionsort.suffix "-rc"
-git config versionsort.suffix "-pre"
+# versionsort.suffix is a multi-valued config key: plain `git config` REPLACES the value, so four
+# consecutive calls left only the last one registered and -alpha/-beta/-rc sorted as if they were
+# release versions. Clear the key and append each suffix instead. --local keeps this out of the
+# developer's global config when the script is run outside CI.
+git config --local --unset-all versionsort.suffix
+git config --local --add versionsort.suffix "-alpha"
+git config --local --add versionsort.suffix "-beta"
+git config --local --add versionsort.suffix "-rc"
+git config --local --add versionsort.suffix "-pre"
+
+# `git config --unset-all` exits 5 when the key was not set, which is not an error here.
+$global:LASTEXITCODE = 0
 
 # Get the first commit in the repo for use as a fallback
 $FIRST_COMMIT = (git rev-list HEAD)[-1]
@@ -28,7 +36,8 @@ if ($null -eq $ALL_TAGS) {
 
 Write-Host $LAST_TAG
 
-$LAST_VERSION = $LAST_TAG -replace 'v', ''
+# Anchored: an unanchored 'v' strips every v in the tag, not just the leading one.
+$LAST_VERSION = $LAST_TAG -replace '^v', ''
 
 Write-Host $LAST_VERSION
 
@@ -53,21 +62,31 @@ if ($LAST_VERSION_COMPONENTS.Length -gt 3) {
 # calculate which increment is needed
 
 $EXCLUDE_BOTS = '^(?!.*(\[bot\]|github|ProjectDirector|SyncFileContents)).*$'
-$EXCLUDE_HIDDEN_FILES = ":(icase,exclude)*/.*"
-$EXCLUDE_MARKDOWN_FILES = ":(icase,exclude)*/*.md"
-$EXCLUDE_TEXT_FILES = ":(icase,exclude)*/*.txt"
-$EXCLUDE_SOLUTIONS_FILES = ":(icase,exclude)*/*.sln"
-$EXCLUDE_PROJECTS_FILES = ":(icase,exclude)*/*.*proj"
-$EXCLUDE_URL_FILES = ":(icase,exclude)*/*.url"
-$EXCLUDE_BUILD_FILES = ":(icase,exclude)*/Directory.Build.*"
+
+# Git matches pathspecs with wildmatch, in which `*` also matches `/`. A leading `*/` therefore
+# requires the path to contain a directory separator, which silently exempted every root-level file
+# from the minor-bump scan - including this repository's own Sdk.Common.*.props/.targets, where a
+# large part of the SDK logic lives. Dropping the `*/` prefix makes each pattern match root-level
+# and nested paths alike; hidden files need both forms because a leading dot cannot be matched by a
+# pattern that starts with `*`.
+$EXCLUDE_HIDDEN_FILES = ":(icase,exclude).*"
+$EXCLUDE_HIDDEN_FILES_NESTED = ":(icase,exclude)*/.*"
+$EXCLUDE_MARKDOWN_FILES = ":(icase,exclude)*.md"
+$EXCLUDE_TEXT_FILES = ":(icase,exclude)*.txt"
+$EXCLUDE_SOLUTIONS_FILES = ":(icase,exclude)*.sln"
+$EXCLUDE_PROJECTS_FILES = ":(icase,exclude)*.*proj"
+$EXCLUDE_URL_FILES = ":(icase,exclude)*.url"
+$EXCLUDE_BUILD_FILES = ":(icase,exclude)*Directory.Build.*"
 $EXCLUDE_CI_FILES = ":(icase,exclude).github/workflows/*"
-$EXCLUDE_PS_FILES = ":(icase,exclude)*/*.ps1"
+$EXCLUDE_PS_FILES = ":(icase,exclude)*.ps1"
 
 $EXCLUDE_PRS = @'
 ^.*(Merge pull request|Merge branch 'main'|Updated packages in|Update.*package version).*$
 '@
 
-$INCLUDE_ALL_FILES = "*/*.*"
+# "*" rather than "*/*.*": the latter required both a directory separator and a dot, so a change to
+# any root-level or extensionless file could never qualify for a minor bump.
+$INCLUDE_ALL_FILES = "*"
 
 # Get all relevant commits since the last tag to the current commit
 # If we're using a fallback tag, use the first commit instead
@@ -112,6 +131,7 @@ if ($VERSION_INCREMENT -eq 'prerelease') {
         -- `
         $INCLUDE_ALL_FILES `
         $EXCLUDE_HIDDEN_FILES `
+        $EXCLUDE_HIDDEN_FILES_NESTED `
         $EXCLUDE_MARKDOWN_FILES `
         $EXCLUDE_TEXT_FILES `
         $EXCLUDE_SOLUTIONS_FILES `

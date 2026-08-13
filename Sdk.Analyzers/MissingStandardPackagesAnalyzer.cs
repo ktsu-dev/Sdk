@@ -66,25 +66,29 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 
 		if (isTestProject != "true")
 		{
-			CheckPackageProperty(context, "Polyfill", hasPolyfill);
+			CheckPackageProperty(context, options, "Polyfill", hasPolyfill);
 		}
 
 		// Check for System.Memory (conditional on target framework)
 
 		if (RequiresSystemMemory(targetFramework, targetFrameworkIdentifier))
 		{
-			CheckPackageProperty(context, "System.Memory", hasSystemMemory);
+			CheckPackageProperty(context, options, "System.Memory", hasSystemMemory);
 		}
 
 		// Check for System.Threading.Tasks.Extensions (conditional on target framework)
 
 		if (RequiresTaskExtensions(targetFramework, targetFrameworkIdentifier))
 		{
-			CheckPackageProperty(context, "System.Threading.Tasks.Extensions", hasSystemThreadingTasksExtensions);
+			CheckPackageProperty(context, options, "System.Threading.Tasks.Extensions", hasSystemThreadingTasksExtensions);
 		}
 	}
 
-	private static void CheckPackageProperty(CompilationAnalysisContext context, string packageName, string? hasPackageProperty)
+	private static void CheckPackageProperty(
+		CompilationAnalysisContext context,
+		AnalyzerConfigOptions options,
+		string packageName,
+		string? hasPackageProperty)
 	{
 		// Check if package reference exists via MSBuild property
 		// Build-time-only packages (with PrivateAssets=all) don't appear in compilation references,
@@ -94,7 +98,12 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 
 		if (!hasPackage)
 		{
-			Location location = context.Compilation.SyntaxTrees.FirstOrDefault()?.GetRoot().GetLocation() ?? Location.None;
+			// Anchor the diagnostic to a project-owned file. The compilation's first syntax tree is
+			// a Polyfill file whenever Polyfill is referenced, and a diagnostic located in generated
+			// code is discarded under GeneratedCodeAnalysisFlags.None - which would silently drop
+			// the System.Memory / System.Threading.Tasks.Extensions checks on exactly the target
+			// frameworks that need them. See ProjectSourceLocation.
+			Location location = ProjectSourceLocation.Find(context.Compilation, options);
 
 			Diagnostic diagnostic = Diagnostic.Create(
 				Rule,

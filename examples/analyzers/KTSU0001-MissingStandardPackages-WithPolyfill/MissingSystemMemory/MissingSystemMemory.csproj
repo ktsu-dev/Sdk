@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- KTSU0001, in the configuration that used to slip through silently.
+
+       Polyfill IS referenced, so Polyfill's source-embedded files are prepended to the
+       compilation and the first syntax tree is a file marked as generated code. The target
+       framework is netstandard2.0, which requires System.Memory and
+       System.Threading.Tasks.Extensions - and neither is referenced.
+
+       While KTSU0001 anchored its diagnostic to the compilation's first syntax tree, both of
+       those errors were located in generated code and discarded under
+       GeneratedCodeAnalysisFlags.None, so this project built clean. The sibling
+       KTSU0001-MissingStandardPackages example did not catch it because omitting Polyfill also
+       removes the generated-code tree that causes the drop. -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

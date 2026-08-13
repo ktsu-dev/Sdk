@@ -1,0 +1,41 @@
+<Project>
+  <!--
+    Shared packaging settings for the MSBuild SDK packages (ktsu.Sdk and its sub-SDKs).
+
+    An MSBuild SDK package's entire payload is the Sdk/Sdk.props and Sdk/Sdk.targets it carries.
+    Consumers resolve it through `msbuild-sdks` in global.json and a <Sdk Name="..." /> element;
+    nothing ever references the compiled assembly, and none of these projects contain a single .cs
+    file. Multi-targeting them across eight frameworks therefore built eight identical, empty
+    ~6.5 KB assemblies per package and put eight dependency groups in every nuspec, for no
+    consumer-visible effect - it just made the repository build and pack roughly eight times
+    slower than it needs to be. The test harness already packs with -p:TargetFrameworks=net10.0
+    for exactly this reason (see SdkFeed.cs).
+
+    IncludeBuildOutput=false drops lib/ from the package entirely, the same way
+    Sdk.Analyzers.csproj already does; the single TFM below only governs the compile that produces
+    the assembly nobody consumes.
+
+    Requires: import after `Sdk.props` from Microsoft.NET.Sdk, so these win over the SDK defaults.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+
+    <!-- Required for proper MSBuild SDK packaging. -->
+    <PackageType>MSBuildSdk</PackageType>
+
+    <!-- No lib/ in the package: there is no API to ship. -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+
+    <!-- Nothing is compiled, so there is nothing to validate, symbolize or source-index. -->
+    <EnablePackageValidation>false</EnablePackageValidation>
+    <ApiCompatValidateAssemblies>false</ApiCompatValidateAssemblies>
+    <IncludeSource>false</IncludeSource>
+    <IncludeSymbols>false</IncludeSymbols>
+    <SymbolPackageFormat></SymbolPackageFormat>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!-- NU5128: no lib/ or ref/ for the declared framework. Expected - the payload is Sdk/. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+</Project>

@@ -129,9 +129,14 @@ jobs:
       shell: pwsh
       run: dotnet build --configuration Release --verbosity normal --no-incremental ${{ env.BUILD_ARGS }}
 
+    # Sdk.sln contains only the packaging projects, which have no tests. The real coverage is the
+    # example-integration-tests job, which packs the SDKs to a local feed and builds the examples
+    # against them. Running `dotnet test` on Sdk.sln here passed vacuously and read like coverage
+    # that did not exist, so it is stated explicitly instead.
     - name: Test
       shell: pwsh
-      run: dotnet test -m:1 --configuration Release --verbosity normal --no-build
+      run: |
+        Write-Host "Sdk.sln has no test projects by design; see the example-integration-tests job."
 
     - name: Package Libraries
       if: ${{ env.SHOULD_RELEASE == 'True' }}

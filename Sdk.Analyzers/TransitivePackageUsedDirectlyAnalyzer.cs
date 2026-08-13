@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -67,7 +68,8 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 		Category,
 		DiagnosticSeverity.Error,
 		isEnabledByDefault: true,
-		description: Description);
+		description: Description,
+		customTags: "CompilationEnd");
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
@@ -91,20 +93,27 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 
 		ImmutableHashSet<string> directPackages = LoadLineSet(context.Options.AdditionalFiles, DirectPackagesFileName, context.CancellationToken);
 
-		// Report at most one diagnostic per transitive package across the whole compilation.
-		ConcurrentDictionary<string, byte> reported = new(StringComparer.OrdinalIgnoreCase);
+		// One diagnostic per transitive package, reported at compilation end rather than from the
+		// syntax node action. Reporting inline meant "whichever usage the parallel analysis reached
+		// first won the race": the flagged location moved between builds of identical source, and
+		// in the IDE - which analyzes per document - the dedup could suppress the diagnostic in
+		// whichever document lost. Collecting first and reporting once, at the lexicographically
+		// first usage, makes the output a function of the source alone.
+		ConcurrentDictionary<string, Usage> usages = new(StringComparer.OrdinalIgnoreCase);
 
 		context.RegisterSyntaxNodeAction(
-			nodeContext => AnalyzeName(nodeContext, assemblyToPackage, directPackages, reported),
+			nodeContext => AnalyzeName(nodeContext, assemblyToPackage, directPackages, usages),
 			SyntaxKind.IdentifierName,
 			SyntaxKind.GenericName);
+
+		context.RegisterCompilationEndAction(endContext => ReportUsages(endContext, usages));
 	}
 
 	private static void AnalyzeName(
 		SyntaxNodeAnalysisContext context,
 		Dictionary<string, PackageInfo> assemblyToPackage,
 		ImmutableHashSet<string> directPackages,
-		ConcurrentDictionary<string, byte> reported)
+		ConcurrentDictionary<string, Usage> usages)
 	{
 		if (context.Node is not SimpleNameSyntax name)
 		{
@@ -134,17 +143,55 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 			return;
 		}
 
-		// Only the first usage of each transitive package produces a diagnostic.
-		if (!reported.TryAdd(package.Id, 0))
+		Usage candidate = new(package, name.GetLocation());
+
+		usages.AddOrUpdate(
+			package.Id,
+			candidate,
+			(_, existing) => Precedes(candidate.Location, existing.Location) ? candidate : existing);
+	}
+
+	private static void ReportUsages(CompilationAnalysisContext context, ConcurrentDictionary<string, Usage> usages)
+	{
+		// Ordered so that multiple transitive packages are also reported in a stable sequence.
+		foreach (string packageId in usages.Keys.OrderBy(id => id, StringComparer.Ordinal))
 		{
-			return;
+			if (!usages.TryGetValue(packageId, out Usage usage))
+			{
+				continue;
+			}
+
+			ImmutableDictionary<string, string?> properties = ImmutableDictionary<string, string?>.Empty
+				.Add(PackageIdProperty, usage.Package.Id)
+				.Add(PackageVersionProperty, usage.Package.Version);
+
+			context.ReportDiagnostic(Diagnostic.Create(Rule, usage.Location, properties, usage.Package.Id));
 		}
+	}
 
-		ImmutableDictionary<string, string?> properties = ImmutableDictionary<string, string?>.Empty
-			.Add(PackageIdProperty, package.Id)
-			.Add(PackageVersionProperty, package.Version);
+	/// <summary>
+	/// Orders two locations by file path and then by position, so the "first" usage of a package is
+	/// the same one on every build regardless of the order documents happened to be analyzed in.
+	/// </summary>
+	/// <param name="candidate">The location being considered.</param>
+	/// <param name="incumbent">The location currently recorded.</param>
+	/// <returns><see langword="true"/> when <paramref name="candidate"/> sorts first.</returns>
+	private static bool Precedes(Location candidate, Location incumbent)
+	{
+		int byPath = string.CompareOrdinal(
+			candidate.SourceTree?.FilePath ?? string.Empty,
+			incumbent.SourceTree?.FilePath ?? string.Empty);
 
-		context.ReportDiagnostic(Diagnostic.Create(Rule, name.GetLocation(), properties, package.Id));
+		return byPath != 0
+			? byPath < 0
+			: candidate.SourceSpan.Start < incumbent.SourceSpan.Start;
+	}
+
+	private readonly struct Usage(PackageInfo package, Location location)
+	{
+		public PackageInfo Package { get; } = package;
+
+		public Location Location { get; } = location;
 	}
 
 	private static Dictionary<string, PackageInfo> LoadAssemblyMap(ImmutableArray<AdditionalText> files, CancellationToken cancellationToken)

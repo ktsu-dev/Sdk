@@ -28,4 +28,14 @@
     <PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--
+      The custom MSBuild task assembly, so its pure helpers can be unit tested directly instead of
+      only through an end-to-end build. This is the reason the logic was moved out of an inline
+      RoslynCodeTaskFactory fragment. Only the dependency-free helper type is exercised, so the
+      MSBuild assemblies the task itself derives from are never loaded here.
+    -->
+    <ProjectReference Include="..\..\Sdk.Tasks\Sdk.Tasks.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -49,6 +49,10 @@ public static class SdkFeed
             {
                 string csproj = Path.Combine(RepoLayout.Root, project, project + ".csproj");
 
+                // The SDK packages are single-TFM by construction (Sdk.Common.MSBuildSdkPackage.props):
+                // an MSBuild SDK package's payload is its Sdk.props/Sdk.targets content, which is
+                // target-framework agnostic, and consumers never reference the compiled lib. No
+                // -p:TargetFrameworks override is needed here any more.
                 List<string> args =
                 [
                     "pack", csproj, "-c", "Release", "-o", feed, "--nologo", "-v", "quiet",
@@ -56,16 +60,6 @@ public static class SdkFeed
                     "-p:Version=" + Version,
                     "-p:PackageVersion=" + Version,
                 ];
-
-                // An MSBuild SDK package's payload is its Sdk.props/Sdk.targets content, which is
-                // target-framework agnostic; consumers never reference the compiled lib. Packing a
-                // single TFM produces a valid SDK package far faster than building all eight target
-                // frameworks. Sdk.Analyzers is excluded: it is a netstandard2.0 Roslyn component, so
-                // forcing net10.0 would mismatch its restore.
-                if (!string.Equals(project, "Sdk.Analyzers", StringComparison.Ordinal))
-                {
-                    args.Add("-p:TargetFrameworks=net10.0");
-                }
 
                 CliResult result = Cli.Dotnet(RepoLayout.Root, [.. args]);
 

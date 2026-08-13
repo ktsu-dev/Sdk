@@ -61,6 +61,31 @@ The SDK consists of multiple sub-SDKs:
   - `Sdk.props`: Hierarchical solution discovery, metadata file loading, namespace generation, package configuration
   - `Sdk.targets`: Project type detection, automatic references, package inclusion logic
 
+- **Sdk.Tasks/**: Compiled MSBuild tasks used by `Sdk/Sdk.targets`, packed into `ktsu.Sdk` at
+  `tasks/ktsu.Sdk.Tasks.dll`. Not a package of its own (`IsPackable=false`). Currently holds
+  `KtsuSyncStyleConfigFiles`, which was previously an inline `RoslynCodeTaskFactory` fragment —
+  recompiled by every MSBuild node of every consumer build, and impossible to unit test, debug or
+  analyze. Two rules govern this project and both are easy to break by accident:
+  - **`netstandard2.0` is mandatory.** A task assembly is loaded by whichever MSBuild is running:
+    .NET Framework MSBuild inside Visual Studio, or .NET MSBuild under `dotnet build`.
+    `netstandard2.0` is the only TFM both hosts load, so one DLL serves both. Retargeting to
+    `net10.0` would make the task fail to load in Visual Studio.
+  - **No runtime dependencies.** MSBuild does not resolve NuGet dependencies for task assemblies,
+    so anything needed at run time must already be in the host. `Microsoft.Build.Utilities.Core` is
+    referenced with `ExcludeAssets="runtime"` (compile against it, satisfied by the host's copy) and
+    the task code stays on the BCL. An ordinary `PackageReference` here produces a task that throws
+    `FileNotFoundException` in consumer builds.
+
+  The pure logic lives in `StyleConfigContent` (no MSBuild types), which
+  `test/Sdk.Examples.Tests/StyleConfigContentTests.cs` covers directly — 14 cases in ~30s, against
+  ~15 minutes for the end-to-end parallel-sync test that was previously the only coverage. The
+  end-to-end tests still cover file-system and locking behaviour.
+
+  `Sdk/Sdk.csproj` resolves the assembly via `GetTargetPath` on the referenced project rather than a
+  guessed `bin` path, and errors (KTSU1002) if it is missing, because packing without it yields an
+  SDK whose sync target fails at task resolution in every consumer build. The `tasks/` package path
+  and the `$(MSBuildThisFileDirectory)../tasks/` lookup in `Sdk.targets` have to move together.
+
 - **Sdk.ConsoleApp/**: Console application SDK
   - Sets `OutputType=Exe` and `TargetFramework=net10.0`
 
@@ -137,12 +162,12 @@ Properties set based on detection: `IsPrimaryProject`, `IsCliProject`, `IsAppPro
 
 The SDK automatically includes the `ktsu.Sdk.Analyzers` package (with version synchronization via `{version}` placeholder) to enforce proper project configuration:
 
-- **KTSU0001 (Error)**: Projects must include required standard packages (Polyfill, System.Memory, System.Threading.Tasks.Extensions). Requirements vary based on project type and target framework. SourceLink is intentionally **not** required: the .NET 8+ SDK bundles SourceLink and enables it implicitly, and an explicit `Microsoft.SourceLink.*` `PackageReference` re-enables the noisy "Source control information is not available" warning for any build without a usable remote. Consumers should not reference SourceLink packages directly.
+- **KTSU0001 (Error)**: Projects must include required standard packages (Polyfill, System.Memory, System.Threading.Tasks.Extensions). Requirements vary based on project type and target framework. SourceLink is intentionally **not** required: the .NET 8+ SDK bundles SourceLink and enables it implicitly, and an explicit `Microsoft.SourceLink.*` `PackageReference` re-enables the noisy "Source control information is not available" warning for any build without a usable remote. Consumers should not reference SourceLink packages directly. Like KTSU0002 and KTSU0007, the diagnostic is anchored to a project-owned source file via the shared `ProjectSourceLocation` helper rather than to the compilation's first syntax tree. With Polyfill referenced, that first tree is a Polyfill source file marked as generated code, and a diagnostic located in generated code is discarded under `GeneratedCodeAnalysisFlags.None` — which silently dropped the `System.Memory` / `System.Threading.Tasks.Extensions` checks on exactly the target frameworks (netstandard2.0, .NET Framework) that require them. The Polyfill check itself was unaffected, and so was the existing test, because when Polyfill is missing the first tree is user code.
 - **KTSU0002 (Error)**: Projects must expose internals to test projects using `[assembly: InternalsVisibleTo(...)]`. A code fixer is available to automatically add this attribute. The diagnostic is anchored to a project-owned source file (under `ProjectDir`, excluding `obj`), not to the compilation's first syntax tree. With a source-embedding package such as Polyfill the first tree is a package file marked as generated code, and a diagnostic located in generated code is discarded under `GeneratedCodeAnalysisFlags.None`. That was the real cause of the intermittent behavior tracked in ktsu-dev/Sdk#12 / #8 / #11, and it is also why the code fix now always lands in a file the user owns.
 - **KTSU0003 (Error)**: Use `Ensure.NotNull()` over `ArgumentNullException.ThrowIfNull()` for better framework compatibility. A code fixer is available to automatically replace the invocation.
 - **KTSU0004 (Error)**: Use `Ensure.NotNull()` instead of manual null checks with ArgumentNullException. Detects patterns like `if (x == null) throw new ArgumentNullException(...)`, `if (x is null) throw ...`, and `x ?? throw ...`. A code fixer is available.
 - **KTSU0005 (Error)**: Orphaned `PackageVersion` entries. Flags `PackageVersion` entries in `Directory.Packages.props` (Central Package Management) that no project in the solution references via `PackageReference`/`GlobalPackageReference`. A code fixer removes the orphaned entry. Disable with `<KtsuEnableOrphanedPackageVersionAnalysis>false</KtsuEnableOrphanedPackageVersionAnalysis>`. An ignore list (`Sdk.targets`) keeps SDK-governed packages from being flagged even without a direct `PackageReference`: the KTSU0001 standard packages (`Polyfill`, `System.Memory`, `System.Threading.Tasks.Extensions`) and the `Microsoft.Testing.Extensions.*` runner family that test SDKs (e.g. `MSTest.Sdk`) inject into test projects (which the scan skips). Consumers can extend it via `<KtsuOrphanedPackageVersionIgnore Include="..." />`.
-- **KTSU0006 (Error)**: Transitive package used directly. Flags use of a type or member that originates from a transitive package dependency when the project does not declare a direct `PackageReference` to it. A code fixer adds the `PackageReference` (and, under Central Package Management, a matching `PackageVersion`). Disable with `<KtsuEnableTransitivePackageAnalysis>false</KtsuEnableTransitivePackageAnalysis>`.
+- **KTSU0006 (Error)**: Transitive package used directly. Flags use of a type or member that originates from a transitive package dependency when the project does not declare a direct `PackageReference` to it. A code fixer adds the `PackageReference` (and, under Central Package Management, a matching `PackageVersion`). Disable with `<KtsuEnableTransitivePackageAnalysis>false</KtsuEnableTransitivePackageAnalysis>`. Usages are collected during syntax-node analysis but reported from a `CompilationEnd` action, one per package, anchored at the lexicographically first usage (by file path, then position). Reporting inline from the node action meant the winner of a race between parallel document analyses decided which usage got flagged, so the location moved between builds of identical source, and in the IDE — which analyzes per document — the per-package dedup could suppress the diagnostic in whichever document lost.
 - **KTSU0007 (Error)**: Build-time package reference is not private. Requires `PrivateAssets="all"` on the `Polyfill` reference in non-test projects. Polyfill embeds source at build time and has no runtime assembly, and NuGet only omits a dependency from the produced package when *every* asset kind is private, so a partial `PrivateAssets` value still leaks Polyfill into every downstream consumer's graph. Satisfied by `all` or by a value naming every asset kind. Deliberately scoped to Polyfill: the other KTSU0001 standard packages (`System.Memory`, `System.Threading.Tasks.Extensions`) are genuine runtime dependencies that must flow transitively. A code fixer sets the attribute, rewriting an existing `PrivateAssets` attribute or child element in place. No fix is offered when the reference is declared outside the project file (e.g. in a `Directory.Build.props`), since only the project file is supplied as an `AdditionalDocument`. The diagnostic still reports in that case. The diagnostic is reported at the `PackageReference` line in the project file rather than at a syntax-tree location: package compile items are prepended to the compilation, so the first syntax tree is usually a Polyfill source file, and a diagnostic located in generated code is dropped under `GeneratedCodeAnalysisFlags.None`.
 
 These properties are passed to analyzers via `CompilerVisibleProperty`: `IsTestProject`, `TestProjectExists`, `TestProjectNamespace`, `TargetFramework`, `TargetFrameworkIdentifier`, `HasPolyfill`, `HasSystemMemory`, `HasSystemThreadingTasksExtensions`, `PolyfillPrivateAssets`, `ManagePackageVersionsCentrally`.
@@ -167,7 +192,10 @@ The SDK reads markdown files from the solution root and uses them to populate pa
 - `LICENSE.md` → PackageLicenseFile
 - `README.md` → PackageReadmeFile (checked in project directory first, then solution directory)
 - `COPYRIGHT.md` → Copyright
-- `PROJECT.url` → ProjectUrl, PackageProjectUrl
+- `PROJECT.url`, falling back to `PROJECT_URL.url` → ProjectUrl, PackageProjectUrl. Both names are
+  accepted because `scripts/make-license.ps1` (and KtsuBuild) generate `PROJECT_URL.url` while the
+  documented name has always been `PROJECT.url`. Reading only the latter is why every ktsu.Sdk
+  package up to 2.26.1 shipped with no `<projectUrl>` in its nuspec.
 - `AUTHORS.url` → AuthorsUrl
 - `icon.png` → PackageIcon
 
@@ -211,7 +239,10 @@ Individual SDK sub-projects (ConsoleApp, App) override `TargetFrameworks` to tar
 - `LangVersion=latest`
 - `Nullable=enable`
 - `TreatWarningsAsErrors=true`
-- `AnalysisLevel=latest-all`
+- `AnalysisLevel=10.0-all` — pinned, not `latest-all`. With `TreatWarningsAsErrors` on, `latest`
+  turns every rule added by a .NET SDK update into a build break across every consuming repository
+  the day the runner image moves. Bump this deliberately. Consumers can still opt into
+  `latest-all` in their own project.
 - `EnforceCodeStyleInBuild=true`
 
 ### Package Validation
@@ -253,16 +284,39 @@ Release process (only on main branch, non-fork):
 3. Create `Sdk.props` with project-type-specific property overrides
 4. Create `Sdk.targets` if custom build logic needed
 5. Package structure: SDK packages must include `Sdk/Sdk.props` and `Sdk/Sdk.targets` in the package
+6. Import `..\Sdk.Common.MSBuildSdkPackage.props` after the `Microsoft.NET.Sdk` props import, so the
+   new package gets the same single-TFM, no-`lib/` shape as the others
+
+### Adding a New MSBuild Task
+
+Add the class to `Sdk.Tasks/` — do not reintroduce an inline `RoslynCodeTaskFactory` fragment. Keep
+the project on `netstandard2.0` with no runtime dependencies (see **Sdk.Tasks/** above for why both
+are load-bearing), put the decision logic in a plain class with no MSBuild types so it can be unit
+tested, and register it with a `UsingTask` in `Sdk/Sdk.targets` using the fully-qualified task name
+and `AssemblyFile="$(_KtsuTasksAssembly)"`. Guard the invoking target on
+`Exists('$(_KtsuTasksAssembly)')` so a package missing the assembly skips the work instead of failing
+the consumer's build with MSB4036.
 
 ### Modifying Core SDK Logic
 
-- **Solution/project discovery**: Edit `Sdk/Sdk.props` (lines 1-70)
-- **Project type detection**: Edit `Sdk/Sdk.props` (lines 72-187)
-- **Metadata file loading**: Edit `Sdk/Sdk.props` (lines 189-248)
-- **Namespace generation**: Edit `Sdk/Sdk.props` (lines 249-287)
-- **Package configuration**: Edit `Sdk/Sdk.props` (lines 289-330)
-- **Package reference detection**: Edit `Sdk/Sdk.targets` (lines 29-53)
-- **Polyfill configuration**: Edit `Sdk/Sdk.targets` (lines 76-82)
+Located by the comment banner that heads each block, not by line number — the line numbers that used
+to be here had drifted out of date and silently pointed at the wrong code.
+
+In `Sdk/Sdk.props`:
+- **Solution/project discovery**: `<!-- Find solution directory by searching up the hierarchy -->`
+- **Project type detection**: the `{Cli,App,Ios,Android,Windows,Linux,Mac,Tool,Test,Primary}ProjectName`
+  probe chains, ending at the `Is*Project` flags
+- **Metadata file loading**: `<!-- Descriptive properties -->`
+- **Namespace generation**: `<!-- Namespace properties -->`
+- **Package configuration**: `<!-- Package properties -->`
+
+In `Sdk/Sdk.targets`:
+- **Package reference detection**: `<Target Name="SetPackageReferenceProperties">`
+- **Analyzer inputs (KTSU0005/0006)**: `<Target Name="_KtsuGenerateOrphanedPackageVersionInputs">`
+  and `<Target Name="_KtsuGenerateTransitivePackageInputs">`
+- **Polyfill configuration**: `<!-- Configure Polyfill source generators for non-test projects -->`
+- **Style/config sync**: `<Target Name="_KtsuSyncStyleConfigFiles">`; the task itself is in
+  `Sdk.Tasks/`
 
 ### Testing SDK Changes Locally
 
@@ -305,6 +359,21 @@ The SDK includes robust null/empty checks to prevent MSBuild failures:
 - String operations check for null/empty before manipulation
 - File existence validated before `File.ReadAllText()` calls
 
-### Package Type
+### Package Type and SDK package shape
 
-The core SDK sets `PackageType=MSBuildSdk` in `Directory.Build.props`, which is required for proper MSBuild SDK packaging. The `Directory.Build.targets` file includes the SDK props/targets files in the package at the correct paths.
+There is no `Directory.Build.props`/`.targets` in this repository. Every MSBuild SDK packaging
+project (`Sdk`, `Sdk.App`, `Sdk.ConsoleApp`, `Sdk.Tool`, and the five platform SDKs) imports
+`Sdk.Common.MSBuildSdkPackage.props`, which sets `PackageType=MSBuildSdk` — required for MSBuild SDK
+packaging — along with the rest of the packaging shape. `Sdk.Common.SdkContent.targets` puts
+`Sdk.props`/`Sdk.targets` into the package under `Sdk/`, and `Sdk.Common.PackageContent.targets`
+adds the metadata and `_PackageData` files.
+
+These projects contain **no source**. Their entire payload is the packaged `Sdk/Sdk.props` and
+`Sdk/Sdk.targets`; consumers resolve them through `msbuild-sdks` in `global.json` and never
+reference the compiled assembly. They are therefore single-TFM (`netstandard2.0`) with
+`IncludeBuildOutput=false`, so no `lib/` is produced at all. They previously multi-targeted eight
+frameworks, which built eight identical empty assemblies per package and made the whole repository
+build and pack about eight times slower for no consumer-visible difference.
+
+`Sdk.Analyzers` is the exception: it is a real `netstandard2.0` Roslyn component with its own
+packaging settings, packed under `analyzers/dotnet/cs`.
