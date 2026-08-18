@@ -1,3 +1,8 @@
+## v2.27.1-pre.2 (prerelease)
+
+Changes since v2.27.1-pre.1:
+
+- Bump the microsoft group with 3 updates ([@dependabot[bot]](https://github.com/dependabot[bot]))
 ## v2.27.1-pre.1 (prerelease)
 
 Changes since v2.27.0:
