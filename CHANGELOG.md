@@ -1,3 +1,8 @@
+## v2.27.2 (patch)
+
+Changes since v2.27.1:
+
+- docs: scope build badge to the default branch ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.27.1 (patch)
 
 Changes since v2.27.0:
@@ -10,9 +15,7 @@ Changes since v2.27.1-pre.1:
 - Bump the microsoft group with 3 updates ([@dependabot[bot]](https://github.com/dependabot[bot]))
 ## v2.27.1-pre.1 (prerelease)
 
-Changes since v2.27.0:
-
-- Bump the microsoft group with 1 update ([@dependabot[bot]](https://github.com/dependabot[bot]))
+Incremental prerelease update.
 ## v2.27.0 (minor)
 
 Changes since v2.26.0:
