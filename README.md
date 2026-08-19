@@ -8,7 +8,7 @@ A comprehensive, robust MSBuild-based SDK for .NET projects that standardizes co
 [![NuGet Downloads](https://img.shields.io/nuget/dt/ktsu.Sdk?label=Downloads&logo=nuget)](https://nuget.org/packages/ktsu.Sdk)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ktsu-dev/Sdk?label=Commits&logo=github)](https://github.com/ktsu-dev/Sdk/commits/main)
 [![GitHub contributors](https://img.shields.io/github/contributors/ktsu-dev/Sdk?label=Contributors&logo=github)](https://github.com/ktsu-dev/Sdk/graphs/contributors)
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ktsu-dev/Sdk/dotnet-sdk.yml?label=Build&logo=github)](https://github.com/ktsu-dev/Sdk/actions)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ktsu-dev/Sdk/dotnet-sdk.yml?branch=main&label=Build&logo=github)](https://github.com/ktsu-dev/Sdk/actions)
 
 ## Quick Start
 
