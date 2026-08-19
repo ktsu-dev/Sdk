@@ -2,6 +2,14 @@
 
 A comprehensive, robust MSBuild-based SDK for .NET projects that standardizes configuration, metadata management, and package workflows. Features intelligent project structure detection, hierarchical solution discovery, and path-based namespace generation. Supports multiple .NET versions (.NET 5.0+, .NET Standard 2.0/2.1) with optimizations for .NET 9.0+.
 
+[![License](https://img.shields.io/github/license/ktsu-dev/Sdk.svg?label=License&logo=nuget)](LICENSE.md)
+[![NuGet Version](https://img.shields.io/nuget/v/ktsu.Sdk?label=Stable&logo=nuget)](https://nuget.org/packages/ktsu.Sdk)
+[![NuGet Version](https://img.shields.io/nuget/vpre/ktsu.Sdk?label=Latest&logo=nuget)](https://nuget.org/packages/ktsu.Sdk)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/ktsu.Sdk?label=Downloads&logo=nuget)](https://nuget.org/packages/ktsu.Sdk)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ktsu-dev/Sdk?label=Commits&logo=github)](https://github.com/ktsu-dev/Sdk/commits/main)
+[![GitHub contributors](https://img.shields.io/github/contributors/ktsu-dev/Sdk?label=Contributors&logo=github)](https://github.com/ktsu-dev/Sdk/graphs/contributors)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ktsu-dev/Sdk/dotnet-sdk.yml?label=Build&logo=github)](https://github.com/ktsu-dev/Sdk/actions)
+
 ## Quick Start
 
 ### Installation
