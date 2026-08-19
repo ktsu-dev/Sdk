@@ -1,3 +1,8 @@
+## v2.27.1 (patch)
+
+Changes since v2.27.0:
+
+- docs: correct README, DESCRIPTION and TAGS metadata ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.27.1-pre.2 (prerelease)
 
 Changes since v2.27.1-pre.1:
