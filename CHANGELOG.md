@@ -1,3 +1,8 @@
+## v2.27.3 (patch)
+
+Changes since v2.27.2:
+
+- fix: parse .url metadata files and stop package data colliding on publish [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.27.2 (patch)
 
 Changes since v2.27.1:
