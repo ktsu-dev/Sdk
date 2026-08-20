@@ -170,6 +170,45 @@ internal sealed class ExampleWorkspace : IDisposable
         return values;
     }
 
+    /// <summary>
+    /// Evaluates an item type on a project and returns each item's metadata. No build or restore,
+    /// so this is cheap enough to assert on item shape directly.
+    /// </summary>
+    public IReadOnlyList<IReadOnlyDictionary<string, string>> EvaluateItems(string projectRelativePath, string itemType)
+    {
+        CliResult result = Cli.Dotnet(root, "msbuild", projectRelativePath, "-getItem:" + itemType);
+
+        string output = result.Output.Trim();
+        int brace = output.IndexOf('{', StringComparison.Ordinal);
+        if (brace < 0)
+        {
+            return [];
+        }
+
+        using JsonDocument doc = JsonDocument.Parse(output[brace..]);
+        if (!doc.RootElement.TryGetProperty("Items", out JsonElement items) ||
+            !items.TryGetProperty(itemType, out JsonElement entries))
+        {
+            return [];
+        }
+
+        List<IReadOnlyDictionary<string, string>> results = [];
+        foreach (JsonElement entry in entries.EnumerateArray())
+        {
+            Dictionary<string, string> metadata = new(StringComparer.Ordinal);
+            foreach (JsonProperty property in entry.EnumerateObject())
+            {
+                metadata[property.Name] = property.Value.ValueKind == JsonValueKind.String
+                    ? property.Value.GetString() ?? string.Empty
+                    : property.Value.ToString();
+            }
+
+            results.Add(metadata);
+        }
+
+        return results;
+    }
+
     /// <inheritdoc/>
     public void Dispose()
     {
