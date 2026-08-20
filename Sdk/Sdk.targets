@@ -287,18 +287,26 @@
                               Condition="'@(_KtsuStyleConfigFile)' != ''" />
   </Target>
 
-  <!-- Add package data to the package -->
+  <!--
+    Add package data to the package.
+
+    Deliberately no CopyToOutputDirectory here. These files exist to be packed (Pack + PackagePath),
+    and copying them to the consumer's output as well was incidental: the link path is fixed per
+    file name, so two ktsu packages in one publish graph both wrote _PackageData\README.md and the
+    publish failed with NETSDK1152. Nothing reads these from the output directory - only from inside
+    the package - so the copy is dropped rather than made unique. See ktsu-dev/Sdk#32.
+  -->
   <ItemGroup Condition="$(IsTestProject) == 'false'">
-    <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" CopyToOutputDirectory="Always" />
-    <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" CopyToOutputDirectory="Always" />
-    <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" CopyToOutputDirectory="Always" />
-    <None Include="$(DescriptionFilePath)" Condition="Exists('$(DescriptionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(DescriptionFileName)" CopyToOutputDirectory="Always" />
-    <None Include="$(TagsFilePath)" Condition="Exists('$(TagsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(TagsFileName)" CopyToOutputDirectory="Always" />
-    <None Include="$(LicenseFilePath)" Condition="Exists('$(LicenseFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(LicenseFileName)" CopyToOutputDirectory="Always" />
-    <None Include="$(ChangelogFilePath)" Condition="Exists('$(ChangelogFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ChangelogFileName)" CopyToOutputDirectory="Always" />
-    <None Include="$(ReadmeFilePath)" Condition="Exists('$(ReadmeFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ReadmeFileName)" CopyToOutputDirectory="Always" />
-    <None Include="$(VersionFilePath)" Condition="Exists('$(VersionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(VersionFileName)" CopyToOutputDirectory="Always" />
-    <None Include="$(IconFilePath)" Condition="Exists('$(IconFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(IconFileName)" CopyToOutputDirectory="Always" />
+    <None Include="$(AuthorsFilePath)" Condition="Exists('$(AuthorsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsFileName)" />
+    <None Include="$(AuthorsUrlFilePath)" Condition="Exists('$(AuthorsUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(AuthorsUrlFileName)" />
+    <None Include="$(ProjectUrlFilePath)" Condition="Exists('$(ProjectUrlFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ProjectUrlFileName)" />
+    <None Include="$(DescriptionFilePath)" Condition="Exists('$(DescriptionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(DescriptionFileName)" />
+    <None Include="$(TagsFilePath)" Condition="Exists('$(TagsFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(TagsFileName)" />
+    <None Include="$(LicenseFilePath)" Condition="Exists('$(LicenseFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(LicenseFileName)" />
+    <None Include="$(ChangelogFilePath)" Condition="Exists('$(ChangelogFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ChangelogFileName)" />
+    <None Include="$(ReadmeFilePath)" Condition="Exists('$(ReadmeFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(ReadmeFileName)" />
+    <None Include="$(VersionFilePath)" Condition="Exists('$(VersionFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(VersionFileName)" />
+    <None Include="$(IconFilePath)" Condition="Exists('$(IconFilePath)')" Pack="true" PackagePath="\" Link="_PackageData\$(IconFileName)" />
   </ItemGroup>
 
   <!-- ================================================================= -->

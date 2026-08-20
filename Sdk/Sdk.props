@@ -352,7 +352,9 @@
 
     <AuthorsUrlFileName>AUTHORS.url</AuthorsUrlFileName>
     <AuthorsUrlFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(AuthorsUrlFileName)"))</AuthorsUrlFilePath>
-    <AuthorsUrl Condition="Exists($(AuthorsUrlFilePath))">$([System.IO.File]::ReadAllText($(AuthorsUrlFilePath)).Trim())</AuthorsUrl>
+    <AuthorsUrlRaw Condition="Exists($(AuthorsUrlFilePath))">$([System.IO.File]::ReadAllText($(AuthorsUrlFilePath)))</AuthorsUrlRaw>
+    <AuthorsUrl Condition="'$(AuthorsUrlRaw)' != ''">$([System.Text.RegularExpressions.Regex]::Match($(AuthorsUrlRaw), 'https?://.+').Value.Trim())</AuthorsUrl>
+    <AuthorsUrl Condition="'$(AuthorsUrl)' == '' And '$(AuthorsUrlRaw)' != ''">$(AuthorsUrlRaw.Trim())</AuthorsUrl>
 
     <!-- Project URL. Two names are in circulation: PROJECT.url is the documented one, but
          scripts/make-license.ps1 (and KtsuBuild, which builds every consuming repository) writes
@@ -362,7 +364,15 @@
     <ProjectUrlFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(ProjectUrlFileName)"))</ProjectUrlFilePath>
     <ProjectUrlFileName Condition="!Exists($(ProjectUrlFilePath))">PROJECT_URL.url</ProjectUrlFileName>
     <ProjectUrlFilePath Condition="!Exists($(ProjectUrlFilePath))">$([MSBuild]::NormalizePath("$(SolutionDir)\$(ProjectUrlFileName)"))</ProjectUrlFilePath>
-    <ProjectUrl Condition="Exists($(ProjectUrlFilePath))">$([System.IO.File]::ReadAllText($(ProjectUrlFilePath)).Trim())</ProjectUrl>
+    <!-- A .url file is an InternetShortcut INI, not a bare URL. Reading it whole produced a
+         two-line value (the [InternetShortcut] header plus the URL= line), which NuGet rejected,
+         so every published package ended up with no <projectUrl> at all. Match the URL itself.
+         The regex uses . rather than a negated newline class because . already excludes newlines,
+         which keeps the match on one line without escapes MSBuild would have to carry. The
+         fallback preserves the old behaviour for a plain-text .url with no INI wrapper. -->
+    <ProjectUrlRaw Condition="Exists($(ProjectUrlFilePath))">$([System.IO.File]::ReadAllText($(ProjectUrlFilePath)))</ProjectUrlRaw>
+    <ProjectUrl Condition="'$(ProjectUrlRaw)' != ''">$([System.Text.RegularExpressions.Regex]::Match($(ProjectUrlRaw), 'https?://.+').Value.Trim())</ProjectUrl>
+    <ProjectUrl Condition="'$(ProjectUrl)' == '' And '$(ProjectUrlRaw)' != ''">$(ProjectUrlRaw.Trim())</ProjectUrl>
 
     <CopyrightFileName>COPYRIGHT.md</CopyrightFileName>
     <CopyrightFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(CopyrightFileName)"))</CopyrightFilePath>
