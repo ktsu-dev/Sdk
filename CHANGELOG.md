@@ -1,3 +1,8 @@
+## v2.27.4 (patch)
+
+Changes since v2.27.3:
+
+- fix: stop the example harness waiting out MSBuild node reuse [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.27.3 (patch)
 
 Changes since v2.27.2:
