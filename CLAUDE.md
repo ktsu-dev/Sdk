@@ -78,8 +78,11 @@ The SDK consists of multiple sub-SDKs:
 
   The pure logic lives in `StyleConfigContent` (no MSBuild types), which
   `test/Sdk.Examples.Tests/StyleConfigContentTests.cs` covers directly — 14 cases in ~30s, against
-  ~15 minutes for the end-to-end parallel-sync test that was previously the only coverage. The
-  end-to-end tests still cover file-system and locking behaviour.
+  the end-to-end parallel-sync test that was previously the only coverage. That test used to take
+  ~15 minutes; almost all of it was the harness waiting out MSBuild node reuse rather than building,
+  and with `MSBUILDDISABLENODEREUSE` set in `Cli.Run` it is ~25s. Covering the logic directly is
+  still worth it, but the end-to-end tests are no longer expensive enough to avoid. The end-to-end
+  tests still cover file-system and locking behaviour.
 
   `Sdk/Sdk.csproj` resolves the assembly via `GetTargetPath` on the referenced project rather than a
   guessed `bin` path, and errors (KTSU1002) if it is missing, because packing without it yields an
