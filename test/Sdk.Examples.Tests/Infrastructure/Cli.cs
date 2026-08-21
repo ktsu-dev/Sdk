@@ -56,6 +56,14 @@ internal static class Cli
         psi.Environment["DOTNET_NOLOGO"] = "1";
         psi.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "1";
 
+        // MSBuild worker nodes inherit the redirected handles set up below, and with node reuse left
+        // on they outlive the build by the reuse idle timeout, keeping those pipes open. The
+        // WaitForExit() at the end of this method waits for the streams to reach EOF rather than for
+        // the process to exit, so any build that had to spawn fresh nodes stalled here for the full
+        // fifteen minutes with nothing running. Node reuse has nothing to offer a harness that
+        // builds each project once in a throwaway workspace.
+        psi.Environment["MSBUILDDISABLENODEREUSE"] = "1";
+
         StringBuilder output = new();
         using Process process = new() { StartInfo = psi };
         process.OutputDataReceived += (_, e) => { if (e.Data is not null) { lock (output) { output.AppendLine(e.Data); } } };
