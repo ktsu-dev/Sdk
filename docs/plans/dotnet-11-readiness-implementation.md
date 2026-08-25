@@ -593,13 +593,25 @@ In the `Multi-Targeting` section, replace the default list with `net10.0;net9.0;
        when the default framework list moves.
 ```
 
-- [ ] **Step 4: Verify no stale framework references remain**
+- [ ] **Step 4: Verify no stale framework list remains**
+
+A bare search for `net[567]\.0` is the wrong check. Task 4 added a troubleshooting section to `README.md` that names net5.0, net6.0 and net7.0 on purpose, telling consumers what diagnostics to expect when those frameworks disappear. That prose must stay. What must not survive is any place still advertising them as *defaults*.
+
+Check the framework lists specifically:
+
+```powershell
+Select-String -Path README.md, CLAUDE.md -Pattern 'net[567]\.0[;,]|[;,]\s*net[567]\.0|net10\.0, 9\.0, 8\.0, 7\.0'
+```
+
+Expected: no matches. A semicolon or comma either side of the framework is what distinguishes a list entry from a prose mention.
+
+Then confirm the surviving mentions are the intended ones:
 
 ```powershell
 Select-String -Path README.md, CLAUDE.md -Pattern 'net[567]\.0'
 ```
 
-Expected: no matches.
+Expected: matches only inside Task 4's package validation troubleshooting section in `README.md`, and inside any explanatory comment about why those frameworks were dropped. Read each hit and confirm it is prose explaining the removal, never a list offering them.
 
 - [ ] **Step 5: Commit**
 
