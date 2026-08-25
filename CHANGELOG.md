@@ -1,3 +1,28 @@
+## v2.28.0 (minor)
+
+Changes since v2.27.0:
+
+- docs: add the .NET 11 readiness implementation plan [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: correct baseline validation comments to match the verified finding [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: correct README, DESCRIPTION and TAGS metadata ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: correct Task 4 to pack a unique local SDK version in a temp clone [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: correct Task 6 for the branch it will execute on [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: correct the plan's line-ending constraint to LF [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: document KtsuHostRuntimeOnly [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: document the package validation fallback for a dropped framework [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: narrow Task 5's stale-framework check to lists, not prose [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: plan .NET 11 readiness and a support-lifecycle framework rule [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: plan the host runtime only flag ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: record the support-lifecycle framework rule [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: record the verified package validation mechanism in the design [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: regenerate CompatibilitySuppressions.xml once after the framework trim [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- docs: scope build badge to the default branch ([@matt-edmondson](https://github.com/matt-edmondson))
+- feat: add KtsuHostRuntimeOnly to build for the host runtime only [minor] ([@matt-edmondson](https://github.com/matt-edmondson))
+- feat: trim out-of-support frameworks from the default target list [minor] ([@matt-edmondson](https://github.com/matt-edmondson))
+- fix: parse .url metadata files and stop package data colliding on publish [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- fix: stop the example harness waiting out MSBuild node reuse [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- test: repin example frameworks from the shared constant [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- test: route framework assertions through one constant [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.27.4 (patch)
 
 Changes since v2.27.3:
