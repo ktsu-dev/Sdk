@@ -132,6 +132,11 @@ requires a macOS host with Xcode.
 - **Source Link Integration**: Automatic GitHub and Azure Repos source linking for debugging
 - **Central Package Management**: Requires and works with Directory.Packages.props
 
+**Upgrading:** Moving to a `ktsu.Sdk` version that dropped a target framework from this list can fail
+your next `dotnet pack` if your project carries a `CompatibilitySuppressions.xml`. See
+[Package Validation Fails After a Framework Is Dropped](#package-validation-fails-after-a-framework-is-dropped)
+below.
+
 ### 🔧 **Development Workflow**
 
 - **Analyzer-Enforced Requirements**: Roslyn analyzers (KTSU0001/KTSU0002) ensure proper package dependencies and internals visibility with helpful diagnostics and code fixers
