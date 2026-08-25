@@ -445,8 +445,9 @@
          ApiCompatStrictMode is deliberately NOT set: it is the blanket strict switch, and turning
          it on here contradicts the reasoning below (see EnableStrictModeForCompatibleFrameworks-
          InPackage) for why strict cross-target-framework validation has to stay off in an SDK that
-         mandates Polyfill plus broad multi-targeting. Baseline validation remains strict via
-         EnableStrictModeForBaselineValidation, which is the check that catches real breaks. -->
+         mandates Polyfill plus broad multi-targeting. EnableStrictModeForBaselineValidation governs
+         how strict a baseline comparison is if one runs, but no PackageValidationBaselineVersion is
+         set here or in any consumer, so baseline validation itself never runs. -->
     <ApiCompatValidateAssemblies>true</ApiCompatValidateAssemblies>
 
     <!-- Assembly attribute properties -->
@@ -514,10 +515,11 @@
       ExperimentalAttribute, NullabilityInfo, DynamicallyAccessedMemberTypes) whose shape legitimately differs
       per TFM because each framework's BCL provides a different baseline. Strict mode reports those by-design
       differences as breaking changes (CP0002/CP0014/CP0015/CP0016), which are false positives for the
-      library's own API. Baseline validation (EnableStrictModeForBaselineValidation) stays on, so real
-      breaking changes vs a published version are still caught. Package consumers are unaffected either way -
-      package validation is a producer-side, pack-time gate only. Residual non-strict compatible-framework
-      diffs can be captured per-repo via a regenerable CompatibilitySuppressions.xml.
+      library's own API. EnableStrictModeForBaselineValidation governs how strict a comparison against a
+      published baseline would be, but no PackageValidationBaselineVersion is set here or in any
+      consumer, so baseline validation does not currently run. Package consumers are unaffected either
+      way - package validation is a producer-side, pack-time gate only. Residual non-strict
+      compatible-framework diffs can be captured per-repo via a regenerable CompatibilitySuppressions.xml.
     -->
     <EnableStrictModeForCompatibleFrameworksInPackage>false</EnableStrictModeForCompatibleFrameworksInPackage>
     <EnableStrictModeForCompatibleTfms>false</EnableStrictModeForCompatibleTfms>
