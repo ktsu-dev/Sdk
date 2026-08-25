@@ -548,7 +548,27 @@
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64;osx-x64;linux-x64;osx-arm64;linux-arm64</RuntimeIdentifiers>
     <!-- <SatelliteResourceLanguages>en-US;de-DE</SatelliteResourceLanguages> -->
     <!-- <UseAppHost>false</UseAppHost> -->
+  </PropertyGroup>
 
+  <!-- Opt in, off unless a caller asks for it. When set, every project builds for the host's
+       runtime only, so its output carries that runtime's native assets instead of one copy per
+       runtime its packages ship. For a repository using the ImGui packages that is sixteen
+       copies, and the smallest test project measured 115 MB against 39 MB pinned.
+
+       Only applied when the project has not chosen a runtime identifier itself, so a project
+       that knows what it targets keeps its own choice.
+
+       Deliberate consequence: ktsu.Sdk.App turns OutputType into WinExe when the runtime
+       identifier starts with win, and ktsu.Sdk is imported before it, so app projects build as
+       WinExe during a run with this set. That is accepted. It is harmless when the purpose of
+       the run is to execute tests, and it is the reason a build with this flag is not
+       interchangeable with a release build. -->
+  <PropertyGroup Condition="'$(KtsuHostRuntimeOnly)' == 'true' and '$(RuntimeIdentifier)' == ''">
+    <RuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <!-- Build-related properties -->
     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true' Or '$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
