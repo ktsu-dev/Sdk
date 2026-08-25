@@ -1,5 +1,7 @@
 namespace Sdk.Examples.Tests.Infrastructure;
 
+using System.Text.RegularExpressions;
+
 /// <summary>
 /// The frameworks ktsu.Sdk pins, mirrored here as the suite's expected values.
 /// </summary>
@@ -10,7 +12,7 @@ namespace Sdk.Examples.Tests.Infrastructure;
 /// is in <c>docs/plans/dotnet-11-readiness.md</c>: a framework enters the list when it ships and
 /// leaves when it goes out of support.
 /// </remarks>
-internal static class TargetFrameworks
+internal static partial class TargetFrameworks
 {
     /// <summary>The single framework every extension SDK and every test project pins.</summary>
     public const string Latest = "net10.0";
@@ -29,4 +31,24 @@ internal static class TargetFrameworks
     /// <param name="suffix">The platform suffix including its leading hyphen, or an empty string.</param>
     /// <returns>The framework the matching platform SDK pins.</returns>
     public static string Platform(string suffix) => Latest + suffix;
+
+    /// <summary>
+    /// Repins every versioned .NET framework in a project file to <paramref name="latest"/>,
+    /// preserving any platform suffix.
+    /// </summary>
+    /// <param name="projectXml">The project file's contents.</param>
+    /// <param name="latest">The framework to pin, for example <c>net11.0</c>.</param>
+    /// <returns>The rewritten contents, unchanged when the file pins no versioned framework.</returns>
+    /// <remarks>
+    /// Only a <c>netX.Y</c> pin is rewritten. A <c>netstandard2.0</c> pin is deliberate in the
+    /// KTSU0001 examples and is left alone, which falls out of the pattern requiring a digit
+    /// immediately after <c>net</c>. The plural <c>TargetFrameworks</c> element is also left
+    /// alone, since the tests that build a multi-target list compose it from
+    /// <see cref="MultiTargetProbe"/> rather than from whatever an example happens to declare.
+    /// </remarks>
+    public static string RewritePins(string projectXml, string latest) =>
+        VersionedPin().Replace(projectXml, $"<TargetFramework>{latest}${{platform}}</TargetFramework>");
+
+    [GeneratedRegex(@"<TargetFramework>net\d+\.\d+(?<platform>-[a-z][a-z0-9.]*)?</TargetFramework>")]
+    private static partial Regex VersionedPin();
 }
