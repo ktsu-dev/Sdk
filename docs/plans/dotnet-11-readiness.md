@@ -11,7 +11,7 @@ The work splits into three commits.
 | Commit | When | Change |
 | --- | --- | --- |
 | 1 | Now | Trim net5.0, net6.0, and net7.0, which are already unsupported. Remove the framework literals from the test assertions. |
-| 2 | 2026-11-10 | Add net11.0 as it ships, drop net8.0 and net9.0 as they retire. Eleven literals, one CI variable, and one SDK pin. |
+| 2 | 2026-11-10 | Add net11.0 as it ships, drop net8.0 and net9.0 as they retire. Eleven SDK literals, three test constants, one CI variable, and one SDK pin. |
 | 3 | After | `AnalysisLevel` to `11.0-all`, on its own so a break is attributable. |
 
 No new MSBuild properties are introduced, and no behavior changes for a consumer
@@ -134,8 +134,11 @@ consumer-facing framework choice.
 
 ### Commit 2, 2026-11-10
 
-Eleven framework literals, one CI variable, and one SDK pin, all mechanical:
+Eleven framework literals in the SDK, three test constants, one CI variable, and one SDK
+pin, all mechanical:
 
+0. `test/Sdk.Examples.Tests/Infrastructure/TargetFrameworks.cs`, first, so the suite goes
+   red before the SDK moves and proves no hidden literal survived
 1. `Sdk/Sdk.props:460` to `net11.0;net10.0;netstandard2.0;netstandard2.1`
 2. `Sdk/Sdk.props:458` and `:461`, test project framework, to `net11.0`
 3. `Sdk.App`, `Sdk.ConsoleApp`, `Sdk.Tool`, `Sdk.Windows`, `Sdk.Linux`,
