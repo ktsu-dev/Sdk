@@ -122,12 +122,20 @@ requires a macOS host with Xcode.
 
 ### 📦 **Advanced Package Management**
 
-- **Multi-Target Support**: .NET 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, .NET Standard 2.0/2.1 (default: net10.0)
+- **Multi-Target Support**: .NET 10.0, 9.0, 8.0, .NET Standard 2.0/2.1 (default: net10.0).
+  Frameworks follow the .NET support lifecycle: one enters the list when it ships and leaves
+  when it goes out of support. .NET Standard 2.0/2.1 stay as the fallback, so a consumer on an
+  older framework resolves the netstandard2.1 asset rather than being stranded.
 - **MSBuildSdk Packaging**: Properly configured for MSBuild SDK project packaging
 - **Automatic Metadata Integration**: Seamlessly includes markdown files in package metadata
 - **Package Validation**: Built-in API compatibility and package validation
 - **Source Link Integration**: Automatic GitHub and Azure Repos source linking for debugging
 - **Central Package Management**: Requires and works with Directory.Packages.props
+
+**Upgrading:** Moving to a `ktsu.Sdk` version that dropped a target framework from this list can fail
+your next `dotnet pack` if your project carries a `CompatibilitySuppressions.xml`. See
+[Package Validation Fails After a Framework Is Dropped](#package-validation-fails-after-a-framework-is-dropped)
+below.
 
 ### 🔧 **Development Workflow**
 
@@ -287,6 +295,59 @@ To opt out:
   <KtsuSyncStyleConfigFiles>false</KtsuSyncStyleConfigFiles>
 </PropertyGroup>
 ```
+
+#### Host-only runtime builds
+
+By default, a project carries every runtime identifier its packages ship, and its output
+holds one copy of native assets per runtime. Set `KtsuHostRuntimeOnly` to build for the
+host's runtime only instead:
+
+```xml
+<PropertyGroup>
+  <KtsuHostRuntimeOnly>true</KtsuHostRuntimeOnly>
+</PropertyGroup>
+```
+
+or on the command line:
+
+```bash
+dotnet test -p:KtsuHostRuntimeOnly=true
+```
+
+This exists so a whole workspace can be tested with one `dotnet test` invocation, which
+cannot take a `RuntimeIdentifier` global property directly (NETSDK1134), without every
+test project copying native assets for every runtime its packages ship.
+
+The flag is off by default and applies only when the project has not already resolved a
+runtime identifier before `ktsu.Sdk.props` is imported (a command-line value or one set in
+`Directory.Build.props`). A project that sets `RuntimeIdentifier` in its own project body
+is not protected by that check: the flag's property group still runs, and the project body
+simply overwrites the runtime identifier afterward because it evaluates later. Such a
+project also keeps `SelfContained=false`, which the flag imposes before the project body
+runs. So the project ends up with its own runtime identifier, but not because the flag
+deferred to it.
+
+The platform SDKs (`ktsu.Sdk.Linux`, `ktsu.Sdk.macOS`, `ktsu.Sdk.Windows`) set their
+runtime identifier behind that same `== ''` check, which the flag has already satisfied by
+the time those SDKs run. Under the flag, a `ktsu.Sdk.Linux` project built on a Windows host
+resolves `RuntimeIdentifier` to `win-x64` while `RuntimeIdentifiers` still lists the Linux
+set. Treat the flag as incompatible with the platform SDKs until this is fixed.
+
+**Never combine this flag with packing.** `ktsu.Sdk.Tool` clears `RuntimeIdentifiers`
+(plural) so a tool ships as one runtime-agnostic package, but it does not clear
+`RuntimeIdentifier` (singular), and the base SDK that sets `RuntimeIdentifier` under the
+flag is imported first. Packing a `PackAsTool` project under the flag moves the tool
+payload from `tools/net10.0/any/` to a runtime-specific folder such as
+`tools/net10.0/win-x64/`, producing a package that will not install on any other platform.
+Four repositories use `ktsu.Sdk.Tool`, including KtsuBuild itself, the tool every ktsu
+repository installs. This flag is for building and testing, never for packing or
+releasing.
+
+Deliberate consequence: `ktsu.Sdk.App` sets `OutputType` to `WinExe` when the runtime
+identifier starts with `win`, and the base SDK that sets `RuntimeIdentifier` under this
+flag is imported before it, so app projects build as `WinExe` during a run with this flag
+set. That is accepted. It is harmless when the purpose of the run is to execute tests, and
+it is the reason a build with this flag is not interchangeable with a release build.
 
 ### Project Type Detection
 
@@ -580,6 +641,30 @@ Additional suppressions for test projects:
   <TargetFrameworks></TargetFrameworks>
 </PropertyGroup>
 ```
+
+### Package Validation Fails After a Framework Is Dropped
+
+**Problem**: `dotnet pack` fails with `EnablePackageValidation=true` after you take a version of
+ktsu.Sdk that drops a target framework. The errors are CP0001, CP0002, CP0008, CP0014, CP0015, or
+CP0016 diagnostics naming the removed framework (for example net5.0, net6.0, or net7.0), even
+though `PackageValidationBaselineVersion` isn't set anywhere in your project.
+
+**Solution**: This isn't baseline validation, and setting `PackageValidationBaselineVersion` won't
+fix it. The real cause is a committed `CompatibilitySuppressions.xml` file that still records
+comparisons against the framework you dropped. The package validation tool reprocesses those
+entries on every pack, and once a recorded comparison names a framework that no longer exists, the
+suppression can never match a live comparison again. The default
+`ApiCompatPermitUnnecessarySuppressions=false` then treats that stale, unmatched suppression as an
+error instead of discarding it. Regenerate the file once, against the new SDK, and commit the
+result:
+
+```powershell
+dotnet pack -p:ApiCompatGenerateSuppressionFile=true
+```
+
+This replaces the stale entries with ones for your current target frameworks. If your project has
+no `CompatibilitySuppressions.xml`, this problem doesn't apply to you, and a package validation
+failure has a different cause.
 
 ### Solution Not Found
 

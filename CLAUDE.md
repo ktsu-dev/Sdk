@@ -234,7 +234,12 @@ the only one.
 ## Important MSBuild Properties
 
 ### Multi-Targeting
-Default: `net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1`
+Default: `net10.0;net9.0;net8.0;netstandard2.0;netstandard2.1`
+
+Frameworks follow the .NET support lifecycle: one enters the list when it ships and leaves when it
+goes out of support. .NET Standard 2.0/2.1 stay as the fallback, so a consumer on an older
+framework resolves the netstandard2.1 asset rather than being stranded. Next scheduled change:
+2026-11-10.
 
 Individual SDK sub-projects (ConsoleApp, App) override `TargetFrameworks` to target a single framework (net10.0).
 
@@ -251,7 +256,9 @@ Individual SDK sub-projects (ConsoleApp, App) override `TargetFrameworks` to tar
 ### Package Validation
 - `EnablePackageValidation=true`
 - `ApiCompatValidateAssemblies=true`
-- `EnableStrictModeForBaselineValidation=true` — real breaking changes vs a published baseline are caught
+- `EnableStrictModeForBaselineValidation=true` — governs how strict a comparison against a published
+  baseline would be, if one runs. No `PackageValidationBaselineVersion` is set here or in any consumer,
+  so baseline validation does not currently run.
 - `EnableStrictModeForCompatibleFrameworksInPackage=false` and `EnableStrictModeForCompatibleTfms=false` — strict cross-TFM validation is intentionally off. This SDK mandates Polyfill + broad multi-targeting, and Polyfill source-embeds framework shim types whose shape legitimately differs per TFM; strict mode reports those as false-positive breaking changes (CP0002/CP0014/CP0015/CP0016). Baseline validation stays on, and package consumers are unaffected (validation is producer-side only). Repos capture any residual non-strict compatible-framework diffs in a regenerable `CompatibilitySuppressions.xml` (`dotnet pack -p:ApiCompatGenerateSuppressionFile=true`).
 
 ### Runtime Identifiers

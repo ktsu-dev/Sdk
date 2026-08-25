@@ -30,7 +30,7 @@ public sealed class ToolSdkTests
             "TargetFramework", "TargetFrameworks", "OutputType", "PackAsTool",
             "ToolCommandName", "IsPackable", "IsPublishable", "IsToolProject");
 
-        Assert.AreEqual("net10.0", props["TargetFramework"], "TargetFramework");
+        Assert.AreEqual(TargetFrameworks.Latest, props["TargetFramework"], "TargetFramework");
         Assert.AreEqual(string.Empty, props["TargetFrameworks"], "TargetFrameworks");
         Assert.AreEqual("Exe", props["OutputType"], "OutputType");
         Assert.AreEqual("true", props["PackAsTool"], "PackAsTool");
@@ -76,7 +76,7 @@ public sealed class ToolSdkTests
 
         // The runnable payload, not just the manifest: the entry-point assembly and the
         // runtimeconfig the shim needs to launch it.
-        const string toolsDir = "tools/net10.0/any/";
+        const string toolsDir = $"tools/{TargetFrameworks.Latest}/any/";
         foreach (string required in new[]
                  {
                      toolsDir + "DotnetToolSettings.xml",

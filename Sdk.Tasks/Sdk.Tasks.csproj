@@ -21,6 +21,10 @@
        compile against, and satisfied at run time by the host's own copy - and why the task code
        stays on the BCL. Adding an ordinary PackageReference here would produce a task that throws
        FileNotFoundException in consumer builds.
+
+       This project is deliberately excluded from the repository's framework policy: it is a
+       host-loaded MSBuild task assembly, not a consumer-facing target, and it does not move
+       when the default framework list moves.
   -->
 
   <PropertyGroup>

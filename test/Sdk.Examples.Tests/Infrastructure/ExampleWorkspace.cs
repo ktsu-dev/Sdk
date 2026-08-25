@@ -23,6 +23,7 @@ internal sealed class ExampleWorkspace : IDisposable
         string dest = Path.Combine(Path.GetTempPath(), "ktsu-sdk-example-" + Guid.NewGuid().ToString("N"));
         CopyTree(sourceDir, dest);
 
+        RewriteFrameworkPins(dest);
         WriteGlobalJson(dest);
         WriteNuGetConfig(dest);
         MaybeWriteCompilerToolset(dest);
@@ -265,6 +266,25 @@ internal sealed class ExampleWorkspace : IDisposable
               </ItemGroup>
             </Project>
             """);
+    }
+
+    /// <summary>
+    /// Repins every versioned framework in the copied examples to the framework the SDK pins.
+    /// Without this an example's literal and the SDK's value drift apart on a framework bump, and
+    /// the tests that rewrite project text by literal match stop matching, failing for a reason
+    /// unrelated to what they test.
+    /// </summary>
+    private static void RewriteFrameworkPins(string dest)
+    {
+        foreach (string projectFile in Directory.GetFiles(dest, "*.csproj", SearchOption.AllDirectories))
+        {
+            string original = File.ReadAllText(projectFile);
+            string rewritten = TargetFrameworks.RewritePins(original, TargetFrameworks.Latest);
+            if (!string.Equals(original, rewritten, StringComparison.Ordinal))
+            {
+                File.WriteAllText(projectFile, rewritten);
+            }
+        }
     }
 
     private static void CopyTree(string source, string dest)

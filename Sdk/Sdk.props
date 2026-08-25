@@ -445,8 +445,9 @@
          ApiCompatStrictMode is deliberately NOT set: it is the blanket strict switch, and turning
          it on here contradicts the reasoning below (see EnableStrictModeForCompatibleFrameworks-
          InPackage) for why strict cross-target-framework validation has to stay off in an SDK that
-         mandates Polyfill plus broad multi-targeting. Baseline validation remains strict via
-         EnableStrictModeForBaselineValidation, which is the check that catches real breaks. -->
+         mandates Polyfill plus broad multi-targeting. EnableStrictModeForBaselineValidation governs
+         how strict a baseline comparison is if one runs, but no PackageValidationBaselineVersion is
+         set here or in any consumer, so baseline validation itself never runs. -->
     <ApiCompatValidateAssemblies>true</ApiCompatValidateAssemblies>
 
     <!-- Assembly attribute properties -->
@@ -457,7 +458,14 @@
     <TargetFramework></TargetFramework>
     <TargetFramework Condition="$(IsTestProject) == 'true'">net10.0</TargetFramework>
 
-    <TargetFrameworks>net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <!-- Frameworks follow the .NET support lifecycle: one enters the list when it ships and
+         leaves when it goes out of support. net5.0 (May 2022), net7.0 (May 2024) and net6.0
+         (November 2024) are long gone. netstandard2.0/2.1 are API standards, not runtimes, have
+         no support term, and stay as the fallback: .NET 5 through 9 all implement netstandard2.1,
+         so a consumer on a trimmed framework resolves that asset instead of being stranded, and
+         .NET Framework needs 2.0 because it never implemented 2.1.
+         Next change: 2026-11-10, when .NET 11 ships and .NET 8 and .NET 9 retire together. -->
+    <TargetFrameworks>net10.0;net9.0;net8.0;netstandard2.0;netstandard2.1</TargetFrameworks>
     <TargetFrameworks Condition="$(IsTestProject) == 'true'">net10.0</TargetFrameworks>
 
     <!-- Package properties -->
@@ -507,10 +515,11 @@
       ExperimentalAttribute, NullabilityInfo, DynamicallyAccessedMemberTypes) whose shape legitimately differs
       per TFM because each framework's BCL provides a different baseline. Strict mode reports those by-design
       differences as breaking changes (CP0002/CP0014/CP0015/CP0016), which are false positives for the
-      library's own API. Baseline validation (EnableStrictModeForBaselineValidation) stays on, so real
-      breaking changes vs a published version are still caught. Package consumers are unaffected either way -
-      package validation is a producer-side, pack-time gate only. Residual non-strict compatible-framework
-      diffs can be captured per-repo via a regenerable CompatibilitySuppressions.xml.
+      library's own API. EnableStrictModeForBaselineValidation governs how strict a comparison against a
+      published baseline would be, but no PackageValidationBaselineVersion is set here or in any
+      consumer, so baseline validation does not currently run. Package consumers are unaffected either
+      way - package validation is a producer-side, pack-time gate only. Residual non-strict
+      compatible-framework diffs can be captured per-repo via a regenerable CompatibilitySuppressions.xml.
     -->
     <EnableStrictModeForCompatibleFrameworksInPackage>false</EnableStrictModeForCompatibleFrameworksInPackage>
     <EnableStrictModeForCompatibleTfms>false</EnableStrictModeForCompatibleTfms>
@@ -539,7 +548,44 @@
     <RuntimeIdentifiers>win-x64;win-x86;win-arm64;osx-x64;linux-x64;osx-arm64;linux-arm64</RuntimeIdentifiers>
     <!-- <SatelliteResourceLanguages>en-US;de-DE</SatelliteResourceLanguages> -->
     <!-- <UseAppHost>false</UseAppHost> -->
+  </PropertyGroup>
 
+  <!-- Opt in, off unless a caller asks for it. When set, every project builds for the host's
+       runtime only, so its output carries that runtime's native assets instead of one copy per
+       runtime its packages ship. For a repository using the ImGui packages that is sixteen
+       copies, and the smallest test project measured 115 MB against 39 MB pinned.
+
+       The '$(RuntimeIdentifier)' == '' guard only protects a runtime identifier set before this
+       file is imported (the command line or a Directory.Build.props). A project that sets
+       RuntimeIdentifier in its own body is NOT protected by the guard: this group still runs
+       and imposes SelfContained=false on that project, and the project body's own value simply
+       overwrites RuntimeIdentifier afterward because it evaluates later. The outcome looks like
+       the project kept its own choice; the mechanism is last writer wins, not the guard.
+
+       That same gap means ktsu.Sdk.Linux, ktsu.Sdk.macOS and ktsu.Sdk.Windows are incompatible
+       with this flag: each sets RuntimeIdentifier behind an '== ''' guard of its own, after this
+       file runs, so the flag has already satisfied that guard by the time those SDKs check it.
+       Under the flag, a ktsu.Sdk.Linux project on a Windows host resolves RuntimeIdentifier to
+       win-x64 while RuntimeIdentifiers still lists the Linux set. Verified empirically.
+
+       This flag must never be combined with packing. ktsu.Sdk.Tool clears RuntimeIdentifiers
+       (plural) to avoid runtime-specific tool packages, but does not clear RuntimeIdentifier
+       (singular), and this file runs before ktsu.Sdk.Tool. Packing a PackAsTool project under
+       this flag moves the tool payload from tools/net10.0/any/ to a runtime-specific folder such
+       as tools/net10.0/win-x64/, producing a package that will not install on any other
+       platform. This flag is for building and testing only, never for packing or releasing.
+
+       Deliberate consequence: ktsu.Sdk.App turns OutputType into WinExe when the runtime
+       identifier starts with win, and ktsu.Sdk is imported before it, so app projects build as
+       WinExe during a run with this set. That is accepted. It is harmless when the purpose of
+       the run is to execute tests, and it is the reason a build with this flag is not
+       interchangeable with a release build. -->
+  <PropertyGroup Condition="'$(KtsuHostRuntimeOnly)' == 'true' And '$(RuntimeIdentifier)' == ''">
+    <RuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <!-- Build-related properties -->
     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true' Or '$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
