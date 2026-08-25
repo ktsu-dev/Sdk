@@ -144,12 +144,12 @@ public sealed class StyleConfigSyncTests
         string projectPath = Path.Combine(solutionDir, "Library", "Library.csproj");
         string original = File.ReadAllText(projectPath);
         string multiTargeted = original.Replace(
-            "<TargetFramework>net10.0</TargetFramework>",
+            $"<TargetFramework>{TargetFrameworks.Latest}</TargetFramework>",
             "<TargetFramework></TargetFramework>",
             StringComparison.Ordinal)
             .Replace(
                 "<TargetFrameworks></TargetFrameworks>",
-                "<TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>",
+                $"<TargetFrameworks>{TargetFrameworks.MultiTargetProbe}</TargetFrameworks>",
                 StringComparison.Ordinal);
 
         Assert.AreNotEqual(original, multiTargeted, "The demo project no longer has the expected framework properties.");
