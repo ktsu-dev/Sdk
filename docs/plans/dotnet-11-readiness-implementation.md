@@ -13,7 +13,7 @@
 ## Global constraints
 
 - **Indentation in `test/` is four spaces, not tabs.** `test/.editorconfig` line 15 sets `indent_style = space` for `*.cs`, overriding the repository root's `indent_style = tab`. Files elsewhere in the repository use tabs. Match the file you are in.
-- CRLF line endings.
+- **LF line endings, not CRLF.** `.gitattributes:11` pins `* text=auto eol=lf` and both `.editorconfig:14` and `test/.editorconfig` restate `end_of_line = lf`. The user-level `CLAUDE.md` says to use CRLF for Windows projects; this repository deliberately overrides that, and `.gitattributes` normalizes on commit regardless of a machine's `core.autocrlf`. Verify stored bytes with `git cat-file blob`, never `git show`, which applies the working-tree conversion and reports CRLF on a Windows checkout.
 - File-scoped namespace first, `using` directives after it, matching `test/Sdk.Examples.Tests/Infrastructure/ExampleWorkspace.cs`.
 - `Nullable` enabled, `TreatWarningsAsErrors=true`, `AnalysisLevel=10.0-all`. A warning fails the build.
 - MSTest with semantic asserts. `Assert.AreEqual`, `CollectionAssert.Contains`, `StringAssert.Contains`. Never `Assert.IsTrue` on an equality.
