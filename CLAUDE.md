@@ -234,7 +234,12 @@ the only one.
 ## Important MSBuild Properties
 
 ### Multi-Targeting
-Default: `net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard2.1`
+Default: `net10.0;net9.0;net8.0;netstandard2.0;netstandard2.1`
+
+Frameworks follow the .NET support lifecycle: one enters the list when it ships and leaves when it
+goes out of support. .NET Standard 2.0/2.1 stay as the fallback, so a consumer on an older
+framework resolves the netstandard2.1 asset rather than being stranded. Next scheduled change:
+2026-11-10.
 
 Individual SDK sub-projects (ConsoleApp, App) override `TargetFrameworks` to target a single framework (net10.0).
 

@@ -122,7 +122,10 @@ requires a macOS host with Xcode.
 
 ### 📦 **Advanced Package Management**
 
-- **Multi-Target Support**: .NET 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, .NET Standard 2.0/2.1 (default: net10.0)
+- **Multi-Target Support**: .NET 10.0, 9.0, 8.0, .NET Standard 2.0/2.1 (default: net10.0).
+  Frameworks follow the .NET support lifecycle: one enters the list when it ships and leaves
+  when it goes out of support. .NET Standard 2.0/2.1 stay as the fallback, so a consumer on an
+  older framework resolves the netstandard2.1 asset rather than being stranded.
 - **MSBuildSdk Packaging**: Properly configured for MSBuild SDK project packaging
 - **Automatic Metadata Integration**: Seamlessly includes markdown files in package metadata
 - **Package Validation**: Built-in API compatibility and package validation
@@ -591,9 +594,11 @@ though `PackageValidationBaselineVersion` isn't set anywhere in your project.
 **Solution**: This isn't baseline validation, and setting `PackageValidationBaselineVersion` won't
 fix it. The real cause is a committed `CompatibilitySuppressions.xml` file that still records
 comparisons against the framework you dropped. The package validation tool reprocesses those
-entries on every pack, and once one side of a recorded comparison no longer has a real assembly to
-load, it reports a failure instead of skipping the entry. Regenerate the file once, against the
-new SDK, and commit the result:
+entries on every pack, and once a recorded comparison names a framework that no longer exists, the
+suppression can never match a live comparison again. The default
+`ApiCompatPermitUnnecessarySuppressions=false` then treats that stale, unmatched suppression as an
+error instead of discarding it. Regenerate the file once, against the new SDK, and commit the
+result:
 
 ```powershell
 dotnet pack -p:ApiCompatGenerateSuppressionFile=true
