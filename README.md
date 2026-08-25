@@ -581,6 +581,28 @@ Additional suppressions for test projects:
 </PropertyGroup>
 ```
 
+### Package Validation Fails After a Framework Is Dropped
+
+**Problem**: `dotnet pack` fails with `EnablePackageValidation=true` after you take a version of
+ktsu.Sdk that drops a target framework. The errors are CP0001, CP0002, CP0008, CP0014, CP0015, or
+CP0016 diagnostics naming the removed framework (for example net5.0, net6.0, or net7.0), even
+though `PackageValidationBaselineVersion` isn't set anywhere in your project.
+
+**Solution**: This isn't baseline validation, and setting `PackageValidationBaselineVersion` won't
+fix it. The real cause is a committed `CompatibilitySuppressions.xml` file that still records
+comparisons against the framework you dropped. The package validation tool reprocesses those
+entries on every pack, and once one side of a recorded comparison no longer has a real assembly to
+load, it reports a failure instead of skipping the entry. Regenerate the file once, against the
+new SDK, and commit the result:
+
+```powershell
+dotnet pack -p:ApiCompatGenerateSuppressionFile=true
+```
+
+This replaces the stale entries with ones for your current target frameworks. If your project has
+no `CompatibilitySuppressions.xml`, this problem doesn't apply to you, and a package validation
+failure has a different cause.
+
 ### Solution Not Found
 
 **Problem**: SDK reports it cannot find a solution file
