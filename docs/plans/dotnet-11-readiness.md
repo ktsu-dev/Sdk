@@ -92,6 +92,14 @@ pin from the first entry of the library list would give a single literal, but
 `README.md` tells consumers to override `TargetFrameworks` per project, so an
 unrelated consumer edit would silently change which runtime their tool requires.
 
+**Commit 1 is tagged `[minor]`, not `[major]`.** It removes assets from every downstream
+published package and, per the Risks section below, requires a one-time
+`CompatibilitySuppressions.xml` regeneration in three of five surveyed consumer repositories.
+Neither makes it a breaking change in the semantic-versioning sense: no consumer is stranded
+(the netstandard2.1 fallback below covers them), and nothing happens automatically. A consumer
+only takes the trim by bumping `ktsu.Sdk` in their own `global.json`, which is an opt-in action
+on their side.
+
 ### Dropping a framework does not strand a consumer
 
 .NET 5, 6, and 7 all implement .NET Standard 2.1. A consumer on net6.0
@@ -134,18 +142,25 @@ consumer-facing framework choice.
 
 ### Commit 2, 2026-11-10
 
-Eleven framework literals in the SDK, three test constants, one CI variable, and one SDK
-pin, all mechanical:
+Eleven framework literals in the SDK, three test constants, one CI variable, one SDK
+pin, and the documentation, all mechanical. `Sdk/Sdk.props` line numbers below drift with
+unrelated edits (Task 3 already shifted them once), so the implementation plan locates each
+by element and condition, not by number alone:
 
 0. `test/Sdk.Examples.Tests/Infrastructure/TargetFrameworks.cs`, first, so the suite goes
    red before the SDK moves and proves no hidden literal survived
-1. `Sdk/Sdk.props:460` to `net11.0;net10.0;netstandard2.0;netstandard2.1`
-2. `Sdk/Sdk.props:458` and `:461`, test project framework, to `net11.0`
+1. `Sdk/Sdk.props`, the library `<TargetFrameworks>` list, to `net11.0;net10.0;netstandard2.0;netstandard2.1`
+2. `Sdk/Sdk.props`, the test-project `<TargetFramework>` and `<TargetFrameworks>` conditions,
+   to `net11.0`
 3. `Sdk.App`, `Sdk.ConsoleApp`, `Sdk.Tool`, `Sdk.Windows`, `Sdk.Linux`,
    `Sdk.macOS` to `net11.0`
 4. `Sdk.iOS` to `net11.0-ios`, `Sdk.Android` to `net11.0-android`
 5. `.github/workflows/dotnet-sdk.yml:24`, `DOTNET_VERSION` to `11.0`
 6. `examples/global.json`, SDK pin to `11.0.100`
+7. `README.md` and `CLAUDE.md`, every mention of the current default framework list or the
+   pinned .NET SDK version. Neither was in this list originally, and both would otherwise
+   still read net10.0-based after the flip. The implementation plan's Task 6 gives the exact
+   sites and a search to catch what a fixed list misses.
 
 `DOTNET_VERSION` already feeds both the SDK install and the publish step's
 framework argument at line 172, so it is one edit. A .NET 11 SDK builds net10.0
@@ -187,8 +202,9 @@ the next reader knows why the list looks the way it does.
 
 ## Out of scope
 
-**The `Directory.Build.props` override.** `Sdk/Sdk.props:456` clears
-`TargetFramework` unconditionally, setting it to an empty value.
+**The `Directory.Build.props` override.** `Sdk/Sdk.props`'s unconditional
+`<TargetFramework></TargetFramework>` clear (currently line 458) sets `TargetFramework` to an
+empty value.
 
 `Directory.Build.props` is imported by `Microsoft.Common.props` as part of the
 `Project Sdk="Microsoft.NET.Sdk"` attribute, and the `Sdk` element props are
@@ -203,7 +219,8 @@ change: any repository with `TargetFramework` in a `Directory.Build.props` today
 gets multi-targeting because of that wipe and would start single-targeting
 instead. That deserves its own change, not a ride along with a version bump.
 
-**`AnalysisLevel`.** Pinned at `10.0-all` in `Sdk/Sdk.props:576`. With
+**`AnalysisLevel`.** Pinned at `10.0-all` in `Sdk/Sdk.props`'s code analysis properties block
+(currently line 585). With
 `TreatWarningsAsErrors`, every rule a new analysis level adds breaks every
 consuming repository at once, which is why it is pinned rather than `latest-all`
 in the first place. It moves to `11.0-all` in its own commit after the flip, so
@@ -215,7 +232,7 @@ that when something breaks it is obvious which change did it.
 reason first assumed.** Checked empirically by packing a real consumer against a
 locally packed trimmed SDK. The answer came back in two parts.
 
-*Baseline validation is not the mechanism, and never was.* `Sdk/Sdk.props:510`
+*Baseline validation is not the mechanism, and never was.* `Sdk/Sdk.props` (currently line 511)
 sets `EnableStrictModeForBaselineValidation=true`, but that property only governs
 how strict a baseline comparison is. It enables nothing on its own.
 `PackageValidationBaselineVersion`, `PackageValidationBaselineName` and

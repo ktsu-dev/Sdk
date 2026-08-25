@@ -627,12 +627,24 @@ git commit -m "docs: record the support-lifecycle framework rule [patch]"
 **Do not execute this task before .NET 11 ships on 2026-11-10.** It is recorded here so the November work is a checklist rather than a rediscovery. Everything before this point is executable now.
 
 **Files:**
-- Modify: `Sdk/Sdk.props:458`, `:460`, `:461`
-- Modify: `Sdk.App/Sdk.props:5`, `Sdk.ConsoleApp/Sdk.props:4`, `Sdk.Tool/Sdk.props:6`, `Sdk.Windows/Sdk.props:7`, `Sdk.Linux/Sdk.props:6`, `Sdk.macOS/Sdk.props:8`
-- Modify: `Sdk.iOS/Sdk.props:7`, `Sdk.Android/Sdk.props:7`
+- Modify: `Sdk/Sdk.props` — the test-project `<TargetFramework Condition="$(IsTestProject) == 'true'">` pin
+  (currently line 459), the library `<TargetFrameworks>` list and its support-lifecycle comment
+  (currently lines 461-468), and the test-project `<TargetFrameworks Condition="$(IsTestProject) == 'true'">`
+  pin (currently line 469). Line numbers drift: locate each by the element and condition shown, not by
+  number alone.
+- Modify: `Sdk.App/Sdk.props:5`, `Sdk.ConsoleApp/Sdk.props:4`, `Sdk.Tool/Sdk.props:6`, `Sdk.Windows/Sdk.props:7`, `Sdk.Linux/Sdk.props:6`, `Sdk.macOS/Sdk.props:8` — each project's `<TargetFramework>` element
+- Modify: `Sdk.iOS/Sdk.props:7`, `Sdk.Android/Sdk.props:7` — each project's `<TargetFramework>` element
+- Modify: `Sdk.Windows/Sdk.props:5-6`, `Sdk.macOS/Sdk.props:5-7` — comment-only mentions of the platform
+  variants (`net10.0-windows`, `net10.0-macos`, `net10.0-maccatalyst`); see Step 4
+- Modify: eight demo `.csproj` header comments under `examples/demos/` (`macOS`, `iOS`, `ConsoleApp`,
+  `Linux`, `Windows`, `App`, `Tool`, `Android`) — comment-only mentions of `net10.0`; see Step 4
 - Modify: `test/Sdk.Examples.Tests/Infrastructure/TargetFrameworks.cs`
+- Modify: `test/Sdk.Examples.Tests/Sdk.Examples.Tests.csproj:16` — the test project's own `<TargetFramework>`
+  pin. This project uses plain `Microsoft.NET.Sdk`, not `ktsu.Sdk`, so it isn't covered by the SDK literal
+  table in Step 3. See Step 5 for why its pin needs a deliberate decision, not just a mechanical edit.
 - Modify: `.github/workflows/dotnet-sdk.yml:24`
 - Modify: `examples/global.json`
+- Modify: `README.md` and `CLAUDE.md` — see Step 6
 
 - [ ] **Step 1: Update the test constants first, so the suite goes red before the SDK moves**
 
@@ -641,10 +653,17 @@ In `TargetFrameworks.cs`:
 ```csharp
     public const string Latest = "net11.0";
     public const string Library = "net11.0;net10.0;netstandard2.0;netstandard2.1";
-    public const string MultiTargetProbe = "net11.0;net10.0;netstandard2.1";
+    public const string MultiTargetProbe = "net11.0;net10.0";
 ```
 
-`MultiTargetProbe` needs two or more frameworks that are still in the default list, and net9.0 and net8.0 no longer are.
+`MultiTargetProbe` needs two or more frameworks that are still in the default list, and net9.0 and net8.0
+no longer are. Do not add `netstandard2.1` to shorten the search for a second framework:
+`Sdk.Analyzers/MissingStandardPackagesAnalyzer.cs:128` requires a `System.Memory` reference for any
+`.NETStandard` inner build, netstandard2.1 included, and the Library demo project
+(`examples/demos/Library/Library/Library.csproj:11`, `examples/demos/Library/Directory.Packages.props:6`)
+references only `Polyfill`. A netstandard2.1 probe fails KTSU0001 on that inner build, which fails
+`CliProcessLifetimeTests` and `StyleConfigSyncTests` for a reason that has nothing to do with the .NET 11
+flip.
 
 - [ ] **Step 2: Run the suite to verify it fails**
 
@@ -656,29 +675,89 @@ Expected: FAIL in at least `TargetFrameworkPolicyTests`, `PlatformSdkResolutionT
 
 - [ ] **Step 3: Move the eleven SDK literals**
 
-| File and line | New value |
-| --- | --- |
-| `Sdk/Sdk.props:458` | `net11.0` |
-| `Sdk/Sdk.props:460` | `net11.0;net10.0;netstandard2.0;netstandard2.1` |
-| `Sdk/Sdk.props:461` | `net11.0` |
-| `Sdk.App/Sdk.props:5` | `net11.0` |
-| `Sdk.ConsoleApp/Sdk.props:4` | `net11.0` |
-| `Sdk.Tool/Sdk.props:6` | `net11.0` |
-| `Sdk.Windows/Sdk.props:7` | `net11.0` |
-| `Sdk.Linux/Sdk.props:6` | `net11.0` |
-| `Sdk.macOS/Sdk.props:8` | `net11.0` |
-| `Sdk.iOS/Sdk.props:7` | `net11.0-ios` |
-| `Sdk.Android/Sdk.props:7` | `net11.0-android` |
+Line numbers below are current as of this plan's last sync (this task's own file list) and drift with
+unrelated edits. Locate each site by the element and condition named in the first column, and treat the
+line number as a starting point, not the source of truth.
 
-Update the comment added in Task 3 to say .NET 8 and .NET 9 retired on 2026-11-10, and give the next change date as November 2027, when .NET 12 ships.
+| File, element and condition | Line (may have drifted) | New value |
+| --- | --- | --- |
+| `Sdk/Sdk.props`, test-project `<TargetFramework Condition="$(IsTestProject) == 'true'">` | 459 | `net11.0` |
+| `Sdk/Sdk.props`, the library `<TargetFrameworks>` list (directly below the support-lifecycle comment) | 468 | `net11.0;net10.0;netstandard2.0;netstandard2.1` |
+| `Sdk/Sdk.props`, test-project `<TargetFrameworks Condition="$(IsTestProject) == 'true'">` | 469 | `net11.0` |
+| `Sdk.App/Sdk.props`, `<TargetFramework>` | 5 | `net11.0` |
+| `Sdk.ConsoleApp/Sdk.props`, `<TargetFramework>` | 4 | `net11.0` |
+| `Sdk.Tool/Sdk.props`, `<TargetFramework>` | 6 | `net11.0` |
+| `Sdk.Windows/Sdk.props`, `<TargetFramework>` | 7 | `net11.0` |
+| `Sdk.Linux/Sdk.props`, `<TargetFramework>` | 6 | `net11.0` |
+| `Sdk.macOS/Sdk.props`, `<TargetFramework>` | 8 | `net11.0` |
+| `Sdk.iOS/Sdk.props`, `<TargetFramework>` | 7 | `net11.0-ios` |
+| `Sdk.Android/Sdk.props`, `<TargetFramework>` | 7 | `net11.0-android` |
 
-- [ ] **Step 4: Move CI and the examples pin**
+Update the support-lifecycle comment that heads the `Sdk/Sdk.props` `<TargetFrameworks>` list (added in
+Task 3) to say .NET 8 and .NET 9 retired on 2026-11-10, and give the next change date as November 2027,
+when .NET 12 ships.
+
+- [ ] **Step 4: Sweep comment-only framework mentions**
+
+These are prose, not MSBuild values, so a build never catches a stale one. Update each so the next reader
+isn't told the SDK still pins net10.0:
+
+- `Sdk.Windows/Sdk.props:5-6`, the comment naming the `net10.0-windows` alternative, to `net11.0-windows`.
+- `Sdk.macOS/Sdk.props:5-7`, the comment naming the `net10.0-macos` / `net10.0-maccatalyst` alternatives,
+  to `net11.0-macos` / `net11.0-maccatalyst`.
+- The header comment in each of these eight demo `.csproj` files, none of which have an element pin of
+  their own (they inherit the framework from the extension SDK they reference):
+  `examples/demos/macOS/Demo.macOS/Demo.macOS.csproj`, `examples/demos/iOS/Demo.iOS/Demo.iOS.csproj`,
+  `examples/demos/ConsoleApp/ConsoleApp/ConsoleApp.csproj`, `examples/demos/Linux/Linux/Linux.csproj`,
+  `examples/demos/Windows/Demo.Windows/Demo.Windows.csproj`, `examples/demos/App/App/App.csproj`,
+  `examples/demos/Tool/Demo.Tool/Demo.Tool.csproj`, `examples/demos/Android/Demo.Android/Demo.Android.csproj`.
+  The test harness's `RewriteFrameworkPins` (Task 2) only rewrites the `<TargetFramework>` element, never
+  comment text, and only in the copied workspace, never in the checked-in source, so these eight do not
+  self-correct and must be edited by hand.
+
+- [ ] **Step 5: Move CI, the examples pin, and decide the test project's own pin**
 
 `.github/workflows/dotnet-sdk.yml:24` becomes `DOTNET_VERSION: '11.0'`. It already feeds both the SDK install and the publish step's `--framework net${{ env.DOTNET_VERSION }}` at line 172, so this is the only edit needed there.
 
 `examples/global.json` `"version"` becomes `"11.0.100"`. `rollForward: latestFeature` does not cross a major version, so this pin is not optional.
 
-- [ ] **Step 5: Run the full suite**
+`test/Sdk.Examples.Tests/Sdk.Examples.Tests.csproj:16` pins `<TargetFramework>net10.0</TargetFramework>` on
+plain `Microsoft.NET.Sdk`, deliberately outside `ktsu.Sdk`'s own framework policy (see the file's header
+comment for why). Once `DOTNET_VERSION` moves to `11.0`, the CI job installs only the .NET 11 SDK, and this
+project keeps building only because the GitHub Actions runner image happens to preinstall older runtimes
+alongside whatever `actions/setup-dotnet` adds, not because of anything this repository configured
+deliberately. Decide explicitly rather than leaving it to that reliance: moving this pin to `net11.0`
+alongside the rest removes the dependency on a preinstalled runtime and is the recommended default: nothing
+about these tests requires staying one framework behind the SDK they exercise.
+
+- [ ] **Step 6: Update README.md and CLAUDE.md**
+
+Verified counts as of this plan's last sync: `README.md` has 14 sites describing the current default or
+the pinned .NET SDK version, and `CLAUDE.md` has 11. Both counts exclude mentions that must stay exactly as
+they are: `README.md`'s "Package Validation Fails After a Framework Is Dropped" section names net5.0,
+net6.0 and net7.0 on purpose, documenting an already-shipped, historical fallback rather than a current
+default, and `CLAUDE.md`'s `Sdk.Tasks` section names `net10.0` only to illustrate why retargeting off
+`netstandard2.0` breaks Visual Studio loading, a point that holds for any non-`netstandard2.0` framework
+and isn't tied to the current pin. Leave both alone.
+
+Find the rest with the same method Task 5 Step 4 used, since a fixed line list would only go stale again:
+
+```powershell
+Select-String -Path README.md, CLAUDE.md -Pattern 'net\d+\.\d+(-[a-z]+)?'
+```
+
+Update every hit that names the current default list or a current single-target pin to `net11.0` (dropping
+net9.0 and net8.0 from the README's Multi-Target Support bullet and CLAUDE.md's Multi-Targeting default).
+Two sites use a different form that this pattern misses and need a manual look:
+
+- `README.md`'s `global.json` example (`"version": "10.0.100"`) becomes `"version": "11.0.100"`, matching
+  the `examples/global.json` edit in Step 5.
+- `CLAUDE.md`'s CI/CD Workflow section, "The workflow uses .NET SDK 10.0.", becomes "The workflow uses
+  .NET SDK 11.0.", matching the `DOTNET_VERSION` edit in Step 5.
+
+Also update `CLAUDE.md`'s "Next scheduled change: 2026-11-10" line to the next flip date, November 2027.
+
+- [ ] **Step 7: Run the full suite**
 
 ```powershell
 dotnet test test/Sdk.Examples.Tests --configuration Release -m:1
@@ -686,16 +765,19 @@ dotnet test test/Sdk.Examples.Tests --configuration Release -m:1
 
 Expected: PASS. Requires the .NET 11 SDK installed on the machine.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 8: Commit**
 
 ```powershell
-git add Sdk Sdk.App Sdk.ConsoleApp Sdk.Tool Sdk.Windows Sdk.Linux Sdk.macOS Sdk.iOS Sdk.Android test examples .github
+git add Sdk Sdk.App Sdk.ConsoleApp Sdk.Tool Sdk.Windows Sdk.Linux Sdk.macOS Sdk.iOS Sdk.Android test examples .github README.md CLAUDE.md
 git commit -m "feat: target .NET 11 and drop .NET 8 and .NET 9 [minor]"
 ```
 
-- [ ] **Step 7: Bump AnalysisLevel separately**
+- [ ] **Step 9: Bump AnalysisLevel separately**
 
-Only after Step 6 is merged and green. `Sdk/Sdk.props:576` becomes `<AnalysisLevel>11.0-all</AnalysisLevel>`. With `TreatWarningsAsErrors`, every rule the new analysis level adds becomes an error in every consuming repository at once, which is why this is a separate commit: when something breaks, it is obvious which change did it.
+Only after Step 8 is merged and green. `Sdk/Sdk.props`'s `<AnalysisLevel>` (currently line 585, in the code
+analysis properties block) becomes `<AnalysisLevel>11.0-all</AnalysisLevel>`. With `TreatWarningsAsErrors`,
+every rule the new analysis level adds becomes an error in every consuming repository at once, which is why
+this is a separate commit: when something breaks, it is obvious which change did it.
 
 ```powershell
 git commit -am "feat: raise AnalysisLevel to 11.0-all [minor]"
