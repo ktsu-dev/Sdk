@@ -296,6 +296,59 @@ To opt out:
 </PropertyGroup>
 ```
 
+#### Host-only runtime builds
+
+By default, a project carries every runtime identifier its packages ship, and its output
+holds one copy of native assets per runtime. Set `KtsuHostRuntimeOnly` to build for the
+host's runtime only instead:
+
+```xml
+<PropertyGroup>
+  <KtsuHostRuntimeOnly>true</KtsuHostRuntimeOnly>
+</PropertyGroup>
+```
+
+or on the command line:
+
+```bash
+dotnet test -p:KtsuHostRuntimeOnly=true
+```
+
+This exists so a whole workspace can be tested with one `dotnet test` invocation, which
+cannot take a `RuntimeIdentifier` global property directly (NETSDK1134), without every
+test project copying native assets for every runtime its packages ship.
+
+The flag is off by default and applies only when the project has not already resolved a
+runtime identifier before `ktsu.Sdk.props` is imported (a command-line value or one set in
+`Directory.Build.props`). A project that sets `RuntimeIdentifier` in its own project body
+is not protected by that check: the flag's property group still runs, and the project body
+simply overwrites the runtime identifier afterward because it evaluates later. Such a
+project also keeps `SelfContained=false`, which the flag imposes before the project body
+runs. So the project ends up with its own runtime identifier, but not because the flag
+deferred to it.
+
+The platform SDKs (`ktsu.Sdk.Linux`, `ktsu.Sdk.macOS`, `ktsu.Sdk.Windows`) set their
+runtime identifier behind that same `== ''` check, which the flag has already satisfied by
+the time those SDKs run. Under the flag, a `ktsu.Sdk.Linux` project built on a Windows host
+resolves `RuntimeIdentifier` to `win-x64` while `RuntimeIdentifiers` still lists the Linux
+set. Treat the flag as incompatible with the platform SDKs until this is fixed.
+
+**Never combine this flag with packing.** `ktsu.Sdk.Tool` clears `RuntimeIdentifiers`
+(plural) so a tool ships as one runtime-agnostic package, but it does not clear
+`RuntimeIdentifier` (singular), and the base SDK that sets `RuntimeIdentifier` under the
+flag is imported first. Packing a `PackAsTool` project under the flag moves the tool
+payload from `tools/net10.0/any/` to a runtime-specific folder such as
+`tools/net10.0/win-x64/`, producing a package that will not install on any other platform.
+Four repositories use `ktsu.Sdk.Tool`, including KtsuBuild itself, the tool every ktsu
+repository installs. This flag is for building and testing, never for packing or
+releasing.
+
+Deliberate consequence: `ktsu.Sdk.App` sets `OutputType` to `WinExe` when the runtime
+identifier starts with `win`, and the base SDK that sets `RuntimeIdentifier` under this
+flag is imported before it, so app projects build as `WinExe` during a run with this flag
+set. That is accepted. It is harmless when the purpose of the run is to execute tests, and
+it is the reason a build with this flag is not interchangeable with a release build.
+
 ### Project Type Detection
 
 The SDK automatically detects different project types in your solution:
