@@ -24,7 +24,7 @@
 
 ## Running the tests
 
-The suite packs the SDK into a local feed on first use, then builds throwaway example workspaces, so it is slow. The full run is around ten minutes.
+The suite packs the SDK into a local feed on first use, then builds throwaway example workspaces. A warm full run is about 3 minutes 30 seconds, which fits inside the Bash tool's 600s ceiling. Run it in the FOREGROUND with an explicit `timeout: 600000`. Never background a test run: a backgrounded run is torn down when a subagent yields its turn, which cost one full run early in this plan's execution.
 
 ```powershell
 dotnet test test/Sdk.Examples.Tests --configuration Release -m:1
@@ -462,45 +462,65 @@ This task produces a finding and, if needed, a documented fallback. It changes n
 
 **Interfaces:**
 - Consumes: the trimmed SDK from Task 3.
-- Produces: a recorded finding for Task 5's documentation.
+- Produces: a recorded finding for Task 5's documentation, and confirmation that a real consumer packs against the trimmed SDK.
 
-- [ ] **Step 1: Pack the SDK from this branch into a local feed**
+- [ ] **Step 1: Determine whether baseline validation is active at all**
 
-```powershell
-dotnet pack --configuration Release --output ./local-packages
-```
-
-Expected: ten `.nupkg` files, including `ktsu.Sdk` and `ktsu.Sdk.Analyzers`.
-
-- [ ] **Step 2: Pick a consuming library that has published packages**
+Before packing anything, establish whether the risk can even occur. Baseline validation runs only when a baseline package is named. `EnableStrictModeForBaselineValidation` governs how strict that comparison is; on its own it enables nothing.
 
 ```powershell
-Get-ChildItem C:/dev/ktsu-dev -Directory | Select-Object -ExpandProperty Name
+Select-String -Path Sdk/Sdk.props, Sdk.Common.*.props -Pattern 'PackageValidationBaseline'
+Select-String -Path C:/dev/ktsu-dev/Containers/*.props, C:/dev/ktsu-dev/Containers/**/*.csproj -Pattern 'PackageValidationBaseline'
 ```
 
-Choose a library repository (not `Sdk` itself, and not a tool or app repository, since those disable package validation). Confirm it publishes to nuget.org by checking that its `global.json` lists `ktsu.Sdk` under `msbuild-sdks`.
+Expected: no `PackageValidationBaselineVersion`, `PackageValidationBaselineName`, or `PackageValidationBaselinePath` anywhere. If that holds, baseline validation never runs, and removing a framework cannot break it. Record the finding either way. Steps 2 to 5 then serve as the empirical confirmation, and as an end-to-end check that a real consumer still packs against the trimmed SDK.
 
-- [ ] **Step 3: Point it at the local feed and pack**
+- [ ] **Step 2: Pack the SDK to a temp feed at a unique local version**
 
-In the chosen repository, add the local source and pack against the published baseline:
+Both details here are load-bearing, and `test/Sdk.Examples.Tests/Infrastructure/SdkFeed.cs:19-31` documents why. Packing at the bare `VERSION.md` value collides with the already-published package of that version, and NuGet resolves `msbuild-sdks` from the global packages folder before any configured source, so the consumer would silently build against the **published** SDK and the whole exercise would prove nothing. Separately, `Sdk/Sdk.targets:242` carries a literal `{version}` placeholder that `make-analyzer-releases.ps1` substitutes at release time; without substituting it, the `ktsu.Sdk.Analyzers` reference cannot restore.
+
+Mirror what `SdkFeed.Pack` does:
+
+1. Pick a version of the form `<VERSION.md>-local<8 hex chars>`, for example `2.27.4-localab12cd34`.
+2. In every `Sdk.targets` under the repository that contains `{version}`, replace it with that version. **Record the original contents.**
+3. Pack each of the ten SDK projects to a temp feed directory:
+   ```powershell
+   dotnet pack <Project>/<Project>.csproj -c Release -o <feed> --nologo -p:EnablePackageValidation=false -p:Version=<ver> -p:PackageVersion=<ver>
+   ```
+4. **Restore the original `Sdk.targets` contents**, so the working tree is left with no diff. Verify with `git status --short` before moving on.
+
+- [ ] **Step 3: Clone a clean consumer to a temp directory**
+
+Do not modify any repository under `C:/dev/ktsu-dev` in place. Clone one to a temp directory and work there, so the user's checkouts are untouched whatever happens.
+
+`Containers`, `DeepClone`, `CaseConverter` and `Invoker` were all clean and on `main` at the time of writing, and all pin `ktsu.Sdk` 2.27.4. Pick one, confirm it is still clean, and clone it:
 
 ```powershell
-dotnet pack --configuration Release -p:RestoreAdditionalProjectSources=C:\dev\ktsu-dev\Sdk\local-packages -p:EnablePackageValidation=true
+git -C C:/dev/ktsu-dev/Containers status --porcelain   # must be empty
+git clone C:/dev/ktsu-dev/Containers $env:TEMP/pkgval-check
 ```
 
-Update its `global.json` `msbuild-sdks` entry to the version in this repository's `VERSION.md` first, so it resolves the locally packed SDK rather than the published one.
+- [ ] **Step 4: Point the clone at the local feed and pack**
 
-- [ ] **Step 4: Record the result**
+In the clone only, set every `msbuild-sdks` entry in `global.json` to the local version from Step 2, and write a `nuget.config` listing the temp feed ahead of nuget.org. Then:
 
-Expected if the risk is not real: PASS. The validator accepts netstandard2.1 as covering the removed frameworks.
+```powershell
+dotnet pack -c Release -p:EnablePackageValidation=true
+```
 
-Expected if the risk is real: a `CP` or `PKV` diagnostic naming a target framework present in the baseline and missing from the new package.
+- [ ] **Step 5: Record the result**
 
-Write the exact outcome down, including any diagnostic code, because Task 5 documents it either way.
+Expected, given Step 1: PASS. No baseline is configured, so baseline validation never runs, and the pack additionally confirms a real consumer builds and packs against the trimmed SDK.
 
-- [ ] **Step 5: If it failed, document the consumer-side fallback**
+Expected if the risk turns out to be real after all: a `CP` or `PKV` diagnostic naming a target framework present in the baseline and missing from the new package.
 
-Only if Step 4 failed. Add to `README.md`, in the troubleshooting section that already covers overriding `TargetFrameworks` around line 574. The heading and body below go in verbatim, with the version in the example replaced by the first version the repository publishes after taking the trimmed SDK:
+Either way, confirm the pack produced a `.nupkg` and record which frameworks its `lib/` contains — that is the direct evidence of what a consumer now ships, and it should show five, not eight. Write the exact outcome down, including any diagnostic code, because Task 5 documents it.
+
+Delete the temp clone and the temp feed when finished.
+
+- [ ] **Step 6: If it failed, document the consumer-side fallback**
+
+Only if Step 5 failed. Add to `README.md`, in the troubleshooting section that already covers overriding `TargetFrameworks` around line 574. The heading and body below go in verbatim, with the version in the example replaced by the first version the repository publishes after taking the trimmed SDK:
 
 ````markdown
 ### Package validation fails after a framework is dropped
@@ -518,9 +538,9 @@ version you publish after taking the trimmed SDK:
 ```
 ````
 
-- [ ] **Step 6: Clean up and commit**
+- [ ] **Step 7: Clean up and commit**
 
-Revert the `global.json` change in the consuming repository and delete `./local-packages`. Commit only if Step 5 produced a change:
+Commit only if Step 6 produced a change. Nothing else in this task leaves anything to revert, because all of its work happened in temp directories:
 
 ```powershell
 git add README.md
