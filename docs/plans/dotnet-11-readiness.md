@@ -211,19 +211,43 @@ that when something breaks it is obvious which change did it.
 
 ## Risks
 
-**Package validation baselines in consuming repositories.** Consumers build with
-`EnablePackageValidation=true` and baseline validation against their last
-published package. Removing net5.0, net6.0, and net7.0 removes frameworks the
-baseline contains, and that may fail their next pack. This repository's own SDK
-packages are immune, because `Sdk.Common.MSBuildSdkPackage.props` sets
-`EnablePackageValidation=false`, so the failure would surface downstream rather
-than here.
+**Package validation in consuming repositories. Verified: real, but not for the
+reason first assumed.** Checked empirically by packing a real consumer against a
+locally packed trimmed SDK. The answer came back in two parts.
 
-The validator does account for compatible frameworks and netstandard2.1 covers
-all three, so it may pass cleanly. **Verify before merging commit 1**: pack a
-real ktsu library against its published baseline with the trimmed list and
-observe the result. If it fails, document `PackageValidationBaselineVersion` as
-the consumer-side fallback and say so in `README.md`.
+*Baseline validation is not the mechanism, and never was.* `Sdk/Sdk.props:510`
+sets `EnableStrictModeForBaselineValidation=true`, but that property only governs
+how strict a baseline comparison is. It enables nothing on its own.
+`PackageValidationBaselineVersion`, `PackageValidationBaselineName` and
+`PackageValidationBaselinePath` are set nowhere, in this SDK or in any surveyed
+consumer, so baseline validation never runs and a removed framework cannot break
+it. `PackageValidationBaselineVersion` is therefore *not* the consumer-side
+fallback, and recommending it would send people to a fix that does nothing.
+
+*The real mechanism is a stale `CompatibilitySuppressions.xml`.* A consumer that
+has one carries entries recording comparisons involving net5.0, net6.0 and
+net7.0. When those frameworks stop producing an assembly, the entries can never
+match a live comparison, and the default
+`ApiCompatPermitUnnecessarySuppressions=false` turns an unmatched suppression
+into an error rather than discarding it. The pack fails with CP0001, CP0002,
+CP0008, CP0014, CP0015 and CP0016 all naming frameworks the package no longer
+contains, which is why the wrong fix is the intuitive guess.
+
+*Scope and remedy.* Three of five surveyed consumers carry the file
+(`Containers`, `DeepClone`, `Invoker`; `CaseConverter` and `Extensions` do not),
+so most repositories taking the trimmed SDK need a one-time regeneration:
+
+```powershell
+dotnet pack -p:ApiCompatGenerateSuppressionFile=true
+```
+
+That is already this repository's documented convention for the same file, so
+the migration step is not a new idea, only a newly required one. `README.md`
+carries a troubleshooting entry that rules out the wrong fix before giving this
+one.
+
+This repository's own SDK packages are unaffected either way, because
+`Sdk.Common.MSBuildSdkPackage.props` sets `EnablePackageValidation=false`.
 
 **Consumers genuinely on net5.0 to net7.0.** They set `TargetFrameworks` in
 their csproj, which `README.md` documents at line 574. No consumer is stranded,
@@ -236,5 +260,7 @@ bump the version in `global.json`.
 
 - Full test suite green after the test constant refactor, with the constant
   still reading `net10.0`, proving the refactor changed no behavior
-- Pack a consuming library against a published baseline, per the risk above
+- Pack a real consumer against a locally packed trimmed SDK (done: the local SDK
+  must carry a unique `-local` version, or NuGet resolves the published one from the
+  global packages folder and the check silently proves nothing)
 - After commit 2, a demo app from `examples/demos` builds, packs, and runs
