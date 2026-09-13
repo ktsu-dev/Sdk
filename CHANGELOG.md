@@ -1,3 +1,8 @@
+## v2.28.1 (patch)
+
+Changes since v2.28.0:
+
+- fix: strip scaffolding folder segments from derived project identity [patch] ([@Claude](https://github.com/Claude))
 ## v2.28.1-pre.1 (prerelease)
 
 Changes since v2.28.0:
