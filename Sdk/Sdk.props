@@ -410,11 +410,20 @@
 
     <!-- Build ProjectNamespace from subdirectories between solution and project -->
     <!-- Examples:
-         Solution: /MySln/, Project: /MySln/src/Core/MyLib/ → ProjectNamespace: src.Core.MyLib
+         Solution: /MySln/, Project: /MySln/src/Core/MyLib/ → ProjectNamespace: Core.MyLib (src stripped, see below)
          Solution: /MySln/, Project: /MySln/libs/Utils/Utils.csproj → ProjectNamespace: libs.Utils (Utils already included)
          Solution: /MySln/, Project: /MySln/MyApp/ → ProjectNamespace: MyApp -->
     <_ProjectRelativePath Condition="'$(SolutionDir)' != '' And '$(MSBuildProjectDirectory)' != ''">$([MSBuild]::MakeRelative($(SolutionDir), $(MSBuildProjectDirectory)))</_ProjectRelativePath>
     <_ProjectPathNamespace Condition="'$(_ProjectRelativePath)' != ''">$(_ProjectRelativePath.Replace('\', '.').Replace('/', '.').TrimEnd('.'))</_ProjectPathNamespace>
+
+    <!-- Strip leading scaffolding segments (src, source, tests, test, examples, samples) before
+         they can leak into the derived namespace, assembly name, and package ID: a project under
+         one of these wrapper directories is meant to inherit the identity of the directory below
+         it, not the wrapper's own lowercase name. Only leading segments are stripped - one that
+         appears deeper in the path (e.g. examples/demos/Foo) is left alone, since nothing else in
+         this file treats it as scaffolding at that position. -->
+    <_ProjectPathNamespace Condition="'$(_ProjectPathNamespace)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_ProjectPathNamespace), '^(?:(?:src|source|tests|test|examples|samples)\.)+', ''))</_ProjectPathNamespace>
+
     <_CleanProjectName Condition="'$(MSBuildProjectName)' != ''">$(MSBuildProjectName.Replace(" ", ""))</_CleanProjectName>
 
     <!-- Check if path already ends with project name (case-sensitive) -->
