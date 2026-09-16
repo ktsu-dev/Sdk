@@ -36,6 +36,8 @@ internal static class RepoLayout
         "Sdk.macOS",
         "Sdk.iOS",
         "Sdk.Android",
+        "Sdk.Unity",
+        "Sdk.Godot",
     ];
 
     private static string FindRoot()

@@ -32,7 +32,9 @@ Add the SDK to your global.json (recommended):
     "ktsu.Sdk.Linux": "2.26.1",
     "ktsu.Sdk.macOS": "2.26.1",
     "ktsu.Sdk.iOS": "2.26.1",
-    "ktsu.Sdk.Android": "2.26.1"
+    "ktsu.Sdk.Android": "2.26.1",
+    "ktsu.Sdk.Unity": "2.26.1",
+    "ktsu.Sdk.Godot": "2.26.1"
   },
   "test": {
     "runner": "Microsoft.Testing.Platform"
@@ -103,6 +105,27 @@ The same pattern applies to `ktsu.Sdk.Windows`, `ktsu.Sdk.macOS`,
 `ktsu.Sdk.iOS`, and `ktsu.Sdk.Android`. Mobile targets require the relevant .NET
 workload (`dotnet workload install android ios maui`), and iOS additionally
 requires a macOS host with Xcode.
+
+For a Unity managed plug-in:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Unity" />
+</Project>
+```
+
+For a Godot game assembly, `Godot.NET.Sdk` is the outer SDK:
+
+```xml
+<Project Sdk="Godot.NET.Sdk/4.7.2">
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Godot" />
+</Project>
+```
+
+Order matters in both cases: `ktsu.Sdk` first, then the extension SDK, which is
+what lets the extension override the core defaults.
 
 ## Key Features
 
@@ -221,6 +244,67 @@ the corresponding .NET workload.
 > **Prerequisites for mobile targets:** install the workloads once with
 > `dotnet workload install android ios maui`. The SDK packages themselves carry no
 > workload dependency — only consuming app projects do.
+
+### Game Engine SDKs
+
+Unity and Godot both host their own runtime and produce their own executable, so a
+C# project for either is a **library** the engine loads, not an app the .NET SDK
+publishes. Each of these extension SDKs pins the shape that engine can actually
+load and puts back the core SDK defaults that would otherwise get in the way.
+Neither needs the engine installed to build.
+
+- **ktsu.Sdk.Unity** — `netstandard2.1`, `OutputType=Library`, no runtime
+  identifiers. Builds a [managed plug-in](https://docs.unity3d.com/Manual/plug-ins-managed.html)
+  to drop into a Unity project's `Assets/Plugins` (or to publish for NuGetForUnity).
+- **ktsu.Sdk.Godot** — `net10.0`, `OutputType=Library`, `EnableDynamicLoading=true`,
+  no runtime identifiers. Composes with `Godot.NET.Sdk`, which supplies the
+  GodotSharp bindings, the source generators and the engine's output layout.
+
+**Unity: why netstandard2.1.** Unity's scripting runtime is Mono or IL2CPP, not
+.NET Core. Both API Compatibility Levels Unity offers (".NET Standard 2.1", the
+default, and ".NET Framework") implement netstandard2.1, so it is the one pin that
+loads in every supported configuration; a `netX.0` assembly fails to import
+outright. Override to `netstandard2.0` for editors older than Unity 2021.2, or to a
+`net4x` framework for a project fixed on the .NET Framework profile — **KTSU1003**
+fails the build for anything else, rather than letting the failure surface later as
+an import error in the Unity console. The assembly is compiled by your own .NET
+SDK, so it may use language features newer than Unity's in-editor compiler accepts;
+features that need a newer *runtime* (ref fields, static abstract interface members)
+will still fail on Unity's.
+
+**Godot: what the SDK puts back.** Godot.NET.Sdk deliberately sets no
+`TargetFramework` — GodotSharp declares the minimum and the project chooses — so
+`ktsu.Sdk.Godot` pins the same `net10.0` as the rest of this SDK family. It also
+restores two values the core SDK overwrites, and only when `Godot.NET.Sdk` is the
+outer SDK:
+
+- `AppendTargetFrameworkToOutputPath=false`, because Godot loads the assembly from
+  `.godot/mono/temp/bin/$(Configuration)/` with no framework folder. The core SDK
+  sets it back to `true`, which moves the output one directory deeper and leaves
+  the editor reporting a missing assembly.
+- `AssemblyName=$(MSBuildProjectName)`, because `project.godot` records the
+  assembly to load in `dotnet/project/assembly_name` and Godot writes the project
+  name there. The core SDK sets `AssemblyName` to the fully-qualified namespace
+  (e.g. `ktsu.MyGame.Godot`), which is no longer the file Godot looks for.
+  `RootNamespace`, `PackageId` and `Title` keep the ktsu-namespaced value — only
+  the assembly file name is pinned — and a project whose `project.godot` says
+  otherwise can still set `AssemblyName` itself.
+
+A project named `{Solution}.Unity`/`{Solution}Unity` or
+`{Solution}.Godot`/`{Solution}Godot` also sets `IsUnityProject` / `IsGodotProject`.
+
+Runnable demos for both, including the engine-side halves and the deployment step, are under
+[`examples/demos/Unity`](examples/demos/Unity/README.md) and
+[`examples/demos/Godot`](examples/demos/Godot/README.md).
+
+The `.gitignore` the SDK syncs into consuming repositories gains Godot's `.godot/` cache, and
+negates two of its own generic rules for Unity: `**/[Pp]ackages/*` (a NuGet restore folder, but
+Unity's `Packages/` is project source) and `*.meta` (the Visual Studio C++ build artifact, but
+Unity generates one `.meta` per asset carrying the GUID scenes and prefabs reference). Both
+negations are scoped, so a Unity project keeps its source while the artifacts they were written
+for stay ignored everywhere else. Unity's generated caches — `Library/`, `Temp/`, `Logs/` — are
+deliberately *not* added: those names are only caches beside an `Assets/` folder, so they belong
+in the Unity project's own `.gitignore`, as the demo shows.
 
 ## Detailed Usage
 
@@ -356,6 +440,9 @@ The SDK automatically detects different project types in your solution:
 - **Primary Project**: The main project of your solution (YourSolution, YourSolution.Core)
 - **Console Projects**: Command-line interface projects (YourSolution.CLI, YourSolution.Cli, YourSolutionCli, YourSolutionCLI, YourSolution.ConsoleApp, YourSolution.Console)
 - **GUI App Projects**: Application projects (YourSolution.App, YourSolutionApp, YourSolution.WinApp, YourSolutionWinApp, YourSolution.ImGuiApp, YourSolutionImGuiApp)
+- **Platform App Projects**: Per-OS app projects (YourSolution.Windows, YourSolution.Linux, YourSolution.macOS, YourSolution.iOS, YourSolution.Android, and their suffix-free and abbreviated forms)
+- **Game Engine Projects**: Engine assemblies (YourSolution.Unity, YourSolutionUnity, YourSolution.Godot, YourSolutionGodot)
+- **Tool Projects**: .NET tool projects (YourSolution.Tool, YourSolutionTool)
 - **Test Projects**: Test projects (YourSolution.Test, YourSolution.Tests, YourSolutionTest, YourSolutionTests)
 
 Each project type receives appropriate default settings, references, and output configurations (console apps vs. GUI apps).
@@ -462,6 +549,9 @@ The SDK makes these properties available for conditional logic in your project f
 - `IsPrimaryProject` - True if this is the main library project
 - `IsCliProject` - True if this is a console application
 - `IsAppProject` - True if this is a GUI application
+- `IsWindowsProject`, `IsLinuxProject`, `IsMacProject`, `IsIosProject`, `IsAndroidProject` - True for the matching per-OS app project
+- `IsUnityProject` - True if this is a Unity managed plug-in project
+- `IsGodotProject` - True if this is a Godot game assembly project
 - `IsToolProject` - True if this is a .NET tool project
 - `IsTestProject` - True if this is a test project
 

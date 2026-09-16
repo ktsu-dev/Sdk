@@ -26,12 +26,30 @@ feed and builds each example against it. That project runs in CI via the
 | `macOS` | `ktsu.Sdk` + `ktsu.Sdk.macOS` | `Exe`, macOS RIDs. |
 | `iOS` | `ktsu.Sdk` + `ktsu.Sdk.iOS` | `net10.0-ios` (requires the `ios` workload + macOS host to build). |
 | `Android` | `ktsu.Sdk` + `ktsu.Sdk.Android` | `net10.0-android` (requires the `android` workload to build). |
+| [`Unity`](./demos/Unity/README.md) | `ktsu.Sdk` + `ktsu.Sdk.Unity` | `netstandard2.1` managed plug-in, plus the Unity project it is deployed into. |
+| [`Godot`](./demos/Godot/README.md) | `Godot.NET.Sdk` + `ktsu.Sdk` + `ktsu.Sdk.Godot` | An openable Godot 4 project whose `project.godot` resolves the built assembly. |
 | `Test` | `ktsu.Sdk` | Library + MSTest project: test-project detection and `InternalsVisibleTo`. |
 
-`Library`, `ConsoleApp`, `App`, `Tool`, `Linux` and `Test` build fully on a Linux runner. The
-remaining platform SDKs need another OS or a workload, so CI verifies them by **property
-evaluation** (`TargetFramework`, `OutputType`, `RuntimeIdentifiers`, detection flag) instead
-of a full build.
+`Library`, `ConsoleApp`, `App`, `Tool`, `Linux`, `Unity`, `Godot` and `Test` build fully on a
+Linux runner. The remaining platform SDKs need another OS or a workload, so CI verifies them by
+**property evaluation** (`TargetFramework`, `OutputType`, `RuntimeIdentifiers`, detection flag)
+instead of a full build.
+
+Neither engine demo needs its engine installed: a Unity managed plug-in is an ordinary
+netstandard2.1 library, and a Godot game assembly compiles against the GodotSharp NuGet package.
+Both are bigger than the other demos because the interesting part of each SDK is a contract with
+the engine rather than a property value, and a bare csproj cannot show that — so each carries the
+engine-side files too, and each has its own README. `EngineDemoWorkflowTests` asserts the
+artifacts those contracts are about: that the assembly named in `project.godot` is where Godot
+loads it from, and that the Unity plug-in reaches `Assets/Plugins`.
+
+The `Godot` demo is the only one that pins an external MSBuild SDK (`Godot.NET.Sdk`) in the
+project file rather than in [`global.json`](./global.json), because that version tracks the Godot
+editor version, which is a per-project choice — and because the integration harness rewrites
+`global.json` to point every ktsu SDK at its locally packed build. It is also the only demo with
+an `AUTHORS.md`, which is load-bearing rather than decorative: without an authors namespace the
+core SDK's derived assembly name and the project name are the same string, and the contract the
+demo exists to show would be invisible.
 
 ## Analyzer triggers (`analyzers/`)
 

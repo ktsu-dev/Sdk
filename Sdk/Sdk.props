@@ -238,6 +238,30 @@
     <MacProjectPath Condition="$(MacProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(MacProjectName)\$(MacProjectFileName)"))</MacProjectPath>
     <MacProjectExists Condition="$(MacProjectExists) == 'false' And Exists($(MacProjectPath))">true</MacProjectExists>
 
+    <!-- Unity Project properties -->
+    <UnityProjectName>$(SolutionName).Unity</UnityProjectName>
+    <UnityProjectFileName>$(UnityProjectName).csproj</UnityProjectFileName>
+    <UnityProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(UnityProjectName)\$(UnityProjectFileName)"))</UnityProjectPath>
+    <UnityProjectExists>false</UnityProjectExists>
+    <UnityProjectExists Condition="Exists($(UnityProjectPath))">true</UnityProjectExists>
+
+    <UnityProjectName Condition="$(UnityProjectExists) == 'false'">$(SolutionName)Unity</UnityProjectName>
+    <UnityProjectFileName Condition="$(UnityProjectExists) == 'false'">$(UnityProjectName).csproj</UnityProjectFileName>
+    <UnityProjectPath Condition="$(UnityProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(UnityProjectName)\$(UnityProjectFileName)"))</UnityProjectPath>
+    <UnityProjectExists Condition="$(UnityProjectExists) == 'false' And Exists($(UnityProjectPath))">true</UnityProjectExists>
+
+    <!-- Godot Project properties -->
+    <GodotProjectName>$(SolutionName).Godot</GodotProjectName>
+    <GodotProjectFileName>$(GodotProjectName).csproj</GodotProjectFileName>
+    <GodotProjectPath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(GodotProjectName)\$(GodotProjectFileName)"))</GodotProjectPath>
+    <GodotProjectExists>false</GodotProjectExists>
+    <GodotProjectExists Condition="Exists($(GodotProjectPath))">true</GodotProjectExists>
+
+    <GodotProjectName Condition="$(GodotProjectExists) == 'false'">$(SolutionName)Godot</GodotProjectName>
+    <GodotProjectFileName Condition="$(GodotProjectExists) == 'false'">$(GodotProjectName).csproj</GodotProjectFileName>
+    <GodotProjectPath Condition="$(GodotProjectExists) == 'false'">$([MSBuild]::NormalizePath("$(SolutionDir)\$(GodotProjectName)\$(GodotProjectFileName)"))</GodotProjectPath>
+    <GodotProjectExists Condition="$(GodotProjectExists) == 'false' And Exists($(GodotProjectPath))">true</GodotProjectExists>
+
     <!-- Tool Project properties. Only the .Tool conventions are recognised: a project named
          {Solution}.CLI stays a console app, so no existing CLI project silently starts
          publishing itself as a dotnet tool package. -->
@@ -317,6 +341,10 @@
     <IsLinuxProject Condition="'$(MSBuildProjectName)' == '$(LinuxProjectName)'">true</IsLinuxProject>
     <IsMacProject>false</IsMacProject>
     <IsMacProject Condition="'$(MSBuildProjectName)' == '$(MacProjectName)'">true</IsMacProject>
+    <IsUnityProject>false</IsUnityProject>
+    <IsUnityProject Condition="'$(MSBuildProjectName)' == '$(UnityProjectName)'">true</IsUnityProject>
+    <IsGodotProject>false</IsGodotProject>
+    <IsGodotProject Condition="'$(MSBuildProjectName)' == '$(GodotProjectName)'">true</IsGodotProject>
     <IsToolProject>false</IsToolProject>
     <IsToolProject Condition="'$(MSBuildProjectName)' == '$(ToolProjectName)'">true</IsToolProject>
     <IsTestProject>false</IsTestProject>

@@ -223,6 +223,7 @@ internal sealed class ExampleWorkspace : IDisposable
             "ktsu.Sdk", "ktsu.Sdk.ConsoleApp", "ktsu.Sdk.App", "ktsu.Sdk.Tool",
             "ktsu.Sdk.Windows", "ktsu.Sdk.Linux", "ktsu.Sdk.macOS",
             "ktsu.Sdk.iOS", "ktsu.Sdk.Android",
+            "ktsu.Sdk.Unity", "ktsu.Sdk.Godot",
         ];
         string entries = string.Join("," + Environment.NewLine,
             sdks.Select(s => $"    \"{s}\": \"{SdkFeed.Version}\""));

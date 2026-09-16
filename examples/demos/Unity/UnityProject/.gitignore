@@ -1,0 +1,29 @@
+# A Unity project carries its own .gitignore. The shared ktsu.Sdk one deliberately does not try to
+# be a Unity .gitignore: the folders below are only generated caches when they sit beside Assets/
+# and ProjectSettings/, and ignoring names this generic repo-wide would catch unrelated
+# directories - this repository's own examples/demos/Library among them.
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+[Uu]serSettings/
+
+# Two rules in the shared .gitignore would otherwise swallow Unity source. Both are generic
+# .NET/Visual Studio rules that predate any engine support:
+#
+#   **/[Pp]ackages/*  - meant for a NuGet restore folder, but Unity's Packages/ is project source
+#                       and both the manifest and the resolved lock file belong in the repository.
+#   *.meta            - meant for the Visual Studio C++ build artifact, but Unity generates one
+#                       .meta per asset carrying the GUID that scenes and prefabs reference.
+#
+# The packaged .gitignore now carries the same negations for consumers, but they cannot be relied
+# on here: examples/.gitignore is generated, and the SDK's _KtsuSyncStyleConfigFiles target
+# rewrites it from whichever ktsu.Sdk version examples/global.json pins - today a published one
+# that predates those negations. A .gitignore this deep in the tree wins over both copies of the
+# rule and is nobody's build output.
+!Packages/manifest.json
+!Packages/packages-lock.json
+!Assets/**/*.meta

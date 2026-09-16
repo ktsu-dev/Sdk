@@ -1,0 +1,10 @@
+# The plug-in is a build output, not a source file: Demo.Unity's DeployToUnityProject target
+# copies it here after every build.
+*.dll
+*.pdb
+
+# .meta files are deliberately NOT ignored, here or anywhere in a Unity project. Unity generates
+# one per asset and it carries the GUID that scenes and prefabs reference; leaving them out of
+# version control gives every clone fresh GUIDs and silently breaks those references. That holds
+# even for a plug-in whose .dll is ignored - the .meta is what keeps the reference stable across
+# rebuilds, and it is the reason this file lists extensions rather than ignoring the folder.

@@ -1,0 +1,50 @@
+<!-- ktsu.Sdk.Godot/Sdk.props -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- Godot.NET.Sdk deliberately sets no TargetFramework: the GodotSharp bindings declare the
+         *minimum* (net8.0 as of Godot 4.7) and the project picks anything at or above it. Godot
+         hosts whichever runtime the project's runtimeconfig.json asks for, so pinning the same
+         net10.0 the rest of this SDK family pins keeps a Godot project on the same framework as
+         its sibling libraries. Override for an engine build older than the pin. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+
+    <!-- Godot is the host process; it loads the game assembly through hostfxr. -->
+    <OutputType>Library</OutputType>
+
+    <!-- Produces the runtimeconfig.json Godot needs to spin up a collectible load context for
+         the assembly, which is what makes assembly reloading in the editor work. The Godot
+         project template sets this per project; setting it here is the point of this SDK. -->
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+
+    <!-- Clear the core SDK's desktop RID list (Sdk/Sdk.props). Godot's export pipeline passes
+         the RID for the platform being exported, and Godot.NET.Sdk derives GodotTargetPlatform
+         (and the GODOT_* define constants) from that single RuntimeIdentifier. A standing list
+         of seven desktop RIDs makes every restore fan out for no benefit. -->
+    <RuntimeIdentifiers></RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <!-- The two properties below only matter when Godot.NET.Sdk is the outer SDK - that is, in a
+       real game or editor-plugin project, as opposed to a plain library that references
+       GodotSharp. Both restore a value the core SDK overwrote. -->
+  <PropertyGroup Condition="'$(UsingGodotNETSdk)' == 'true'">
+    <!-- Godot looks for the assembly at .godot/mono/temp/bin/$(Configuration)/, with no
+         framework folder, and Godot.NET.Sdk sets AppendTargetFrameworkToOutputPath=false to put
+         it there. The core SDK's Sdk.props sets it back to true, which moves the build output
+         one directory deeper and leaves the editor reporting that the assembly is missing. -->
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+    <!-- project.godot records the assembly to load in dotnet/project/assembly_name, which Godot
+         writes as the project name when it creates the C# solution. The core SDK's Sdk.props
+         sets AssemblyName to the fully-qualified namespace (e.g. ktsu.MyGame.Godot), so the
+         built DLL no longer has the name Godot is looking for. Restore the project name; a
+         consumer whose project.godot says otherwise can still set AssemblyName themselves,
+         since the project body is evaluated after this import.
+
+         PackageId, Title and Product keep the fully-qualified value the core SDK gave them:
+         they are package identity, which stays ktsu-namespaced, and are unrelated to the file
+         name Godot resolves. -->
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+  </PropertyGroup>
+</Project>
