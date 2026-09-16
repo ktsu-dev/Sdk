@@ -1,3 +1,8 @@
+## v2.28.2 (patch)
+
+Changes since v2.28.1:
+
+- Gate Dependabot auto-merge on CI actually being green ([@Claude](https://github.com/Claude))
 ## v2.28.1 (patch)
 
 Changes since v2.28.0:
@@ -5,9 +10,7 @@ Changes since v2.28.0:
 - fix: strip scaffolding folder segments from derived project identity [patch] ([@Claude](https://github.com/Claude))
 ## v2.28.1-pre.1 (prerelease)
 
-Changes since v2.28.0:
-
-- Bump the microsoft group with 1 update ([@dependabot[bot]](https://github.com/dependabot[bot]))
+Incremental prerelease update.
 ## v2.28.0 (minor)
 
 Changes since v2.27.0:
