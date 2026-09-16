@@ -7,6 +7,9 @@ using Sdk.Examples.Tests.Infrastructure;
 /// Smoke tests proving the buildable SDK demos compile end-to-end against the locally packed
 /// ktsu.Sdk packages. Platform SDKs that require another OS or a workload (Windows, macOS, iOS,
 /// Android) are covered by <see cref="PlatformSdkResolutionTests"/> via property evaluation.
+/// Both engine SDKs build on any host - Unity's plug-in is plain netstandard2.1, and a Godot
+/// game assembly compiles against the GodotSharp NuGet package with no engine installed - so
+/// they are here as well as in <see cref="EngineSdkResolutionTests"/>.
 /// </summary>
 [TestClass]
 public sealed class DemoBuildTests
@@ -20,6 +23,8 @@ public sealed class DemoBuildTests
     [DataRow("App", "App/App.csproj", DisplayName = "ktsu.Sdk.App")]
     [DataRow("Tool", "Demo.Tool/Demo.Tool.csproj", DisplayName = "ktsu.Sdk.Tool")]
     [DataRow("Linux", "Linux/Linux.csproj", DisplayName = "ktsu.Sdk.Linux")]
+    [DataRow("Unity", "Demo.Unity/Demo.Unity.csproj", DisplayName = "ktsu.Sdk.Unity")]
+    [DataRow("Godot", "Demo.Godot/Demo.Godot.csproj", DisplayName = "ktsu.Sdk.Godot")]
     public void Demo_Builds(string demo, string project)
     {
         using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo(demo));

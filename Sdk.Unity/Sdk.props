@@ -1,0 +1,26 @@
+<!-- ktsu.Sdk.Unity/Sdk.props -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- Unity loads a precompiled managed plug-in with its own Mono/IL2CPP runtime, not with
+         .NET Core, so the assembly has to be built against a profile Unity implements. Both
+         API Compatibility Levels Unity offers (".NET Standard 2.1", the default, and
+         ".NET Framework") implement netstandard2.1, which makes it the one pin that loads in
+         every supported configuration. A netX.0 assembly does not load in Unity at all.
+
+         Override to netstandard2.0 for editors older than Unity 2021.2, or to a net4x
+         framework for a project fixed on the .NET Framework profile. KTSU1003 in Sdk.targets
+         rejects anything Unity cannot load. -->
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+
+    <!-- A managed plug-in is a library that Unity's own player build links; Unity produces the
+         executable, never this project. -->
+    <OutputType>Library</OutputType>
+
+    <!-- Clear the core SDK's desktop RID list (Sdk/Sdk.props). Unity builds each player from
+         the managed assemblies itself, so a RID here buys nothing and a RID-specific restore
+         of a .NET Standard project is meaningless. -->
+    <RuntimeIdentifiers></RuntimeIdentifiers>
+  </PropertyGroup>
+</Project>

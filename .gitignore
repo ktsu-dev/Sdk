@@ -651,3 +651,6 @@ Temporary Items
 
 # ImGui.ini files
 imgui.ini
+
+# Godot generated data: the import cache, and the mono/temp bin+obj a C# build writes
+.godot/

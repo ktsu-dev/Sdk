@@ -1,0 +1,24 @@
+<!-- ktsu.Sdk.Unity/Sdk.targets -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Catches a consumer repinning the framework to one Unity cannot load. Unity's runtime is
+       Mono or IL2CPP, not .NET Core: it implements .NET Standard (2.1 under the default API
+       Compatibility Level, 2.0 before Unity 2021.2) and .NET Framework, and rejects a netX.0
+       assembly outright. Without this, the project builds clean and the failure surfaces as an
+       import error in the Unity console, far from the property that caused it.
+
+       Guarded on a non-empty TargetFramework so the outer build of a multi-targeting project
+       does not fire; each inner build is validated on its own, which leaves a consumer free to
+       multi-target netstandard2.0;netstandard2.1. -->
+  <Target Name="_KtsuValidateUnityTargetFramework" BeforeTargets="Build;Pack" Condition="'$(TargetFramework)' != ''">
+    <PropertyGroup>
+      <_KtsuUnityFrameworkSupported>false</_KtsuUnityFrameworkSupported>
+      <_KtsuUnityFrameworkSupported Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">true</_KtsuUnityFrameworkSupported>
+      <_KtsuUnityFrameworkSupported Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">true</_KtsuUnityFrameworkSupported>
+    </PropertyGroup>
+
+    <Error Condition="'$(_KtsuUnityFrameworkSupported)' != 'true'"
+           Code="KTSU1003"
+           Text="ktsu.Sdk.Unity requires a target framework Unity can load, but TargetFramework is '$(TargetFramework)'. Unity's scripting runtime implements .NET Standard and .NET Framework only; a .NET (Core) assembly fails to import. Use netstandard2.1 (the default), netstandard2.0, or a net4x framework." />
+  </Target>
+</Project>

@@ -128,6 +128,40 @@ The SDK consists of multiple sub-SDKs:
     (`dotnet workload install android ios maui`); iOS additionally needs a macOS host
   - The SDK packages themselves carry no workload dependency and pack on any host
 
+- **Sdk.Unity/**: Unity managed plug-in SDK
+  - `TargetFramework=netstandard2.1`, `OutputType=Library`, cleared `RuntimeIdentifiers`
+  - netstandard2.1 is not a stylistic choice. Unity's scripting runtime is Mono or IL2CPP,
+    and both API Compatibility Levels it offers (".NET Standard 2.1", the default, and
+    ".NET Framework") implement netstandard2.1 — a `netX.0` assembly does not import at all.
+  - Errors (KTSU1003) when the resolved `TargetFramework` is not `.NETStandard` or
+    `.NETFramework`. The guard is per inner build (`'$(TargetFramework)' != ''`), so a
+    consumer is still free to multi-target `netstandard2.0;netstandard2.1`; without it the
+    project builds clean and the failure only appears in the Unity console.
+
+- **Sdk.Godot/**: Godot 4 game assembly SDK
+  - `TargetFramework=net10.0`, `OutputType=Library`, `EnableDynamicLoading=true`,
+    cleared `RuntimeIdentifiers`
+  - Composes with `Godot.NET.Sdk` as the outer SDK (`<Project Sdk="Godot.NET.Sdk/4.x">`),
+    which brings the GodotSharp bindings, the source generators, the `Debug;ExportDebug;
+    ExportRelease` configurations and the `.godot/mono/temp` output layout, and which
+    deliberately sets no `TargetFramework` of its own.
+  - `EnableDynamicLoading` produces the runtimeconfig.json Godot needs to load the assembly
+    into a collectible load context, which is what makes editor assembly reloading work.
+    The Godot project template sets it per project; setting it here is the point of the SDK.
+  - Two properties are put back **only under `'$(UsingGodotNETSdk)' == 'true'`**, because
+    each is a contract with the engine rather than with .NET:
+    - `AppendTargetFrameworkToOutputPath=false`. Godot.NET.Sdk sets this so the assembly
+      lands in `.godot/mono/temp/bin/$(Configuration)/`; the core SDK's `Sdk.props` sets it
+      back to `true`, which moves the output one directory deeper and leaves the editor
+      reporting a missing assembly.
+    - `AssemblyName=$(MSBuildProjectName)`. `project.godot` resolves the assembly by the
+      name in `dotnet/project/assembly_name`, which Godot writes as the project name; the
+      core SDK sets `AssemblyName` to the fully-qualified namespace. `PackageId`, `Title`
+      and `Product` were already computed from the old value and keep it, which is correct:
+      they are package identity, not the file name Godot loads.
+  - Neither engine SDK needs its engine installed to build, so both demos are full build
+    tests rather than property-evaluation-only ones.
+
 ## Key SDK Features
 
 ### Hierarchical Solution Discovery
@@ -156,10 +190,12 @@ The SDK automatically detects project types based on naming conventions:
 - **Windows Projects**: `{SolutionName}.Windows`, `{SolutionName}Windows`, `{SolutionName}.Win`
 - **Linux Projects**: `{SolutionName}.Linux`, `{SolutionName}Linux`
 - **macOS Projects**: `{SolutionName}.macOS`, `{SolutionName}.MacOS`, `{SolutionName}.Mac`
+- **Unity Projects**: `{SolutionName}.Unity`, `{SolutionName}Unity`
+- **Godot Projects**: `{SolutionName}.Godot`, `{SolutionName}Godot`
 - **Tool Projects**: `{SolutionName}.Tool`, `{SolutionName}Tool` — deliberately *not* `.CLI`, so no existing console project silently starts publishing itself as a tool package
 - **Test Projects**: `{SolutionName}.Test`, `{SolutionName}.Tests`, `{SolutionName}Test`, `{SolutionName}Tests`
 
-Properties set based on detection: `IsPrimaryProject`, `IsCliProject`, `IsAppProject`, `IsToolProject`, `IsIosProject`, `IsAndroidProject`, `IsWindowsProject`, `IsLinuxProject`, `IsMacProject`, `IsTestProject`
+Properties set based on detection: `IsPrimaryProject`, `IsCliProject`, `IsAppProject`, `IsToolProject`, `IsIosProject`, `IsAndroidProject`, `IsWindowsProject`, `IsLinuxProject`, `IsMacProject`, `IsUnityProject`, `IsGodotProject`, `IsTestProject`
 
 ### Analyzer-Enforced Requirements
 
@@ -241,7 +277,9 @@ goes out of support. .NET Standard 2.0/2.1 stay as the fallback, so a consumer o
 framework resolves the netstandard2.1 asset rather than being stranded. Next scheduled change:
 2026-11-10.
 
-Individual SDK sub-projects (ConsoleApp, App) override `TargetFrameworks` to target a single framework (net10.0).
+Every extension SDK overrides `TargetFrameworks` to pin a single framework: net10.0 for the
+app, tool, desktop and Godot SDKs, the platform TFM for iOS/Android, and netstandard2.1 for
+Unity — the one profile Unity's scripting runtime can load.
 
 ### Code Quality
 - `LangVersion=latest`
@@ -314,7 +352,8 @@ to be here had drifted out of date and silently pointed at the wrong code.
 
 In `Sdk/Sdk.props`:
 - **Solution/project discovery**: `<!-- Find solution directory by searching up the hierarchy -->`
-- **Project type detection**: the `{Cli,App,Ios,Android,Windows,Linux,Mac,Tool,Test,Primary}ProjectName`
+- **Project type detection**: the
+  `{Cli,App,Ios,Android,Windows,Linux,Mac,Unity,Godot,Tool,Test,Primary}ProjectName`
   probe chains, ending at the `Is*Project` flags
 - **Metadata file loading**: `<!-- Descriptive properties -->`
 - **Namespace generation**: `<!-- Namespace properties -->`

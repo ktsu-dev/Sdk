@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Unity managed plug-in (netstandard2.1, the profile Unity's scripting runtime implements).
+       Named {Solution}.Unity so the core SDK detects the project type. Build it, then copy the
+       output into the Unity project's Assets/Plugins folder. -->
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Unity" />
+  <ItemGroup>
+    <!-- Standard packages required by KTSU0001 for a non-test .NET Standard project. -->
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+    <PackageReference Include="System.Memory" />
+  </ItemGroup>
+</Project>

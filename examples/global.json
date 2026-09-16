@@ -13,7 +13,9 @@
     "ktsu.Sdk.Linux": "2.26.1",
     "ktsu.Sdk.macOS": "2.26.1",
     "ktsu.Sdk.iOS": "2.26.1",
-    "ktsu.Sdk.Android": "2.26.1"
+    "ktsu.Sdk.Android": "2.26.1",
+    "ktsu.Sdk.Unity": "2.26.1",
+    "ktsu.Sdk.Godot": "2.26.1"
   },
   "test": {
     "runner": "Microsoft.Testing.Platform"

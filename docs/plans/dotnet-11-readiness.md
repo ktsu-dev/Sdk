@@ -153,8 +153,10 @@ by element and condition, not by number alone:
 2. `Sdk/Sdk.props`, the test-project `<TargetFramework>` and `<TargetFrameworks>` conditions,
    to `net11.0`
 3. `Sdk.App`, `Sdk.ConsoleApp`, `Sdk.Tool`, `Sdk.Windows`, `Sdk.Linux`,
-   `Sdk.macOS` to `net11.0`
-4. `Sdk.iOS` to `net11.0-ios`, `Sdk.Android` to `net11.0-android`
+   `Sdk.macOS`, `Sdk.Godot` to `net11.0`
+4. `Sdk.iOS` to `net11.0-ios`, `Sdk.Android` to `net11.0-android`. `Sdk.Unity` does **not**
+   move: it pins `netstandard2.1` because that is the profile Unity's scripting runtime
+   implements, which has nothing to do with the .NET support lifecycle.
 5. `.github/workflows/dotnet-sdk.yml:24`, `DOTNET_VERSION` to `11.0`
 6. `examples/global.json`, SDK pin to `11.0.100`
 7. `README.md` and `CLAUDE.md`, every mention of the current default framework list or the

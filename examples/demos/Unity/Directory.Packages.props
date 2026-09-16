@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Polyfill" Version="7.0.0" />
+    <!-- KTSU0001 requires System.Memory on every .NET Standard target framework. -->
+    <PackageVersion Include="System.Memory" Version="4.6.3" />
+  </ItemGroup>
+</Project>
