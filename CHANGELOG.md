@@ -1,3 +1,14 @@
+## v2.29.0 (minor)
+
+Changes since v2.28.0:
+
+- feat: add ktsu.Sdk.Unity and ktsu.Sdk.Godot game engine SDKs [minor] ([@Claude](https://github.com/Claude))
+- feat: build out the Unity and Godot demos into real engine projects [minor] ([@Claude](https://github.com/Claude))
+- fix: put the Unity demo's MonoBehaviour in a namespace [patch] ([@Claude](https://github.com/Claude))
+- fix: stop the shared .gitignore from eating Unity source [minor] ([@Claude](https://github.com/Claude))
+- fix: strip scaffolding folder segments from derived project identity [patch] ([@Claude](https://github.com/Claude))
+- fix: validate the assembly name EngineDemoWorkflowTests parses [patch] ([@Claude](https://github.com/Claude))
+- Gate Dependabot auto-merge on CI actually being green ([@Claude](https://github.com/Claude))
 ## v2.28.2 (patch)
 
 Changes since v2.28.1:
