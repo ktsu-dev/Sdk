@@ -40,15 +40,14 @@ public sealed class EngineSdkResolutionTests
     /// resolves it by the file name recorded in <c>project.godot</c>. Godot.NET.Sdk sets both up;
     /// the core SDK's <c>AppendTargetFrameworkToOutputPath</c> and its fully-qualified
     /// <c>AssemblyName</c> each move the assembly out from under the engine, so ktsu.Sdk.Godot
-    /// puts both back. The AUTHORS.md is what makes the assembly name diverge at all — without an
-    /// authors namespace the core SDK's name and the project name coincide and the assertion
-    /// would pass either way.
+    /// puts both back. The demo's AUTHORS.md is what makes the assembly name diverge at all:
+    /// without an authors namespace the core SDK's derived name and the project name are the
+    /// same string and the assertion would pass either way.
     /// </summary>
     [TestMethod]
     public void GodotSdk_KeepsTheAssemblyWhereTheEngineLooksForIt()
     {
         using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Godot"));
-        workspace.WriteFile("AUTHORS.md", "ktsu" + Environment.NewLine);
 
         IReadOnlyDictionary<string, string> props = workspace.Evaluate(
             "Demo.Godot/Demo.Godot.csproj",

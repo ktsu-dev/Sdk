@@ -1,0 +1,6 @@
+# The plug-in is a build output, not a source file: Demo.Unity's DeployToUnityProject target
+# copies it here after every build. Unity's own .meta files for it are generated on import and
+# would normally be committed in a real project, so that a re-import keeps the same GUID.
+*.dll
+*.pdb
+*.meta

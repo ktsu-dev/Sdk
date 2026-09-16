@@ -1,0 +1,18 @@
+; Engine configuration file.
+; A real project.godot is written by the Godot editor; this one is hand-trimmed to the
+; entries the demo needs. The key line for ktsu.Sdk.Godot is dotnet/project/assembly_name:
+; Godot loads that exact file name out of .godot/mono/temp/bin/<Configuration>/, which is
+; why the SDK pins AssemblyName to the project name instead of letting the core SDK rename
+; the assembly to the fully-qualified namespace.
+
+config_version=5
+
+[application]
+
+config/name="Demo.Godot"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.7", "C#", "Forward Plus")
+
+[dotnet]
+
+project/assembly_name="Demo.Godot"

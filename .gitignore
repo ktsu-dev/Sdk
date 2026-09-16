@@ -203,6 +203,11 @@ PublishScripts/
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
+# and except a Unity project's Packages/, which is source: Unity's package manifest and its
+# resolved lock file are both meant to be committed, and a NuGet restore folder never contains
+# a file by either name.
+!**/[Pp]ackages/manifest.json
+!**/[Pp]ackages/packages-lock.json
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
 # NuGet v3's project.json files produces more ignorable files

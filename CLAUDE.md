@@ -160,7 +160,14 @@ The SDK consists of multiple sub-SDKs:
       and `Product` were already computed from the old value and keep it, which is correct:
       they are package identity, not the file name Godot loads.
   - Neither engine SDK needs its engine installed to build, so both demos are full build
-    tests rather than property-evaluation-only ones.
+    tests rather than property-evaluation-only ones. The demos under `examples/demos/{Unity,Godot}`
+    carry the engine-side files as well (a Unity project with `Assets/Plugins` + a MonoBehaviour,
+    an openable Godot project with `project.godot` and a scene), because what is worth showing
+    about either SDK is a contract with the engine rather than a property value.
+    `EngineDemoWorkflowTests` asserts the artifacts: that the assembly named in `project.godot`
+    exists where Godot loads it from, and that the Unity plug-in reaches `Assets/Plugins`. The
+    Godot demo's `AUTHORS.md` is load-bearing — without an authors namespace the core SDK's
+    derived assembly name equals the project name and the assertion is vacuous.
 
 ## Key SDK Features
 

@@ -293,6 +293,10 @@ outer SDK:
 A project named `{Solution}.Unity`/`{Solution}Unity` or
 `{Solution}.Godot`/`{Solution}Godot` also sets `IsUnityProject` / `IsGodotProject`.
 
+Runnable demos for both, including the engine-side halves and the deployment step, are under
+[`examples/demos/Unity`](examples/demos/Unity/README.md) and
+[`examples/demos/Godot`](examples/demos/Godot/README.md).
+
 ## Detailed Usage
 
 ### Setup Requirements

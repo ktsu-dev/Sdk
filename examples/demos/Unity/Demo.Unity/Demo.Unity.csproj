@@ -1,12 +1,41 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Unity managed plug-in (netstandard2.1, the profile Unity's scripting runtime implements).
-       Named {Solution}.Unity so the core SDK detects the project type. Build it, then copy the
-       output into the Unity project's Assets/Plugins folder. -->
+       Named {Solution}.Unity so the core SDK detects the project type. -->
   <Sdk Name="ktsu.Sdk" />
   <Sdk Name="ktsu.Sdk.Unity" />
+
+  <PropertyGroup>
+    <!-- Where the consuming Unity project keeps its managed plug-ins. Unity does no NuGet
+         resolution and never builds this project: the plug-in reaches the editor by being
+         copied into Assets/, and Unity imports whatever .dll it finds there. -->
+    <UnityPluginsDir>$(MSBuildProjectDirectory)/../UnityProject/Assets/Plugins/</UnityPluginsDir>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Standard packages required by KTSU0001 for a non-test .NET Standard project. -->
     <PackageReference Include="Polyfill" PrivateAssets="all" />
     <PackageReference Include="System.Memory" />
   </ItemGroup>
+
+  <!-- Deploys the plug-in and its runtime closure to the Unity project. The whole output
+       directory is copied, not just $(TargetPath): Unity resolves nothing for you, so every
+       assembly the plug-in needs at run time has to sit alongside it.
+
+       This demo happens to have no runtime dependencies at all, which is worth understanding
+       rather than assuming. Polyfill embeds source at build time and has no runtime assembly
+       (which is also why KTSU0007 wants PrivateAssets="all" on it), and System.Memory ships
+       lib/netstandard2.1/_._ because netstandard2.1 already has Span<T> - the reference exists
+       to satisfy KTSU0001, and contributes nothing to the output. Retarget to netstandard2.0
+       for an older editor and System.Memory.dll does appear, and does have to be deployed.
+
+       A real project would more likely deploy from a publish, or hand the DLL over through
+       NuGetForUnity. This target is the smallest thing that shows the shape of the step. -->
+  <Target Name="DeployToUnityProject" AfterTargets="Build" Condition="'$(UnityPluginsDir)' != ''">
+    <ItemGroup>
+      <_UnityPlugin Include="$(TargetDir)*.dll" />
+      <_UnityPlugin Include="$(TargetDir)*.pdb" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_UnityPlugin)" DestinationFolder="$(UnityPluginsDir)" SkipUnchangedFiles="true" />
+    <Message Importance="high" Text="Deployed @(_UnityPlugin->Count()) plug-in file(s) to $(UnityPluginsDir)" />
+  </Target>
 </Project>
