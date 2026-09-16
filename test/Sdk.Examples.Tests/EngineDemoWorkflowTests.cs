@@ -27,22 +27,32 @@ public sealed partial class EngineDemoWorkflowTests
         CliResult result = workspace.Build("Demo.Godot/Demo.Godot.csproj");
         Assert.IsTrue(result.Succeeded, $"Expected the Godot demo to build.{Environment.NewLine}{result.Output}");
 
-        string projectGodot = Path.Combine(workspace.Root, "Demo.Godot", "project.godot");
+        string projectGodot = Path.Join(workspace.Root, "Demo.Godot", "project.godot");
         Match match = AssemblyNameEntry().Match(File.ReadAllText(projectGodot));
         Assert.IsTrue(match.Success, $"'{projectGodot}' has no dotnet/project/assembly_name entry.");
 
         string assemblyName = match.Groups["name"].Value;
-        string godotBin = Path.Combine(workspace.Root, "Demo.Godot", ".godot", "mono", "temp", "bin", "Release");
+
+        // The entry is a bare assembly name, and the checks below depend on that being true: the
+        // regex accepts anything that is not a quote, so a value carrying a directory separator or
+        // a drive root would resolve them outside the bin directory, where File.Exists could
+        // succeed against an unrelated file and report a contract this SDK is not keeping.
+        Assert.AreEqual(
+            assemblyName,
+            Path.GetFileName(assemblyName),
+            "dotnet/project/assembly_name must be a bare assembly name, not a path.");
+
+        string godotBin = Path.Join(workspace.Root, "Demo.Godot", ".godot", "mono", "temp", "bin", "Release");
 
         Assert.IsTrue(
-            File.Exists(Path.Combine(godotBin, assemblyName + ".dll")),
+            File.Exists(Path.Join(godotBin, assemblyName + ".dll")),
             $"Godot loads '{assemblyName}.dll' from its bin directory, but it is not there. " +
             $"Present: {Describe(godotBin)}");
 
         // EnableDynamicLoading, end to end: without the runtimeconfig.json Godot cannot spin up
         // the collectible load context the assembly is loaded into.
         Assert.IsTrue(
-            File.Exists(Path.Combine(godotBin, assemblyName + ".runtimeconfig.json")),
+            File.Exists(Path.Join(godotBin, assemblyName + ".runtimeconfig.json")),
             $"Expected a runtimeconfig.json alongside the assembly. Present: {Describe(godotBin)}");
     }
 
@@ -59,10 +69,10 @@ public sealed partial class EngineDemoWorkflowTests
         CliResult result = workspace.Build("Demo.Unity/Demo.Unity.csproj");
         Assert.IsTrue(result.Succeeded, $"Expected the Unity demo to build.{Environment.NewLine}{result.Output}");
 
-        string plugins = Path.Combine(workspace.Root, "UnityProject", "Assets", "Plugins");
+        string plugins = Path.Join(workspace.Root, "UnityProject", "Assets", "Plugins");
 
         Assert.IsTrue(
-            File.Exists(Path.Combine(plugins, "Demo.Unity.dll")),
+            File.Exists(Path.Join(plugins, "Demo.Unity.dll")),
             $"Expected the plug-in in the Unity project's Assets/Plugins. Present: {Describe(plugins)}");
     }
 
