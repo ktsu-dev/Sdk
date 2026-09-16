@@ -51,8 +51,38 @@ different matter and will still fail on Unity's.
 
 ## About the Unity project
 
-`UnityProject/` is a skeleton, not a full Unity project: it carries the editor version,
-a package manifest and the two `Assets/` folders that matter here. Opening it in Unity
-regenerates the rest. `Assets/Plugins/.gitignore` keeps the deployed build output out of
-version control; in a real project you would commit Unity's generated `.meta` file for the
-plug-in, so that a re-import keeps the same GUID.
+`UnityProject/` is a skeleton, not a full Unity project: it carries the editor version, a
+package manifest and the two `Assets/` folders that matter here. Opening it in Unity
+regenerates the rest.
+
+### Version control
+
+A Unity project brings its own `.gitignore`, and this one is worth reading before you copy the
+layout. Two rules in the shared ktsu.Sdk `.gitignore` — both generic .NET/Visual Studio rules
+that predate any engine support — will quietly eat Unity source if nothing overrides them:
+
+| Rule | Meant for | What it also catches |
+| --- | --- | --- |
+| `**/[Pp]ackages/*` | a NuGet restore folder | Unity's `Packages/manifest.json` and `packages-lock.json`, which are project source |
+| `*.meta` | the Visual Studio C++ build artifact | every Unity `.meta` file |
+
+The `.meta` one is the dangerous one. Unity generates a `.meta` per asset carrying the GUID that
+scenes, prefabs and serialized references point at. Leave them out of version control and every
+clone regenerates fresh GUIDs, silently breaking those references — including for a plug-in whose
+`.dll` is itself a build output, since the `.meta` is what keeps the reference stable across
+rebuilds. The packaged `.gitignore` now negates both rules for the asset tree, so a consuming
+repository gets this right by default.
+
+`UnityProject/.gitignore` repeats those negations anyway, because this demo cannot rely on them:
+`examples/.gitignore` is generated — the SDK's `_KtsuSyncStyleConfigFiles` target rewrites it from
+whichever ktsu.Sdk version [`global.json`](../../global.json) pins, today a published one that
+predates them — and a rule in that copy beats a *negation* of the same rule at the repository
+root. (A brand-new rule with no counterpart there, like Godot's `.godot/`, is unaffected and needs
+no such workaround.)
+
+That file also ignores Unity's own generated folders — `Library/`, `Temp/`, `Logs/` and friends.
+Those stay out of the shared `.gitignore` on purpose: the names are only caches when they sit
+beside `Assets/` and `ProjectSettings/`, and ignoring something as generic as `Library/`
+repo-wide would catch unrelated directories — this repository's own `examples/demos/Library`
+among them. `Assets/Plugins/.gitignore` keeps the deployed `.dll` and `.pdb` out while leaving
+their `.meta` files committable.

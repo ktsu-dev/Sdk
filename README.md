@@ -297,6 +297,15 @@ Runnable demos for both, including the engine-side halves and the deployment ste
 [`examples/demos/Unity`](examples/demos/Unity/README.md) and
 [`examples/demos/Godot`](examples/demos/Godot/README.md).
 
+The `.gitignore` the SDK syncs into consuming repositories gains Godot's `.godot/` cache, and
+negates two of its own generic rules for Unity: `**/[Pp]ackages/*` (a NuGet restore folder, but
+Unity's `Packages/` is project source) and `*.meta` (the Visual Studio C++ build artifact, but
+Unity generates one `.meta` per asset carrying the GUID scenes and prefabs reference). Both
+negations are scoped, so a Unity project keeps its source while the artifacts they were written
+for stay ignored everywhere else. Unity's generated caches — `Library/`, `Temp/`, `Logs/` — are
+deliberately *not* added: those names are only caches beside an `Assets/` folder, so they belong
+in the Unity project's own `.gitignore`, as the demo shows.
+
 ## Detailed Usage
 
 ### Setup Requirements
