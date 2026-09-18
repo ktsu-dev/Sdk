@@ -1,3 +1,8 @@
+## v2.30.0 (minor)
+
+Changes since v2.29.0:
+
+- [minor] Add ktsu.Sdk.Web for ASP.NET Core applications ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.29.0 (minor)
 
 Changes since v2.28.0:
