@@ -1,4 +1,4 @@
-namespace Sdk.Examples.Tests;
+﻿namespace Sdk.Examples.Tests;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdk.Examples.Tests.Infrastructure;
@@ -25,6 +25,7 @@ public sealed class DemoBuildTests
     [DataRow("Linux", "Linux/Linux.csproj", DisplayName = "ktsu.Sdk.Linux")]
     [DataRow("Unity", "Demo.Unity/Demo.Unity.csproj", DisplayName = "ktsu.Sdk.Unity")]
     [DataRow("Godot", "Demo.Godot/Demo.Godot.csproj", DisplayName = "ktsu.Sdk.Godot")]
+    [DataRow("Web", "Web/Web.csproj", DisplayName = "ktsu.Sdk.Web")]
     public void Demo_Builds(string demo, string project)
     {
         using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo(demo));

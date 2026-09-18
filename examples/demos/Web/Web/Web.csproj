@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <!-- ASP.NET Core web application (net10.0, OutputType=Exe). Microsoft.NET.Sdk.Web is the outer
+       SDK because an <Sdk Name="..." /> element extends the base SDK rather than replacing it, so
+       ktsu.Sdk.Web cannot bring the ASP.NET Core framework reference in on its own. -->
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Web" />
+  <ItemGroup>
+    <!-- Standard packages required by KTSU0001 for non-test projects. -->
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

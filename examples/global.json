@@ -8,6 +8,7 @@
     "ktsu.Sdk": "2.26.1",
     "ktsu.Sdk.ConsoleApp": "2.26.1",
     "ktsu.Sdk.Tool": "2.26.1",
+    "ktsu.Sdk.Web": "2.26.1",
     "ktsu.Sdk.App": "2.26.1",
     "ktsu.Sdk.Windows": "2.26.1",
     "ktsu.Sdk.Linux": "2.26.1",

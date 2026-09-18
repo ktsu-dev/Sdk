@@ -1,4 +1,4 @@
-namespace Sdk.Examples.Tests.Infrastructure;
+﻿namespace Sdk.Examples.Tests.Infrastructure;
 
 /// <summary>
 /// Locates the repository root and the well-known paths inside it, independent of where
@@ -38,6 +38,7 @@ internal static class RepoLayout
         "Sdk.Android",
         "Sdk.Unity",
         "Sdk.Godot",
+        "Sdk.Web",
     ];
 
     private static string FindRoot()

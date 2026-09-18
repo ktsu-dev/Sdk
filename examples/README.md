@@ -28,9 +28,10 @@ feed and builds each example against it. That project runs in CI via the
 | `Android` | `ktsu.Sdk` + `ktsu.Sdk.Android` | `net10.0-android` (requires the `android` workload to build). |
 | [`Unity`](./demos/Unity/README.md) | `ktsu.Sdk` + `ktsu.Sdk.Unity` | `netstandard2.1` managed plug-in, plus the Unity project it is deployed into. |
 | [`Godot`](./demos/Godot/README.md) | `Godot.NET.Sdk` + `ktsu.Sdk` + `ktsu.Sdk.Godot` | An openable Godot 4 project whose `project.godot` resolves the built assembly. |
+| `Web` | `Microsoft.NET.Sdk.Web` + `ktsu.Sdk` + `ktsu.Sdk.Web` | ASP.NET Core service on a single `net10.0` target, with an undocumented public type proving CS1591 is suppressed. |
 | `Test` | `ktsu.Sdk` | Library + MSTest project: test-project detection and `InternalsVisibleTo`. |
 
-`Library`, `ConsoleApp`, `App`, `Tool`, `Linux`, `Unity`, `Godot` and `Test` build fully on a
+`Library`, `ConsoleApp`, `App`, `Tool`, `Linux`, `Unity`, `Godot`, `Web` and `Test` build fully on a
 Linux runner. The remaining platform SDKs need another OS or a workload, so CI verifies them by
 **property evaluation** (`TargetFramework`, `OutputType`, `RuntimeIdentifiers`, detection flag)
 instead of a full build.
