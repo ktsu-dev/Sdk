@@ -117,6 +117,31 @@ The SDK consists of multiple sub-SDKs:
     not by this property.
   - Errors (KTSU1001) if `TargetFrameworks` is set: a tool package cannot multi-target
 
+- **Sdk.Web/**: ASP.NET Core web application SDK
+  - `TargetFramework=net10.0`, `OutputType=Exe`, `IsWebProject=true`
+  - The only SDK here whose outer SDK is not `Microsoft.NET.Sdk`. An `<Sdk Name="..." />`
+    element extends the base rather than replacing it, so this SDK cannot supply the
+    ASP.NET Core framework reference: the consumer uses `Microsoft.NET.Sdk.Web`, or adds
+    `<FrameworkReference Include="Microsoft.AspNetCore.App" />` and writes its own usings.
+  - Suppresses `CS1591` while leaving `GenerateDocumentationFile` on. The core SDK pairs
+    documentation generation with `TreatWarningsAsErrors`, so the first undocumented public
+    type fails the build. Correct for a library, whose public types are its product; wrong
+    for a service, whose public types are payload shapes with no external consumer. The
+    documentation file survives because OpenAPI generators read it.
+  - Disables package validation, `ApiCompatValidateAssemblies` and `IncludeSource`, as
+    Sdk.Tool does: the artifact is a container image or a published directory, not a package.
+  - Leaves `RuntimeIdentifiers` as the core desktop list. Unlike packing (Sdk.Tool) or engine
+    export (Sdk.Godot), publishing does not turn each entry into work, so the list is a set of
+    permitted values and narrowing it would reject a legitimate `-r win-x64`.
+  - Errors (KTSU1004) if `TargetFrameworks` is set: ASP.NET Core publishes no netstandard
+    surface, and the failure without the guard is CS0234 inside generated global usings.
+  - Errors (KTSU1005) when neither `UsingMicrosoftNETSdkWeb` nor a `Microsoft.AspNetCore.App`
+    `FrameworkReference` is present. Hooked `BeforeTargets="CoreCompile"`, not `Build`: a
+    target's `DependsOnTargets` are already satisfied when its `BeforeTargets` hooks run, so
+    on a single-framework project a `Build` hook fires after the compile it means to pre-empt.
+    KTSU1001 and KTSU1004 escape this because a set `TargetFrameworks` implies an outer build,
+    which dispatches inner builds from `Build` itself.
+
 - **Sdk.Windows/**, **Sdk.Linux/**, **Sdk.macOS/**: Desktop per-OS app SDKs
   - RID-based presets on the base `net10.0` runtime (no extra prerequisites)
   - Narrow `RuntimeIdentifiers` to the target OS and default `RuntimeIdentifier`

@@ -1,0 +1,58 @@
+<!-- ktsu.Sdk.Web/Sdk.props -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <!-- ASP.NET Core publishes no netstandard surface, and the core SDK's multi-target default
+         (Sdk/Sdk.props) includes netstandard2.0 and netstandard2.1. Left in place, the Web SDK's
+         implicit global usings do not resolve on those two inner builds and the compile fails in
+         generated code - a wall of CS0234 against Microsoft.AspNetCore in GlobalUsings.g.cs, which
+         names neither the framework nor the SDK that put it there. Collapse to the single pinned
+         framework the rest of this SDK family uses. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+
+    <!-- ASP.NET Core hosts itself: the published app is an executable, not something a host
+         loads. Microsoft.NET.Sdk.Web sets this too; it is repeated here so the value is right
+         even when the outer SDK is plain Microsoft.NET.Sdk plus a framework reference. -->
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- A web application is delivered as a container image or a published directory, never as a
+         NuGet package, so the library-oriented pack and API-compatibility defaults inherited from
+         the core SDK are noise. IsPackable is already false by derivation - the core SDK packs
+         libraries and this is an Exe - but these three checks run regardless of it. -->
+    <EnablePackageValidation>false</EnablePackageValidation>
+    <ApiCompatValidateAssemblies>false</ApiCompatValidateAssemblies>
+    <IncludeSource>false</IncludeSource>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- The documentation file stays on, because OpenAPI generators (Swashbuckle, NSwag) read it
+         to enrich generated schemas, which is a real reason a web project wants one. What does not
+         belong is the enforcement: the core SDK pairs GenerateDocumentationFile with
+         TreatWarningsAsErrors, and CS1591 then fails the build on the first undocumented public
+         type. For a library that is correct, since its public types are its product. A web
+         application's public types are request and response shapes with no external consumer, and
+         a rule written for API surface should not stop a service compiling.
+
+         Suppressed rather than disabled so the capability survives, and appended rather than
+         assigned so the core SDK's own suppression list is kept. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Project-type flag, matching IsWindowsProject / IsLinuxProject / IsIosProject. Lets CI and
+         tooling tell a service from a library or a desktop app without parsing the csproj. -->
+    <IsWebProject>true</IsWebProject>
+  </PropertyGroup>
+
+  <!-- RuntimeIdentifiers is deliberately left as the core SDK's desktop list rather than narrowed
+       to linux-x64. A web application is commonly published with an explicit RID for a container
+       image and equally commonly published without one, and nothing here can tell which. The list
+       is a set of permitted values, not a build fan-out, so leaving it costs nothing and narrowing
+       it would reject a legitimate `dotnet publish -r win-x64` for a service hosted on Windows.
+       Sdk.Tool and Sdk.Godot clear it because packing and engine export respectively turn each
+       entry into real work; publishing does not. -->
+
+</Project>

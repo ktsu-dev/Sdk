@@ -1,0 +1,37 @@
+<!-- ktsu.Sdk.Web/Sdk.targets -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Catches a consumer re-declaring TargetFrameworks in their own PropertyGroup, which is
+       evaluated after Sdk.props and so wins over the single framework set there. Without this the
+       netstandard inner builds come back and the failure is a wall of CS0234 inside
+       GlobalUsings.g.cs, pointing at generated code rather than at the property that caused it. -->
+  <Target Name="_KtsuValidateWebTargetFramework" BeforeTargets="Build;Publish">
+    <Error Condition="'$(TargetFrameworks)' != ''"
+           Code="KTSU1004"
+           Text="ktsu.Sdk.Web requires a single TargetFramework, but TargetFrameworks is set to '$(TargetFrameworks)'. ASP.NET Core publishes no netstandard surface, so a multi-targeted web project fails inside generated global usings. Remove TargetFrameworks, or set TargetFramework to override the default." />
+  </Target>
+
+  <!-- ASP.NET Core needs the Microsoft.AspNetCore.App framework reference, which arrives either
+       from Microsoft.NET.Sdk.Web as the outer SDK or from an explicit FrameworkReference. This SDK
+       cannot supply the outer SDK itself - an <Sdk Name="..." /> element extends the base, it does
+       not replace it - so the consumer has to pick one, and getting neither is the easy mistake.
+       Fail with the reason rather than leaving CS0234 to imply it.
+
+       Hooked before CoreCompile rather than before Build, because a target's DependsOnTargets are
+       already satisfied by the time its BeforeTargets hooks run: on a single-framework project
+       BeforeTargets="Build" fires after the compile it is meant to pre-empt, and the compiler error
+       wins the race. KTSU1004 above does not have the problem, since the condition it guards can
+       only be true in an outer build, which dispatches its inner builds from the Build target
+       itself. -->
+  <Target Name="_KtsuValidateWebFrameworkReference" BeforeTargets="CoreCompile;Publish">
+    <ItemGroup>
+      <_KtsuAspNetCoreFrameworkReference Include="@(FrameworkReference)"
+                                         Condition="'%(Identity)' == 'Microsoft.AspNetCore.App'" />
+    </ItemGroup>
+
+    <Error Condition="'$(UsingMicrosoftNETSdkWeb)' != 'true' And '@(_KtsuAspNetCoreFrameworkReference)' == ''"
+           Code="KTSU1005"
+           Text="ktsu.Sdk.Web found no ASP.NET Core framework reference. Use Microsoft.NET.Sdk.Web as the project's SDK (&lt;Project Sdk=&quot;Microsoft.NET.Sdk.Web&quot;&gt;), or add &lt;FrameworkReference Include=&quot;Microsoft.AspNetCore.App&quot; /&gt; for a service that needs the runtime without the Web SDK's static asset and Razor machinery." />
+  </Target>
+
+</Project>

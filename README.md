@@ -28,6 +28,7 @@ Add the SDK to your global.json (recommended):
     "ktsu.Sdk.ConsoleApp": "2.26.1",
     "ktsu.Sdk.App": "2.26.1",
     "ktsu.Sdk.Tool": "2.26.1",
+    "ktsu.Sdk.Web": "2.26.1",
     "ktsu.Sdk.Windows": "2.26.1",
     "ktsu.Sdk.Linux": "2.26.1",
     "ktsu.Sdk.macOS": "2.26.1",
@@ -91,6 +92,22 @@ For a .NET tool (distributed via `dotnet tool install`):
   <Sdk Name="ktsu.Sdk.Tool" />
 </Project>
 ```
+
+For an ASP.NET Core web application or service:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <Sdk Name="ktsu.Sdk" />
+  <Sdk Name="ktsu.Sdk.Web" />
+</Project>
+```
+
+Note the outer SDK. An `<Sdk Name="..." />` element extends the base SDK rather than replacing
+it, so `ktsu.Sdk.Web` cannot supply the ASP.NET Core framework reference itself. Use
+`Microsoft.NET.Sdk.Web` as above, or keep `Microsoft.NET.Sdk` and add
+`<FrameworkReference Include="Microsoft.AspNetCore.App" />` for a service that wants the runtime
+without the Web SDK's static asset and Razor machinery. That second form does not bring the Web
+SDK's implicit global usings, so write them yourself. Getting neither is **KTSU1005**.
 
 For a platform-specific application (e.g. Linux), reference the matching SDK:
 
@@ -221,6 +238,33 @@ reference this SDK.
 
 Note that packing any project requires the metadata files the SDK declares as package
 metadata (`LICENSE.md`, `README.md`, `icon.png`) to exist in the solution directory.
+
+### **ktsu.Sdk.Web**
+
+Extension SDK for ASP.NET Core web applications and services. Adds:
+
+- Single target framework (net10.0). ASP.NET Core publishes no netstandard surface, so the
+  core SDK's multi-target default cannot stand: its netstandard inner builds fail inside the
+  Web SDK's generated global usings, as a wall of CS0234 naming neither the framework nor the
+  SDK responsible. **KTSU1004** catches a consumer putting `TargetFrameworks` back.
+- `CS1591` suppressed, while `GenerateDocumentationFile` stays on. The core SDK pairs
+  documentation generation with warnings-as-errors, which fails a build on the first
+  undocumented public type. That is right for a library, whose public types are its product,
+  and wrong for a service, whose public types are request and response shapes with no external
+  consumer. The documentation file itself is kept because OpenAPI generators read it.
+- Package validation, assembly API compatibility and `IncludeSource` disabled, as on
+  `ktsu.Sdk.Tool`: a web application ships as a container image or a published directory, never
+  as a package.
+- `IsWebProject=true`, matching the `IsWindowsProject` / `IsLinuxProject` family so CI and
+  tooling can tell a service from a library without parsing the project file.
+
+`RuntimeIdentifiers` is deliberately left as the core SDK's desktop list. A service is
+published with an explicit RID about as often as without one, the list permits values rather
+than causing a build fan-out, and narrowing it would reject a legitimate `-r win-x64`.
+
+This is the one SDK in the family whose outer SDK is not `Microsoft.NET.Sdk`. See the usage
+example above, and **KTSU1005** for what happens when the ASP.NET Core framework reference is
+missing entirely.
 
 ### Platform-Specific App SDKs
 
