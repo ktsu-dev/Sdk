@@ -430,10 +430,38 @@
     <IconFilePath>$([MSBuild]::NormalizePath("$(SolutionDir)\$(IconFileName)"))</IconFilePath>
 
     <!-- Namespace properties -->
-    <!-- Safely extract first part of authors for namespace -->
-    <_AuthorsParts Condition="'$(Authors)' != ''">$(Authors.Replace(" ", "").Replace('-', '.'))</_AuthorsParts>
-    <AuthorsNamespace Condition="'$(_AuthorsParts)' != '' And $(_AuthorsParts.Contains('.'))">$(_AuthorsParts.Split('.')[0])</AuthorsNamespace>
-    <AuthorsNamespace Condition="'$(_AuthorsParts)' != '' And !$(_AuthorsParts.Contains('.'))">$(_AuthorsParts)</AuthorsNamespace>
+    <!--
+      AuthorsNamespace is the organisation prefix on RootNamespace, AssemblyName and PackageId, so
+      whatever comes out of here has to be a legal C# identifier and a legal NuGet package ID
+      segment. AUTHORS.md is prose written by a human, which is neither.
+
+      An explicit value wins: a repository whose AUTHORS.md cannot yield a sensible prefix - or that
+      wants one unrelated to its authors - sets AuthorsNamespace in Directory.Build.props, which is
+      evaluated before this file.
+
+      Derivation, applied to the first line of AUTHORS.md that is neither blank nor a markdown
+      heading:
+        1. Drop spaces and turn '-' into '.', so "ktsu-dev" and "ktsu.dev" agree.
+        2. Keep the first dot-separated segment, so "ktsu.dev contributors" gives "ktsu".
+        3. Drop every character that cannot appear in an identifier.
+        4. Reject what is left if it cannot *begin* one (empty, or starting with a digit).
+
+      Steps 3 and 4 are why this is not just the old two lines. Reading the whole file put the
+      markdown heading and a newline into AssemblyName, and the build died in the copy step with an
+      MSB3030 naming a file called "#Authors\n.MyLib.dll" - a message that points at neither
+      AUTHORS.md nor this SDK. Punctuation was worse because it did not fail: "Contoso, Inc."
+      built happily as Contoso,Inc.MyLib.dll and only fell over at `dotnet pack`, which rejects the
+      comma in the package ID. Rejecting a bad prefix outright loses the prefix, which is visible
+      and recoverable; mangling it produces artifacts nobody can publish.
+    -->
+    <_AuthorsIdentityLine Condition="'$(AuthorsNamespace)' == '' And '$(Authors)' != ''">$([System.Text.RegularExpressions.Regex]::Match($(Authors), '(?m)^[ \t]*(?![ \t]*\#)\S.*$').Value.Trim())</_AuthorsIdentityLine>
+    <_AuthorsParts Condition="'$(_AuthorsIdentityLine)' != ''">$(_AuthorsIdentityLine.Replace(" ", "").Replace('-', '.'))</_AuthorsParts>
+    <_AuthorsCandidate Condition="'$(_AuthorsParts)' != '' And $(_AuthorsParts.Contains('.'))">$(_AuthorsParts.Split('.')[0])</_AuthorsCandidate>
+    <_AuthorsCandidate Condition="'$(_AuthorsParts)' != '' And !$(_AuthorsParts.Contains('.'))">$(_AuthorsParts)</_AuthorsCandidate>
+    <_AuthorsCandidate Condition="'$(_AuthorsCandidate)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_AuthorsCandidate), '[^A-Za-z0-9_]', ''))</_AuthorsCandidate>
+    <_AuthorsCandidate Condition="'$(_AuthorsCandidate)' != '' And !$([System.Text.RegularExpressions.Regex]::IsMatch($(_AuthorsCandidate), '^[A-Za-z_]'))"></_AuthorsCandidate>
+    <AuthorsNamespace Condition="'$(AuthorsNamespace)' == ''">$(_AuthorsCandidate)</AuthorsNamespace>
+
     <SolutionNamespace Condition="'$(SolutionName)' != ''">$(SolutionName.Replace(" ", ""))</SolutionNamespace>
 
     <!-- Build ProjectNamespace from subdirectories between solution and project -->
@@ -462,16 +490,40 @@
     <ProjectNamespace Condition="'$(_ProjectPathNamespace)' != '' And ('$(_PathEndsWithProjectName)' == 'true' Or '$(_PathIsProjectName)' == 'true')">$(_ProjectPathNamespace)</ProjectNamespace>
     <ProjectNamespace Condition="'$(_ProjectPathNamespace)' != '' And '$(_PathEndsWithProjectName)' != 'true' And '$(_PathIsProjectName)' != 'true' And '$(_CleanProjectName)' != ''">$(_ProjectPathNamespace).$(_CleanProjectName)</ProjectNamespace>
     <ProjectNamespace Condition="'$(_ProjectPathNamespace)' == '' And '$(_CleanProjectName)' != ''">$(_CleanProjectName)</ProjectNamespace>
-    <!-- Build RootNamespace safely -->
-    <RootNamespace Condition="'$(AuthorsNamespace)' != '' And '$(ProjectNamespace)' != ''">$(AuthorsNamespace).$(ProjectNamespace)</RootNamespace>
-    <RootNamespace Condition="'$(AuthorsNamespace)' == '' And '$(ProjectNamespace)' != ''">$(ProjectNamespace)</RootNamespace>
-    <RootNamespace Condition="'$(AuthorsNamespace)' != '' And '$(ProjectNamespace)' == ''">$(AuthorsNamespace)</RootNamespace>
-    <RootNamespace Condition="'$(AuthorsNamespace)' == '' And '$(ProjectNamespace)' == ''">$(MSBuildProjectName)</RootNamespace>
+    <!--
+      Whether the consumer named this project's identity themselves.
 
-    <AssemblyName>$(RootNamespace)</AssemblyName>
-    <Title>$(AssemblyName)</Title>
-    <Company>$(Authors)</Company>
-    <Product>$(AssemblyName)</Product>
+      "Empty" is not the test. Microsoft.NET.Sdk.props runs before this file and has already
+      defaulted both RootNamespace and AssemblyName to the project name, so a consumer-supplied
+      value arrives as one that *differs* from the project name. Testing for empty would make these
+      unconditional in practice - which is what the previous code did, and why the `<RootNamespace>`
+      override the README advertises moved the namespace but left AssemblyName and PackageId on the
+      derived value. A repository whose derived identity was unusable had no supported way out.
+
+      The value has to come from somewhere evaluated before this file: Directory.Build.props, the
+      command line, or a props file imported ahead of the SDK. A project body is evaluated
+      afterwards, so a RootNamespace set there still moves only the namespace.
+
+      The cost of the heuristic: a consumer cannot ask for an identity that is exactly the project
+      name, because that is indistinguishable from the SDK default. That was already true - this
+      file overwrote it unconditionally before - and an empty AuthorsNamespace is the supported way
+      to drop the organisation prefix.
+    -->
+    <_KtsuRootNamespaceWasSet Condition="'$(RootNamespace)' != '' And '$(RootNamespace)' != '$(MSBuildProjectName)'">true</_KtsuRootNamespaceWasSet>
+    <_KtsuAssemblyNameWasSet Condition="'$(AssemblyName)' != '' And '$(AssemblyName)' != '$(MSBuildProjectName)'">true</_KtsuAssemblyNameWasSet>
+
+    <!-- Build RootNamespace safely -->
+    <RootNamespace Condition="'$(_KtsuRootNamespaceWasSet)' != 'true' And '$(AuthorsNamespace)' != '' And '$(ProjectNamespace)' != ''">$(AuthorsNamespace).$(ProjectNamespace)</RootNamespace>
+    <RootNamespace Condition="'$(_KtsuRootNamespaceWasSet)' != 'true' And '$(AuthorsNamespace)' == '' And '$(ProjectNamespace)' != ''">$(ProjectNamespace)</RootNamespace>
+    <RootNamespace Condition="'$(_KtsuRootNamespaceWasSet)' != 'true' And '$(AuthorsNamespace)' != '' And '$(ProjectNamespace)' == ''">$(AuthorsNamespace)</RootNamespace>
+    <RootNamespace Condition="'$(_KtsuRootNamespaceWasSet)' != 'true' And '$(AuthorsNamespace)' == '' And '$(ProjectNamespace)' == ''">$(MSBuildProjectName)</RootNamespace>
+
+    <!-- AssemblyName follows RootNamespace unless the consumer named it; Title, Company, Product
+         and PackageId are genuinely empty at this point, so a plain empty check is right for them. -->
+    <AssemblyName Condition="'$(_KtsuAssemblyNameWasSet)' != 'true'">$(RootNamespace)</AssemblyName>
+    <Title Condition="'$(Title)' == ''">$(AssemblyName)</Title>
+    <Company Condition="'$(Company)' == ''">$(Authors)</Company>
+    <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
 
     <!-- Build TestProjectNamespace safely -->
     <TestProjectNamespace Condition="'$(AuthorsNamespace)' != '' And '$(TestProjectName)' != ''">$(AuthorsNamespace).$(TestProjectName)</TestProjectNamespace>
@@ -506,11 +558,22 @@
     <TargetFrameworks Condition="$(IsTestProject) == 'true'">net10.0</TargetFrameworks>
 
     <!-- Package properties -->
-    <PackageId>$(AssemblyName)</PackageId>
+    <!-- Conditional for the same reason as AssemblyName above: a consumer that set this before the
+         SDK was imported meant it. -->
+    <PackageId Condition="'$(PackageId)' == ''">$(AssemblyName)</PackageId>
     <PackageVersion>$(Version)</PackageVersion>
-    <PackageIcon>$(IconFileName)</PackageIcon>
-    <PackageReadmeFile>$(ReadmeFileName)</PackageReadmeFile>
-    <PackageLicenseFile>$(LicenseFileName)</PackageLicenseFile>
+
+    <!--
+      Only name a package file that is actually there. Sdk.targets packs each of these through a
+      `Condition="Exists(...)"` None item, so declaring them unconditionally here promised NuGet a
+      file the package does not contain: pack then fails with NU5046 (readme), NU5047 (icon) or
+      NU5030 (license). Every ktsu repository carries all three, which is why this only ever bit
+      consumers outside the organisation - and it bit them at `dotnet pack`, long after the build
+      that appeared to work.
+    -->
+    <PackageIcon Condition="Exists('$(IconFilePath)')">$(IconFileName)</PackageIcon>
+    <PackageReadmeFile Condition="Exists('$(ReadmeFilePath)')">$(ReadmeFileName)</PackageReadmeFile>
+    <PackageLicenseFile Condition="Exists('$(LicenseFilePath)')">$(LicenseFileName)</PackageLicenseFile>
     <!--
       Release notes: an explicit file wins over the full solution changelog. KtsuBuild's pack step
       (ktsu.KtsuBuild.Tool, which builds every consuming repository) points PackageReleaseNotesFile at
