@@ -1,3 +1,9 @@
+## v2.30.1 (patch)
+
+Changes since v2.30.0:
+
+- [patch] Make derived project identity safe for non-ktsu consumers ([@Claude](https://github.com/Claude))
+- Write the test icon through the workspace helper ([@Claude](https://github.com/Claude))
 ## v2.30.0 (minor)
 
 Changes since v2.29.0:
