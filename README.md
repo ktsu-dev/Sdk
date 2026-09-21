@@ -378,6 +378,9 @@ in the Unity project's own `.gitignore`, as the demo shows.
 
 2. **icon.png**: Optional package icon at solution root
 
+   `icon.png`, `README.md` and `LICENSE.md` are declared on the package only when the file is
+   actually present, so a repository without them still packs.
+
 ### Overriding Defaults
 
 The SDK provides sensible defaults, but you can override any property:
@@ -390,7 +393,9 @@ The SDK provides sensible defaults, but you can override any property:
     <!-- Override target frameworks -->
     <TargetFrameworks>net10.0;net9.0</TargetFrameworks>
 
-    <!-- Override namespace -->
+    <!-- Override the namespace only: AssemblyName and PackageId are derived before the
+         project body is evaluated, so setting RootNamespace here does not move them. To move
+         the whole identity, set RootNamespace in Directory.Build.props instead. -->
     <RootNamespace>MyCompany.MyProject</RootNamespace>
 
     <!-- Disable nullable if needed -->
@@ -510,6 +515,46 @@ MySolution/MyApp/MyApp.csproj
 
 **Final Namespace Pattern:**
 `{AuthorsNamespace}.{ProjectNamespace}` where AuthorsNamespace comes from AUTHORS.md
+
+#### How AuthorsNamespace is derived
+
+`AuthorsNamespace` is the organization prefix on `RootNamespace`, `AssemblyName` and `PackageId`,
+so it has to be both a legal C# identifier and a legal NuGet package ID segment. It is derived from
+the first line of `AUTHORS.md` that is neither blank nor a markdown heading:
+
+1. Spaces are dropped and `-` becomes `.`, so `ktsu-dev` and `ktsu.dev` agree.
+2. Only the first dot-separated segment is kept, so `ktsu.dev contributors` gives `ktsu`.
+3. Every character that cannot appear in an identifier is dropped, so `Contoso, Inc.` gives
+   `ContosoInc`.
+4. What is left is rejected if it cannot *begin* an identifier - empty, or starting with a digit -
+   and the prefix is dropped rather than mangled.
+
+A conventional `AUTHORS.md` that lists individual contributors under a heading therefore yields no
+prefix at all, deliberately: a person's name is not an organization namespace. The project keeps its
+own name (`MyLib` rather than `SomeOrg.MyLib`), which is visible and correctable, instead of
+producing an assembly and package nobody can publish.
+
+#### Overriding the derived identity
+
+Identity is computed while the SDK's props are imported, which happens before your project body is
+evaluated. An override therefore has to come from somewhere evaluated earlier - most simply
+`Directory.Build.props` at your solution root:
+
+```xml
+<Project>
+  <PropertyGroup>
+    <!-- Name the organization prefix directly, whatever AUTHORS.md says -->
+    <AuthorsNamespace>Contoso</AuthorsNamespace>
+
+    <!-- Or name the whole identity: RootNamespace, AssemblyName and PackageId all follow -->
+    <RootNamespace>Contoso.Widgets</RootNamespace>
+  </PropertyGroup>
+</Project>
+```
+
+One identity cannot be requested this way: one that is exactly the project name, since that is
+indistinguishable from the SDK's own default. An empty `AuthorsNamespace` is the supported way to
+drop the organization prefix and keep the project name.
 
 ### Hierarchical Solution Discovery  
 
@@ -747,8 +792,14 @@ Additional suppressions for test projects:
 **Solution**:
 
 - Check that `AUTHORS.md` exists and contains valid content
-- The namespace format is: `{FirstPartOfAuthors}.{PathToProject}.{ProjectName}`
-- You can always override with `<RootNamespace>` in your project file
+- The namespace format is: `{AuthorsNamespace}.{PathToProject}.{ProjectName}`
+- `AuthorsNamespace` may come out empty - a heading over a contributor list yields no organization
+  prefix, and neither does a name that cannot begin an identifier. See
+  [How AuthorsNamespace is derived](#how-authorsnamespace-is-derived).
+- You can always override with `<RootNamespace>` in **`Directory.Build.props`**, not in the project
+  file: identity is derived while the SDK's props are imported, which is before the project body is
+  evaluated, so a `RootNamespace` set in the project moves only the namespace and leaves
+  `AssemblyName` and `PackageId` on the derived value
 
 ### Build Warnings as Errors
 
