@@ -125,12 +125,20 @@ internal sealed class ExampleWorkspace : IDisposable
         return reader.ReadToEnd();
     }
 
-    /// <summary>Writes a file into the workspace, creating any missing directories.</summary>
-    public void WriteFile(string relativePath, string content)
+    /// <summary>Writes a text file into the workspace, creating any missing directories.</summary>
+    public void WriteFile(string relativePath, string content) =>
+        File.WriteAllText(ResolveForWrite(relativePath), content);
+
+    /// <summary>Writes a binary file into the workspace, creating any missing directories.</summary>
+    public void WriteFile(string relativePath, byte[] content) =>
+        File.WriteAllBytes(ResolveForWrite(relativePath), content);
+
+    /// <summary>Resolves a workspace-relative path and ensures its directory exists.</summary>
+    private string ResolveForWrite(string relativePath)
     {
         string path = Path.Combine(root, relativePath);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        File.WriteAllText(path, content);
+        return path;
     }
 
     /// <summary>Evaluates the given MSBuild properties on a project (no build/restore of outputs).</summary>

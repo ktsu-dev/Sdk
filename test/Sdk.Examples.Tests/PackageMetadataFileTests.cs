@@ -54,7 +54,7 @@ public sealed class PackageMetadataFileTests
         using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Namespaces"));
         workspace.WriteFile("README.md", "# Testing" + Environment.NewLine);
         workspace.WriteFile("LICENSE.md", "MIT" + Environment.NewLine);
-        File.WriteAllBytes(Path.Combine(workspace.Root, "icon.png"), OnePixelPng);
+        workspace.WriteFile("icon.png", OnePixelPng);
 
         (CliResult result, string outputDir) = workspace.Pack(Project);
 
