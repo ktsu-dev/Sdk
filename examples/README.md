@@ -65,6 +65,7 @@ Each folder is an isolated solution that triggers a single diagnostic:
 | `KTSU0005-OrphanedPackageVersion` | KTSU0005 | A `PackageVersion` no project references. |
 | `KTSU0006-TransitivePackageUsedDirectly` | KTSU0006 | Uses `ILogger` from a transitive package. |
 | `KTSU0007-NonPrivatePolyfill` | KTSU0007 | References `Polyfill` without `PrivateAssets="all"`. |
+| `KTSU0008-FrameworkOverridingPackage` | KTSU0008 | Privately references `System.Text.Json` 10.0.2 on `net9.0`, above the 9.0.x that framework ships. |
 
 > **Note on KTSU0002:** it used to surface only intermittently
 > (see [#12](https://github.com/ktsu-dev/Sdk/issues/12) / #8 / #11). The cause was the
@@ -83,6 +84,7 @@ One folder is the inverse — a regression guard that is **expected to build cle
 | --- | --- | --- |
 | `KTSU0005-OrphanedPackageVersion-CrossProject` | False KTSU0005 | A `PackageVersion` referenced only by a sibling project must not be reported as an orphan when another project is built on its own. |
 | `KTSU0005-OrphanedPackageVersion-Allowlisted` | False KTSU0005 | SDK-governed packages (KTSU0001 standard packages, `Microsoft.Testing.Extensions.*` runner family injected into test projects) must not be flagged even with no direct `PackageReference`. |
+| `KTSU0008-FrameworkOverridingPackage-Pinned` | False KTSU0008 | The shape KTSU0008's own code fix produces — version pinned to the framework's, `NoWarn="NU1510"` on the item — must build cleanly. A framework-supplied package is referenced almost everywhere, so a rule that fired on the pinned shape too would fail every build it touched. |
 
 ## Building an example by hand
 

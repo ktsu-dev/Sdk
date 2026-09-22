@@ -27,14 +27,12 @@ public class PreferEnsureNotNullAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "Use 'Ensure.NotNull({0})' instead of 'ArgumentNullException.ThrowIfNull({0})' for better framework compatibility";
 	private static readonly LocalizableString Description = "ArgumentNullException.ThrowIfNull was introduced in .NET 6. Use Ensure.NotNull from the Polyfill package instead to maintain compatibility with older target frameworks.";
 
-	private static readonly DiagnosticDescriptor Rule = new(
+	private static readonly DiagnosticDescriptor Rule = CreateRule(
 		DiagnosticId,
 		Title,
 		MessageFormat,
-		Category,
-		DiagnosticSeverity.Error,
-		isEnabledByDefault: true,
-		description: Description);
+		Description,
+		reportedAtCompilationEnd: false);
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];

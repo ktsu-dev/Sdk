@@ -25,15 +25,7 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "Project must reference package '{0}'. Add '<PackageReference Include=\"{0}\" />' to your .csproj file.";
 	private static readonly LocalizableString Description = "Projects should include required standard packages for polyfills, and framework compatibility.";
 
-	private static readonly DiagnosticDescriptor Rule = new(
-		DiagnosticId,
-		Title,
-		MessageFormat,
-		Category,
-		DiagnosticSeverity.Error,
-		isEnabledByDefault: true,
-		description: Description,
-		customTags: "CompilationEnd");
+	private static readonly DiagnosticDescriptor Rule = CreateRule(DiagnosticId, Title, MessageFormat, Description);
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];

@@ -26,15 +26,7 @@ public class MissingInternalsVisibleToAttributeAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "Consider exposing internals to test project '{0}'. Add '[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"{0}\")]' to a .cs file.";
 	private static readonly LocalizableString Description = "Projects should expose their internal members to test projects using the InternalsVisibleToAttribute for comprehensive testing.";
 
-	private static readonly DiagnosticDescriptor Rule = new(
-		DiagnosticId,
-		Title,
-		MessageFormat,
-		Category,
-		DiagnosticSeverity.Error,
-		isEnabledByDefault: true,
-		description: Description,
-		customTags: "CompilationEnd");
+	private static readonly DiagnosticDescriptor Rule = CreateRule(DiagnosticId, Title, MessageFormat, Description);
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];

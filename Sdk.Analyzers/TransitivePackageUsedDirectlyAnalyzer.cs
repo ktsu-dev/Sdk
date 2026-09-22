@@ -8,7 +8,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -61,15 +60,7 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "Type or member from transitive package '{0}' is used directly; add a PackageReference to '{0}'";
 	private static readonly LocalizableString Description = "Types from transitive package dependencies should not be used directly. Add an explicit PackageReference so the dependency is not silently lost when an intermediate package changes.";
 
-	private static readonly DiagnosticDescriptor Rule = new(
-		DiagnosticId,
-		Title,
-		MessageFormat,
-		Category,
-		DiagnosticSeverity.Error,
-		isEnabledByDefault: true,
-		description: Description,
-		customTags: "CompilationEnd");
+	private static readonly DiagnosticDescriptor Rule = CreateRule(DiagnosticId, Title, MessageFormat, Description);
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
@@ -198,7 +189,7 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 	{
 		Dictionary<string, PackageInfo> map = new(StringComparer.OrdinalIgnoreCase);
 
-		AdditionalText? mapFile = FindAdditionalFile(files, PackageMapFileName);
+		AdditionalText? mapFile = BuildFileLookup.ByName(files, PackageMapFileName);
 		SourceText? text = mapFile?.GetText(cancellationToken);
 		if (text is null)
 		{
@@ -232,7 +223,7 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 
 	private static ImmutableHashSet<string> LoadLineSet(ImmutableArray<AdditionalText> files, string fileName, CancellationToken cancellationToken)
 	{
-		AdditionalText? file = FindAdditionalFile(files, fileName);
+		AdditionalText? file = BuildFileLookup.ByName(files, fileName);
 		SourceText? text = file?.GetText(cancellationToken);
 		if (text is null)
 		{
@@ -250,19 +241,6 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 		}
 
 		return builder.ToImmutable();
-	}
-
-	private static AdditionalText? FindAdditionalFile(ImmutableArray<AdditionalText> files, string fileName)
-	{
-		foreach (AdditionalText file in files)
-		{
-			if (string.Equals(Path.GetFileName(file.Path), fileName, StringComparison.OrdinalIgnoreCase))
-			{
-				return file;
-			}
-		}
-
-		return null;
 	}
 
 	private readonly struct PackageInfo(string id, string version)

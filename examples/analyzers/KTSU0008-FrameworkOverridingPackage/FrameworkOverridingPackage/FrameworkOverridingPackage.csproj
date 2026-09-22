@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- KTSU0008: System.Text.Json also ships in the net9.0 shared framework, which supplies 9.0.x.
+       Referencing 10.0.2 makes the package win over the framework on that inner build, so the
+       net9.0 assembly compiles against 10.0.0.0 - and PrivateAssets="all" keeps the dependency out
+       of the produced package, leaving a consumer on net9.0 to resolve nothing and fail with
+       FileNotFoundException. The net10.0 inner build of this same project is fine: there the
+       framework ships 10.0.12, so the reference is pruned and nothing is reported. That split is
+       the point of the rule, and multi-targeting here is what exercises it.
+
+       NoWarn="NU1510" is what makes this realistic rather than a straw man. NuGet reports NU1510
+       for *any* reference to a framework-supplied package - "does not need to be referenced
+       explicitly" - whether the version is safe or not, and this SDK treats warnings as errors. A
+       project that KTSU0006 has told to declare the reference has no choice but to silence it,
+       which is the state the fix for ktsu-dev/GitIntegration ended up in. Once silenced NuGet says
+       nothing more, and the version being wrong is exactly what nothing else checks.
+
+       The framework list is spelled out because the harness only repins the singular
+       <TargetFramework> element; it needs the latest framework and the one below it, so update it
+       alongside test/Sdk.Examples.Tests/Infrastructure/TargetFrameworks.cs on a framework bump. -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net9.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" PrivateAssets="all" NoWarn="NU1510" />
+  </ItemGroup>
+</Project>
