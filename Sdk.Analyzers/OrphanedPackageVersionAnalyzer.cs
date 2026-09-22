@@ -49,15 +49,7 @@ public class OrphanedPackageVersionAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "PackageVersion '{0}' in Directory.Packages.props is not referenced by any project and can be removed";
 	private static readonly LocalizableString Description = "Central Package Management entries that are not referenced by any project add maintenance noise and should be removed.";
 
-	private static readonly DiagnosticDescriptor Rule = new(
-		DiagnosticId,
-		Title,
-		MessageFormat,
-		Category,
-		DiagnosticSeverity.Error,
-		isEnabledByDefault: true,
-		description: Description,
-		customTags: "CompilationEnd");
+	private static readonly DiagnosticDescriptor Rule = CreateRule(DiagnosticId, Title, MessageFormat, Description);
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];

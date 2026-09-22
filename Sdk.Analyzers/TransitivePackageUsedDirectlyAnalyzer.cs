@@ -60,15 +60,7 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "Type or member from transitive package '{0}' is used directly; add a PackageReference to '{0}'";
 	private static readonly LocalizableString Description = "Types from transitive package dependencies should not be used directly. Add an explicit PackageReference so the dependency is not silently lost when an intermediate package changes.";
 
-	private static readonly DiagnosticDescriptor Rule = new(
-		DiagnosticId,
-		Title,
-		MessageFormat,
-		Category,
-		DiagnosticSeverity.Error,
-		isEnabledByDefault: true,
-		description: Description,
-		customTags: "CompilationEnd");
+	private static readonly DiagnosticDescriptor Rule = CreateRule(DiagnosticId, Title, MessageFormat, Description);
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];

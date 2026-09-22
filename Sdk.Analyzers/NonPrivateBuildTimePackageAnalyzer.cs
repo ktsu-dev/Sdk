@@ -36,15 +36,7 @@ public class NonPrivateBuildTimePackageAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "Package reference '{0}' must set PrivateAssets=\"all\". Without it this build-time-only package leaks into the dependency graph of every consumer.";
 	private static readonly LocalizableString Description = "Build-time-only packages must not flow to consumers as transitive dependencies. Only a fully private reference is omitted from the produced package's dependencies.";
 
-	private static readonly DiagnosticDescriptor Rule = new(
-		DiagnosticId,
-		Title,
-		MessageFormat,
-		Category,
-		DiagnosticSeverity.Error,
-		isEnabledByDefault: true,
-		description: Description,
-		customTags: "CompilationEnd");
+	private static readonly DiagnosticDescriptor Rule = CreateRule(DiagnosticId, Title, MessageFormat, Description);
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];

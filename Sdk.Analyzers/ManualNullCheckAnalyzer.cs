@@ -34,14 +34,12 @@ public class ManualNullCheckAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "Use 'Ensure.NotNull({0})' instead of manual null check with ArgumentNullException";
 	private static readonly LocalizableString Description = "Manual null checks with ArgumentNullException should be replaced with Ensure.NotNull from the Polyfill package for consistency and better framework compatibility.";
 
-	private static readonly DiagnosticDescriptor Rule = new(
+	private static readonly DiagnosticDescriptor Rule = CreateRule(
 		DiagnosticId,
 		Title,
 		MessageFormat,
-		Category,
-		DiagnosticSeverity.Error,
-		isEnabledByDefault: true,
-		description: Description);
+		Description,
+		reportedAtCompilationEnd: false);
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];

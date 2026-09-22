@@ -85,15 +85,7 @@ public class FrameworkOverridingPackageAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "Package reference '{0}' resolves {1}, overriding the {2} that this target framework's shared framework supplies. A consumer running on that framework will fail to load '{0}'; pin the version to {2}.";
 	private static readonly LocalizableString Description = "A package that also ships in the shared framework must not be referenced above the version the lowest supported target framework provides. Assembly binds roll forward but never backward, so the produced package throws FileNotFoundException for consumers on that framework - a failure invisible in both the producing build and its nuspec.";
 
-	private static readonly DiagnosticDescriptor Rule = new(
-		DiagnosticId,
-		Title,
-		MessageFormat,
-		Category,
-		DiagnosticSeverity.Error,
-		isEnabledByDefault: true,
-		description: Description,
-		customTags: "CompilationEnd");
+	private static readonly DiagnosticDescriptor Rule = CreateRule(DiagnosticId, Title, MessageFormat, Description);
 
 	/// <inheritdoc/>
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
@@ -247,13 +239,13 @@ public class FrameworkOverridingPackageAnalyzer : KtsuAnalyzerBase
 			return new ResolutionFacts(resolved, direct);
 		}
 
-		foreach (string raw in text.Lines
+		// Format: 'R|packageId|version' for a resolved compile assembly,
+		// 'D|packageId|privateAssets' for a direct reference.
+		foreach (string[] parts in text.Lines
 			.Select(static line => line.ToString().Trim())
-			.Where(static line => line.Length > 0))
+			.Where(static line => line.Length > 0)
+			.Select(static line => line.Split('|')))
 		{
-			// Format: 'R|packageId|version' for a resolved compile assembly,
-			// 'D|packageId|privateAssets' for a direct reference.
-			string[] parts = raw.Split('|');
 			if (parts.Length < 2 || parts[1].Length == 0)
 			{
 				continue;
