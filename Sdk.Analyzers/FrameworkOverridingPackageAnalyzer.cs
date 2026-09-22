@@ -193,15 +193,13 @@ public class FrameworkOverridingPackageAnalyzer : KtsuAnalyzerBase
 			return map;
 		}
 
+		// RemoveEmptyEntries drops empty tokens before trimming, but a whitespace-only one survives
+		// it and trims to empty - which this file is full of, since the overrides arrive indented.
 		foreach (string entry in text.ToString()
 			.Split([';', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
-			.Select(static token => token.Trim()))
+			.Select(static token => token.Trim())
+			.Where(static token => token.Length > 0))
 		{
-			if (entry.Length == 0)
-			{
-				continue;
-			}
-
 			// Format: packageId|version
 			int separator = entry.IndexOf('|');
 			if (separator <= 0 || separator == entry.Length - 1)
@@ -249,13 +247,10 @@ public class FrameworkOverridingPackageAnalyzer : KtsuAnalyzerBase
 			return new ResolutionFacts(resolved, direct);
 		}
 
-		foreach (string raw in text.Lines.Select(static line => line.ToString().Trim()))
+		foreach (string raw in text.Lines
+			.Select(static line => line.ToString().Trim())
+			.Where(static line => line.Length > 0))
 		{
-			if (raw.Length == 0)
-			{
-				continue;
-			}
-
 			// Format: 'R|packageId|version' for a resolved compile assembly,
 			// 'D|packageId|privateAssets' for a direct reference.
 			string[] parts = raw.Split('|');

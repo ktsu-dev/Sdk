@@ -135,7 +135,50 @@ public class FrameworkOverridingPackageCodeFixProvider : CodeFixProvider
 		string version,
 		out bool changed)
 	{
-		changed = false;
+		// A returned line equal to the original means the element carries no Version attribute,
+		// which under central package management is the normal shape of a PackageReference. There
+		// is nothing to pin there; the caller falls through to Directory.Packages.props.
+		SourceText updated = RewriteDeclaringLine(
+			text,
+			elementName,
+			packageId,
+			lineText => ReplaceVersionAttribute(lineText, version));
+
+		changed = !ReferenceEquals(updated, text);
+
+		return updated;
+	}
+
+	/// <summary>
+	/// Adds a <c>NoWarn</c> attribute carrying the pruning warning to a package's
+	/// <c>PackageReference</c>, merging with any value already present.
+	/// </summary>
+	/// <param name="text">The project file's text.</param>
+	/// <param name="packageId">The package identifier to match.</param>
+	/// <param name="warning">The warning identifier to suppress.</param>
+	/// <returns>The updated text, or the original when the reference already suppresses it.</returns>
+	internal static SourceText AddNoWarn(SourceText text, string packageId, string warning) =>
+		RewriteDeclaringLine(text, "PackageReference", packageId, lineText => AddNoWarnToLine(lineText, warning));
+
+	/// <summary>
+	/// Rewrites the first line that declares a package, splicing the result back into the file.
+	/// </summary>
+	/// <param name="text">The build file's text.</param>
+	/// <param name="elementName">The item name to match.</param>
+	/// <param name="packageId">The package identifier to match.</param>
+	/// <param name="rewrite">Produces the replacement line, or the line it was given to decline.</param>
+	/// <returns>The updated text, or the very same instance when nothing changed.</returns>
+	/// <remarks>
+	/// Returning the original instance rather than an equal one is what lets
+	/// <see cref="SetVersionAttribute"/> report whether it did anything by reference, so a caller can
+	/// tell "pinned it here" from "there was nothing here to pin" without a second search.
+	/// </remarks>
+	private static SourceText RewriteDeclaringLine(
+		SourceText text,
+		string elementName,
+		string packageId,
+		Func<string, string> rewrite)
+	{
 		string content = text.ToString();
 
 		foreach (TextLine line in text.Lines)
@@ -147,97 +190,59 @@ public class FrameworkOverridingPackageCodeFixProvider : CodeFixProvider
 				continue;
 			}
 
-			string rewritten = ReplaceVersionAttribute(lineText, version);
+			string rewritten = rewrite(lineText);
 
-			if (string.Equals(rewritten, lineText, StringComparison.Ordinal))
-			{
-				// The element exists but carries no Version attribute, which under central package
-				// management is the normal shape of a PackageReference. Nothing to pin here; the
-				// caller falls through to Directory.Packages.props or leaves it alone.
-				return text;
-			}
-
-			changed = true;
-
-			return SourceText.From(
-				content.Substring(0, line.Span.Start)
-				+ rewritten
-				+ content.Substring(line.Span.End));
+			return string.Equals(rewritten, lineText, StringComparison.Ordinal)
+				? text
+				: SourceText.From(
+					content.Substring(0, line.Span.Start)
+					+ rewritten
+					+ content.Substring(line.Span.End));
 		}
 
 		return text;
 	}
 
 	/// <summary>
-	/// Adds a <c>NoWarn</c> attribute carrying the pruning warning to a package's
-	/// <c>PackageReference</c>, merging with any value already present.
+	/// Produces a line carrying the warning in its <c>NoWarn</c>, merging with any value present.
 	/// </summary>
-	/// <param name="text">The project file's text.</param>
-	/// <param name="packageId">The package identifier to match.</param>
+	/// <param name="lineText">The declaring line.</param>
 	/// <param name="warning">The warning identifier to suppress.</param>
-	/// <returns>The updated text, or the original when the reference already suppresses it.</returns>
-	internal static SourceText AddNoWarn(SourceText text, string packageId, string warning)
+	/// <returns>The rewritten line, or <paramref name="lineText"/> when it already suppresses it.</returns>
+	private static string AddNoWarnToLine(string lineText, string warning)
 	{
-		string content = text.ToString();
+		int noWarnIndex = lineText.IndexOf("NoWarn=\"", StringComparison.OrdinalIgnoreCase);
 
-		foreach (TextLine line in text.Lines)
+		if (noWarnIndex < 0)
 		{
-			string lineText = line.ToString();
+			// Insert before the element's own close so the attribute lands inside the tag, whether
+			// it is self-closing or has a body.
+			int selfClose = lineText.IndexOf("/>", StringComparison.Ordinal);
+			int close = selfClose >= 0 ? selfClose : lineText.IndexOf('>');
 
-			if (!BuildFileLookup.DeclaresPackage(lineText, "PackageReference", packageId))
-			{
-				continue;
-			}
-
-			int noWarnIndex = lineText.IndexOf("NoWarn=\"", StringComparison.OrdinalIgnoreCase);
-
-			string rewritten;
-
-			if (noWarnIndex >= 0)
-			{
-				int valueStart = noWarnIndex + "NoWarn=\"".Length;
-				int valueEnd = lineText.IndexOf('"', valueStart);
-
-				if (valueEnd < 0)
-				{
-					return text;
-				}
-
-				string existing = lineText.Substring(valueStart, valueEnd - valueStart);
-
-				if (existing.Split(';').Any(token => string.Equals(token.Trim(), warning, StringComparison.OrdinalIgnoreCase)))
-				{
-					return text;
-				}
-
-				string merged = existing.Length == 0 ? warning : existing.TrimEnd(';') + ";" + warning;
-
-				rewritten = lineText.Substring(0, valueStart) + merged + lineText.Substring(valueEnd);
-			}
-			else
-			{
-				// Insert before the element's own close so the attribute lands inside the tag,
-				// whether it is self-closing or has a body.
-				int selfClose = lineText.IndexOf("/>", StringComparison.Ordinal);
-				int close = selfClose >= 0 ? selfClose : lineText.IndexOf('>');
-
-				if (close < 0)
-				{
-					return text;
-				}
-
-				string head = lineText.Substring(0, close).TrimEnd();
-
-				rewritten = head + $" NoWarn=\"{warning}\"" + lineText.Substring(close);
-			}
-
-			return SourceText.From(
-				content.Substring(0, line.Span.Start)
-				+ rewritten
-				+ content.Substring(line.Span.End));
+			return close < 0
+				? lineText
+				: lineText.Substring(0, close).TrimEnd() + $" NoWarn=\"{warning}\"" + lineText.Substring(close);
 		}
 
-		return text;
+		int valueStart = noWarnIndex + "NoWarn=\"".Length;
+		int valueEnd = lineText.IndexOf('"', valueStart);
+
+		if (valueEnd < 0)
+		{
+			return lineText;
+		}
+
+		string existing = lineText.Substring(valueStart, valueEnd - valueStart);
+
+		if (existing.Split(';').Any(token => string.Equals(token.Trim(), warning, StringComparison.OrdinalIgnoreCase)))
+		{
+			return lineText;
+		}
+
+		string merged = existing.Length == 0 ? warning : existing.TrimEnd(';') + ";" + warning;
+
+		return lineText.Substring(0, valueStart) + merged + lineText.Substring(valueEnd);
 	}
 
 	private static string ReplaceVersionAttribute(string lineText, string version)

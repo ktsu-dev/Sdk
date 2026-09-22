@@ -51,12 +51,11 @@ internal static class PrivateAssets
 
 		HashSet<string> tokens = new(StringComparer.OrdinalIgnoreCase);
 
-		foreach (string trimmed in privateAssets!.Split(';').Select(static token => token.Trim()))
+		foreach (string trimmed in privateAssets!.Split(';')
+			.Select(static token => token.Trim())
+			.Where(static token => token.Length > 0))
 		{
-			if (trimmed.Length > 0)
-			{
-				tokens.Add(trimmed);
-			}
+			tokens.Add(trimmed);
 		}
 
 		return tokens.Contains("all") || AllAssetKinds.All(tokens.Contains);
