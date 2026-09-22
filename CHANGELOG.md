@@ -1,3 +1,13 @@
+## v2.31.0 (minor)
+
+Changes since v2.30.0:
+
+- [patch] Make derived project identity safe for non-ktsu consumers ([@Claude](https://github.com/Claude))
+- feat: add KTSU0008 for a package reference that overrides the shared framework [minor] ([@matt-edmondson](https://github.com/matt-edmondson))
+- refactor: collapse the analyzers' duplicated build-file lookup into one helper [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- refactor: fold the code fix's two line rewrites into one, and filter with Where [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- refactor: state the shared rule settings once, on the analyzer base [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
+- Write the test icon through the workspace helper ([@Claude](https://github.com/Claude))
 ## v2.30.1 (patch)
 
 Changes since v2.30.0:
