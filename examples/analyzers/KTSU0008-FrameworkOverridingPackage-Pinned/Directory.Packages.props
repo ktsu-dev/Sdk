@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Polyfill" Version="7.0.0" />
+    <!-- At the floor the net9.0 shared framework ships, so NuGet prunes the reference and the
+         framework's own copy is what the compilation binds against. -->
+    <PackageVersion Include="System.Text.Json" Version="9.0.0" />
+  </ItemGroup>
+</Project>

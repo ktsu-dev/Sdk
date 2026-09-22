@@ -21,6 +21,7 @@ public sealed class AnalyzerTriggerTests
     [DataRow("KTSU0005-OrphanedPackageVersion", "OrphanedPackageVersion/OrphanedPackageVersion.csproj", "KTSU0005", DisplayName = "KTSU0005 Orphaned PackageVersion")]
     [DataRow("KTSU0006-TransitivePackageUsedDirectly", "TransitivePackageUsedDirectly/TransitivePackageUsedDirectly.csproj", "KTSU0006", DisplayName = "KTSU0006 Transitive package used directly")]
     [DataRow("KTSU0007-NonPrivatePolyfill", "NonPrivatePolyfill/NonPrivatePolyfill.csproj", "KTSU0007", DisplayName = "KTSU0007 Polyfill reference is not private")]
+    [DataRow("KTSU0008-FrameworkOverridingPackage", "FrameworkOverridingPackage/FrameworkOverridingPackage.csproj", "KTSU0008", DisplayName = "KTSU0008 Package reference overrides the shared framework")]
     public void Analyzer_Triggers(string folder, string project, string diagnostic)
     {
         using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Analyzer(folder));
@@ -103,6 +104,31 @@ public sealed class AnalyzerTriggerTests
             "KTSU0001",
             $"Expected KTSU0001 for the missing netstandard2.0 standard packages.{Environment.NewLine}{result.Output}");
         Assert.IsFalse(result.Succeeded, $"Expected KTSU0001 to fail the build.{Environment.NewLine}{result.Output}");
+    }
+
+    /// <summary>
+    /// KTSU0008 must not fire once the reference is pinned to the version the framework ships.
+    /// </summary>
+    /// <remarks>
+    /// This is the shape the code fix produces, and it is the half of the rule that decides whether
+    /// it is usable: a framework-supplied package is referenced by almost every project in the
+    /// organization, so a rule that fired on the pinned shape as well as the overriding one would
+    /// fail every build it touched. At the floor version NuGet prunes the reference, it contributes
+    /// no compile assembly, and there is nothing to report.
+    /// </remarks>
+    [TestMethod]
+    public void Analyzer_KTSU0008_DoesNotTrigger_WhenPinnedToFrameworkVersion()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(
+            RepoLayout.Analyzer("KTSU0008-FrameworkOverridingPackage-Pinned"));
+
+        CliResult result = workspace.Build("FrameworkPinned/FrameworkPinned.csproj");
+
+        CollectionAssert.DoesNotContain(
+            result.KtsuDiagnostics().ToList(),
+            "KTSU0008",
+            $"KTSU0008 must not fire for a reference pinned to the framework's own version.{Environment.NewLine}{result.Output}");
+        Assert.IsTrue(result.Succeeded, $"Expected a clean build.{Environment.NewLine}{result.Output}");
     }
 
     /// <summary>

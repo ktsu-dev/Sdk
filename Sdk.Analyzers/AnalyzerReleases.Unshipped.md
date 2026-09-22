@@ -5,3 +5,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
+KTSU0008 | ktsu.Sdk | Error | Package reference overrides an assembly the shared framework supplies

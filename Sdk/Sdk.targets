@@ -110,10 +110,13 @@
     <!-- Opt-out switches for the package-hygiene analyzers -->
     <KtsuEnableOrphanedPackageVersionAnalysis Condition="'$(KtsuEnableOrphanedPackageVersionAnalysis)' == ''">true</KtsuEnableOrphanedPackageVersionAnalysis>
     <KtsuEnableTransitivePackageAnalysis Condition="'$(KtsuEnableTransitivePackageAnalysis)' == ''">true</KtsuEnableTransitivePackageAnalysis>
+    <KtsuEnableFrameworkOverrideAnalysis Condition="'$(KtsuEnableFrameworkOverrideAnalysis)' == ''">true</KtsuEnableFrameworkOverrideAnalysis>
 
     <_KtsuOrphanedPackageVersionsFile>$(IntermediateOutputPath)ktsu.orphaned-packageversions.g.txt</_KtsuOrphanedPackageVersionsFile>
     <_KtsuTransitivePackageMapFile>$(IntermediateOutputPath)ktsu.transitive-package-map.g.txt</_KtsuTransitivePackageMapFile>
     <_KtsuDirectPackagesFile>$(IntermediateOutputPath)ktsu.direct-packages.g.txt</_KtsuDirectPackagesFile>
+    <_KtsuFrameworkPackagesFile>$(IntermediateOutputPath)ktsu.framework-packages.g.txt</_KtsuFrameworkPackagesFile>
+    <_KtsuFrameworkOverrideFactsFile>$(IntermediateOutputPath)ktsu.framework-override-facts.g.txt</_KtsuFrameworkOverrideFactsFile>
   </PropertyGroup>
 
   <!-- KTSU0005 ignore list: PackageVersion identifiers that must never be reported as orphans,
@@ -234,6 +237,66 @@
       <FileWrites Include="$(_KtsuDirectPackagesFile)" />
       <AdditionalFiles Include="$(_KtsuTransitivePackageMapFile)" />
       <AdditionalFiles Include="$(_KtsuDirectPackagesFile)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- KTSU0008: record which packages this target framework's shared framework also supplies, and
+       which direct references resolved a real compile assembly rather than being pruned.
+
+       A package that ships in the shared framework normally resolves nothing to compile against -
+       NuGet prunes it and the framework's own copy wins. It resolves a real assembly only when the
+       referenced version is higher than the framework's, and then the compiled reference carries
+       that higher assembly version. On the lower target framework of a multi-targeting library
+       that produces a package which throws FileNotFoundException for every consumer, because
+       CoreCLR rolls assembly binds forward but never backward - and nothing in this build, or in
+       the produced nuspec, says so. See ktsu-dev/Sdk#44.
+
+       Both facts are per-target-framework, which is what makes the inner build the right place to
+       observe them: the net10.0 inner build of the same project sees the reference pruned and stays
+       silent, while the net9.0 one sees the override and reports. -->
+  <Target Name="_KtsuGenerateFrameworkOverrideInputs"
+          Condition="'$(KtsuEnableFrameworkOverrideAnalysis)' == 'true' And '$(IsTestProject)' != 'true'"
+          DependsOnTargets="ResolveReferences"
+          BeforeTargets="CoreCompile">
+
+    <ItemGroup>
+      <!-- PackageConflictOverrides carries one item per platform package (Microsoft.NETCore.App,
+           Microsoft.AspNetCore.App), whose OverriddenPackages metadata is the targeting pack's own
+           PackageOverrides.txt: 'packageId|version' entries separated by semicolons and newlines.
+           It is written out verbatim and tokenized by the analyzer rather than reshaped here,
+           because the metadata value keeps its embedded newlines through an MSBuild transform. -->
+      <_KtsuFrameworkPackageLine Include="@(PackageConflictOverrides->'%(OverriddenPackages)')" />
+
+      <!-- 'R' - a package that resolved a real compile assembly, at the version resolved.
+           'D' - a package this project references directly, with its PrivateAssets. A package must
+           be both, and be framework-supplied above, for the override to be this project's to fix.
+
+           PrivateAssets rides along because it decides whether the override is actually harmful:
+           NuGet omits a dependency from the produced package only when every asset kind is private,
+           and it is exactly that omission that leaves the consumer resolving nothing and falling
+           back to the shared framework's lower copy. A reference that still flows to consumers
+           carries the higher version with it and works. -->
+      <_KtsuFrameworkOverrideFact Include="@(ResolvedCompileFileDefinitions->'R|%(NuGetPackageId)|%(NuGetPackageVersion)')"
+                                  Condition="'%(ResolvedCompileFileDefinitions.NuGetPackageId)' != ''" />
+      <_KtsuFrameworkOverrideFact Include="@(PackageReference->'D|%(Identity)|%(PrivateAssets)')" />
+      <_KtsuFrameworkOverrideFact Include="@(GlobalPackageReference->'D|%(Identity)|all')" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(_KtsuFrameworkPackagesFile)"
+                      Lines="@(_KtsuFrameworkPackageLine)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+    <WriteLinesToFile File="$(_KtsuFrameworkOverrideFactsFile)"
+                      Lines="@(_KtsuFrameworkOverrideFact)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+
+    <ItemGroup>
+      <FileWrites Include="$(_KtsuFrameworkPackagesFile)" />
+      <FileWrites Include="$(_KtsuFrameworkOverrideFactsFile)" />
+      <AdditionalFiles Include="$(_KtsuFrameworkPackagesFile)" />
+      <AdditionalFiles Include="$(_KtsuFrameworkOverrideFactsFile)" />
+      <AdditionalFiles Include="$(DirectoryPackagesPropsFilePath)" Condition="Exists('$(DirectoryPackagesPropsFilePath)')" />
     </ItemGroup>
   </Target>
 

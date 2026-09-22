@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Polyfill" Version="7.0.0" />
+    <!-- Above the 9.0.x that the net9.0 shared framework ships, which is what makes the
+         reference resolve a real assembly instead of being pruned. -->
+    <PackageVersion Include="System.Text.Json" Version="10.0.2" />
+  </ItemGroup>
+</Project>

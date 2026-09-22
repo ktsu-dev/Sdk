@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The shape KTSU0008's code fix produces: the version pinned to what the lowest supported
+       framework ships, and NU1510 suppressed on the item because NuGet then reports the reference
+       as prunable - the opposite of what KTSU0006 demands. KTSU0008 must stay silent here, on both
+       inner builds. Same framework list as the triggering sibling, for the same reason. -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net9.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" PrivateAssets="all" NoWarn="NU1510" />
+  </ItemGroup>
+</Project>

@@ -39,21 +39,6 @@ public class NonPrivateBuildTimePackageAnalyzer : KtsuAnalyzerBase
 	private static readonly LocalizableString MessageFormat = "Package reference '{0}' must set PrivateAssets=\"all\". Without it this build-time-only package leaks into the dependency graph of every consumer.";
 	private static readonly LocalizableString Description = "Build-time-only packages must not flow to consumers as transitive dependencies. Only a fully private reference is omitted from the produced package's dependencies.";
 
-	/// <summary>
-	/// The asset kinds that <c>PrivateAssets="all"</c> expands to. A spelled-out value covering
-	/// every one of them is equivalent to <c>all</c> and is not reported.
-	/// </summary>
-	private static readonly ImmutableHashSet<string> AllAssetKinds = ImmutableHashSet.Create(
-		StringComparer.OrdinalIgnoreCase,
-		"compile",
-		"runtime",
-		"build",
-		"buildMultitargeting",
-		"buildTransitive",
-		"contentFiles",
-		"analyzers",
-		"native");
-
 	private static readonly DiagnosticDescriptor Rule = new(
 		DiagnosticId,
 		Title,
@@ -99,7 +84,7 @@ public class NonPrivateBuildTimePackageAnalyzer : KtsuAnalyzerBase
 		// SDK-computed property via CompilerVisibleProperty.
 		options.TryGetValue("build_property.PolyfillPrivateAssets", out string? privateAssets);
 
-		if (IsFullyPrivate(privateAssets))
+		if (PrivateAssets.IsFullyPrivate(privateAssets))
 		{
 			return;
 		}
@@ -161,31 +146,4 @@ public class NonPrivateBuildTimePackageAnalyzer : KtsuAnalyzerBase
 		lineText.IndexOf("PackageReference", StringComparison.OrdinalIgnoreCase) >= 0
 		&& (lineText.IndexOf($"\"{packageId}\"", StringComparison.OrdinalIgnoreCase) >= 0
 			|| lineText.IndexOf($"'{packageId}'", StringComparison.OrdinalIgnoreCase) >= 0);
-
-	/// <summary>
-	/// Determines whether a <c>PrivateAssets</c> value makes the reference fully private.
-	/// </summary>
-	/// <param name="privateAssets">The semicolon-separated metadata value, which may be empty.</param>
-	/// <returns><see langword="true"/> when the value is <c>all</c> or names every asset kind.</returns>
-	private static bool IsFullyPrivate(string? privateAssets)
-	{
-		if (string.IsNullOrWhiteSpace(privateAssets))
-		{
-			return false;
-		}
-
-		HashSet<string> tokens = new(StringComparer.OrdinalIgnoreCase);
-
-		foreach (string token in privateAssets!.Split(';'))
-		{
-			string trimmed = token.Trim();
-
-			if (trimmed.Length > 0)
-			{
-				tokens.Add(trimmed);
-			}
-		}
-
-		return tokens.Contains("all") || AllAssetKinds.All(tokens.Contains);
-	}
 }

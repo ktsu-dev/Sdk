@@ -621,6 +621,23 @@ The SDK automatically includes the `ktsu.Sdk.Analyzers` package (with version sy
 - The other standard packages are deliberately not covered: `System.Memory` and
   `System.Threading.Tasks.Extensions` are genuine runtime dependencies that must flow transitively
 
+**KTSU0008 (Error)**: Package reference overrides the shared framework
+
+- Flags a fully private `PackageReference` to a package that also ships in the target framework's
+  shared framework (`System.Text.Json`, `System.Memory` and the rest of the targeting pack's
+  `PackageOverrides.txt`) at a version above the one that framework supplies
+- Such a reference resolves a real assembly instead of being pruned, so the project compiles against
+  the higher assembly version. `PrivateAssets="all"` then keeps the dependency out of the produced
+  package, and a consumer on that framework resolves nothing and fails with `FileNotFoundException` —
+  assembly binds roll forward but never backward. The producing build and its nuspec are both silent
+- Code fixer pins the version to what the framework ships and adds `NoWarn="NU1510"` on the item,
+  because NuGet then reports the reference as prunable — the opposite of what KTSU0006 demands, and
+  the two can only be satisfied together
+- Reported per target framework: the `net10.0` inner build of a `net10.0;net9.0` project sees the
+  reference pruned and stays silent, while the `net9.0` one sees the override and reports
+- A reference that still flows to consumers is not reported — it carries the higher version with it
+- Disable with `<KtsuEnableFrameworkOverrideAnalysis>false</KtsuEnableFrameworkOverrideAnalysis>`
+
 **Polyfill Configuration**: For non-test projects, the SDK automatically enables:
 - `PolyEnsure=true` - Enables ensure/guard clause polyfills
 - `PolyNullability=true` - Enables nullability-related polyfills
