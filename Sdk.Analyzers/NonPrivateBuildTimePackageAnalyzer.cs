@@ -5,12 +5,9 @@
 namespace ktsu.Sdk.Analyzers;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Text;
 
 /// <summary>
 /// Analyzer that enforces <c>PrivateAssets="all"</c> on build-time-only package references.
@@ -112,38 +109,10 @@ public class NonPrivateBuildTimePackageAnalyzer : KtsuAnalyzerBase
 	/// <see cref="GeneratedCodeAnalysisFlags.None"/>, which silently loses the diagnostic. The
 	/// project file is also the more useful place to point: it is what has to change.
 	/// </remarks>
-	private static Location FindReferenceLocation(CompilationAnalysisContext context, string packageId)
-	{
-		AdditionalText? projectFile = context.Options.AdditionalFiles.FirstOrDefault(
-			f => f.Path.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase));
-
-		SourceText? projectText = projectFile?.GetText(context.CancellationToken);
-
-		if (projectFile is null || projectText is null)
-		{
-			return Location.None;
-		}
-
-		foreach (TextLine line in projectText.Lines)
-		{
-			if (IsPackageReferenceLineFor(line.ToString(), packageId))
-			{
-				return Location.Create(projectFile.Path, line.Span, projectText.Lines.GetLinePositionSpan(line.Span));
-			}
-		}
-
-		return Location.None;
-	}
-
-	/// <summary>
-	/// Determines whether a line of the project file declares a <c>PackageReference</c> for the
-	/// supplied package identifier.
-	/// </summary>
-	/// <param name="lineText">The line to inspect.</param>
-	/// <param name="packageId">The package identifier to match.</param>
-	/// <returns><see langword="true"/> when the line references the package.</returns>
-	internal static bool IsPackageReferenceLineFor(string lineText, string packageId) =>
-		lineText.IndexOf("PackageReference", StringComparison.OrdinalIgnoreCase) >= 0
-		&& (lineText.IndexOf($"\"{packageId}\"", StringComparison.OrdinalIgnoreCase) >= 0
-			|| lineText.IndexOf($"'{packageId}'", StringComparison.OrdinalIgnoreCase) >= 0);
+	private static Location FindReferenceLocation(CompilationAnalysisContext context, string packageId) =>
+		BuildFileLookup.DeclarationLocation(
+			BuildFileLookup.ProjectFile(context.Options.AdditionalFiles),
+			"PackageReference",
+			packageId,
+			context.CancellationToken);
 }

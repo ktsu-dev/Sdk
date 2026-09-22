@@ -8,7 +8,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -198,7 +197,7 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 	{
 		Dictionary<string, PackageInfo> map = new(StringComparer.OrdinalIgnoreCase);
 
-		AdditionalText? mapFile = FindAdditionalFile(files, PackageMapFileName);
+		AdditionalText? mapFile = BuildFileLookup.ByName(files, PackageMapFileName);
 		SourceText? text = mapFile?.GetText(cancellationToken);
 		if (text is null)
 		{
@@ -232,7 +231,7 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 
 	private static ImmutableHashSet<string> LoadLineSet(ImmutableArray<AdditionalText> files, string fileName, CancellationToken cancellationToken)
 	{
-		AdditionalText? file = FindAdditionalFile(files, fileName);
+		AdditionalText? file = BuildFileLookup.ByName(files, fileName);
 		SourceText? text = file?.GetText(cancellationToken);
 		if (text is null)
 		{
@@ -250,19 +249,6 @@ public class TransitivePackageUsedDirectlyAnalyzer : KtsuAnalyzerBase
 		}
 
 		return builder.ToImmutable();
-	}
-
-	private static AdditionalText? FindAdditionalFile(ImmutableArray<AdditionalText> files, string fileName)
-	{
-		foreach (AdditionalText file in files)
-		{
-			if (string.Equals(Path.GetFileName(file.Path), fileName, StringComparison.OrdinalIgnoreCase))
-			{
-				return file;
-			}
-		}
-
-		return null;
 	}
 
 	private readonly struct PackageInfo(string id, string version)

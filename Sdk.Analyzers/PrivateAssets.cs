@@ -51,10 +51,8 @@ internal static class PrivateAssets
 
 		HashSet<string> tokens = new(StringComparer.OrdinalIgnoreCase);
 
-		foreach (string token in privateAssets!.Split(';'))
+		foreach (string trimmed in privateAssets!.Split(';').Select(static token => token.Trim()))
 		{
-			string trimmed = token.Trim();
-
 			if (trimmed.Length > 0)
 			{
 				tokens.Add(trimmed);

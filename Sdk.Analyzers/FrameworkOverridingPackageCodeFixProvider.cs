@@ -142,7 +142,7 @@ public class FrameworkOverridingPackageCodeFixProvider : CodeFixProvider
 		{
 			string lineText = line.ToString();
 
-			if (!IsDeclarationLineFor(lineText, elementName, packageId))
+			if (!BuildFileLookup.DeclaresPackage(lineText, elementName, packageId))
 			{
 				continue;
 			}
@@ -184,7 +184,7 @@ public class FrameworkOverridingPackageCodeFixProvider : CodeFixProvider
 		{
 			string lineText = line.ToString();
 
-			if (!IsDeclarationLineFor(lineText, "PackageReference", packageId))
+			if (!BuildFileLookup.DeclaresPackage(lineText, "PackageReference", packageId))
 			{
 				continue;
 			}
@@ -239,18 +239,6 @@ public class FrameworkOverridingPackageCodeFixProvider : CodeFixProvider
 
 		return text;
 	}
-
-	/// <summary>
-	/// Determines whether a line declares the named element for the supplied package identifier.
-	/// </summary>
-	/// <param name="lineText">The line to inspect.</param>
-	/// <param name="elementName">The element name to match.</param>
-	/// <param name="packageId">The package identifier to match.</param>
-	/// <returns><see langword="true"/> when the line declares that package.</returns>
-	internal static bool IsDeclarationLineFor(string lineText, string elementName, string packageId) =>
-		lineText.IndexOf("<" + elementName, StringComparison.OrdinalIgnoreCase) >= 0
-		&& (lineText.IndexOf($"\"{packageId}\"", StringComparison.OrdinalIgnoreCase) >= 0
-			|| lineText.IndexOf($"'{packageId}'", StringComparison.OrdinalIgnoreCase) >= 0);
 
 	private static string ReplaceVersionAttribute(string lineText, string version)
 	{

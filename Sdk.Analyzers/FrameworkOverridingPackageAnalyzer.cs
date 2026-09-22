@@ -7,7 +7,6 @@ namespace ktsu.Sdk.Analyzers;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -188,15 +187,16 @@ public class FrameworkOverridingPackageAnalyzer : KtsuAnalyzerBase
 	{
 		Dictionary<string, string> map = new(StringComparer.OrdinalIgnoreCase);
 
-		SourceText? text = FindAdditionalFile(files, FrameworkPackagesFileName)?.GetText(cancellationToken);
+		SourceText? text = BuildFileLookup.ByName(files, FrameworkPackagesFileName)?.GetText(cancellationToken);
 		if (text is null)
 		{
 			return map;
 		}
 
-		foreach (string token in text.ToString().Split([';', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+		foreach (string entry in text.ToString()
+			.Split([';', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+			.Select(static token => token.Trim()))
 		{
-			string entry = token.Trim();
 			if (entry.Length == 0)
 			{
 				continue;
@@ -243,15 +243,14 @@ public class FrameworkOverridingPackageAnalyzer : KtsuAnalyzerBase
 		Dictionary<string, string> resolved = new(StringComparer.OrdinalIgnoreCase);
 		Dictionary<string, string> direct = new(StringComparer.OrdinalIgnoreCase);
 
-		SourceText? text = FindAdditionalFile(files, FrameworkOverrideFactsFileName)?.GetText(cancellationToken);
+		SourceText? text = BuildFileLookup.ByName(files, FrameworkOverrideFactsFileName)?.GetText(cancellationToken);
 		if (text is null)
 		{
 			return new ResolutionFacts(resolved, direct);
 		}
 
-		foreach (TextLine line in text.Lines)
+		foreach (string raw in text.Lines.Select(static line => line.ToString().Trim()))
 		{
-			string raw = line.ToString().Trim();
 			if (raw.Length == 0)
 			{
 				continue;
@@ -269,14 +268,14 @@ public class FrameworkOverridingPackageAnalyzer : KtsuAnalyzerBase
 			{
 				direct[parts[1]] = parts.Length >= 3 ? parts[2] : string.Empty;
 			}
-			else if (string.Equals(parts[0], "R", StringComparison.Ordinal) && parts.Length >= 3 && parts[2].Length > 0)
-			{
+			else if (string.Equals(parts[0], "R", StringComparison.Ordinal)
+				&& parts.Length >= 3
+				&& parts[2].Length > 0
 				// A package can contribute several assemblies; they all carry the same package
 				// version, so the first one seen is as good as any.
-				if (!resolved.ContainsKey(parts[1]))
-				{
-					resolved[parts[1]] = parts[2];
-				}
+				&& !resolved.ContainsKey(parts[1]))
+			{
+				resolved[parts[1]] = parts[2];
 			}
 		}
 
@@ -298,49 +297,23 @@ public class FrameworkOverridingPackageAnalyzer : KtsuAnalyzerBase
 	/// </remarks>
 	private static Location FindReferenceLocation(CompilationAnalysisContext context, string packageId)
 	{
-		AdditionalText? packagesProps = context.Options.AdditionalFiles.FirstOrDefault(
-			f => string.Equals(
-				Path.GetFileName(f.Path),
-				OrphanedPackageVersionAnalyzer.DirectoryPackagesPropsFileName,
-				StringComparison.OrdinalIgnoreCase));
+		AdditionalText? packagesProps = BuildFileLookup.ByName(
+			context.Options.AdditionalFiles,
+			OrphanedPackageVersionAnalyzer.DirectoryPackagesPropsFileName);
 
-		Location fromProps = FindDeclarationLine(packagesProps, "PackageVersion", packageId, context.CancellationToken);
-		if (fromProps != Location.None)
-		{
-			return fromProps;
-		}
+		Location fromProps = BuildFileLookup.DeclarationLocation(
+			packagesProps,
+			"PackageVersion",
+			packageId,
+			context.CancellationToken);
 
-		AdditionalText? projectFile = context.Options.AdditionalFiles.FirstOrDefault(
-			f => f.Path.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase));
-
-		return FindDeclarationLine(projectFile, "PackageReference", packageId, context.CancellationToken);
-	}
-
-	private static Location FindDeclarationLine(
-		AdditionalText? file,
-		string elementName,
-		string packageId,
-		CancellationToken cancellationToken)
-	{
-		SourceText? text = file?.GetText(cancellationToken);
-		if (file is null || text is null)
-		{
-			return Location.None;
-		}
-
-		foreach (TextLine line in text.Lines)
-		{
-			string lineText = line.ToString();
-
-			if (lineText.IndexOf(elementName, StringComparison.OrdinalIgnoreCase) >= 0
-				&& (lineText.IndexOf($"\"{packageId}\"", StringComparison.OrdinalIgnoreCase) >= 0
-					|| lineText.IndexOf($"'{packageId}'", StringComparison.OrdinalIgnoreCase) >= 0))
-			{
-				return Location.Create(file.Path, line.Span, text.Lines.GetLinePositionSpan(line.Span));
-			}
-		}
-
-		return Location.None;
+		return fromProps != Location.None
+			? fromProps
+			: BuildFileLookup.DeclarationLocation(
+				BuildFileLookup.ProjectFile(context.Options.AdditionalFiles),
+				"PackageReference",
+				packageId,
+				context.CancellationToken);
 	}
 
 	/// <summary>
@@ -410,19 +383,6 @@ public class FrameworkOverridingPackageAnalyzer : KtsuAnalyzerBase
 		}
 
 		return [.. values];
-	}
-
-	private static AdditionalText? FindAdditionalFile(ImmutableArray<AdditionalText> files, string fileName)
-	{
-		foreach (AdditionalText file in files)
-		{
-			if (string.Equals(Path.GetFileName(file.Path), fileName, StringComparison.OrdinalIgnoreCase))
-			{
-				return file;
-			}
-		}
-
-		return null;
 	}
 
 	private readonly struct ResolutionFacts(Dictionary<string, string> resolved, Dictionary<string, string> direct)
