@@ -1,3 +1,9 @@
+## v2.31.2 (patch)
+
+Changes since v2.31.1:
+
+- [patch] Use Path.Join in WebSdkContentTests ([@matt-edmondson](https://github.com/matt-edmondson))
+- fix: copy appsettings files on the plain-SDK web path [patch] ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.31.1 (patch)
 
 Changes since v2.31.0:
