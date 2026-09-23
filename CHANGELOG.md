@@ -1,3 +1,9 @@
+## v2.31.1 (patch)
+
+Changes since v2.31.0:
+
+- [patch] Stop discarding a test project's explicit TargetFrameworks ([@Claude](https://github.com/Claude))
+- [patch] Use Path.Join in the test-matrix helper ([@Claude](https://github.com/Claude))
 ## v2.31.0 (minor)
 
 Changes since v2.30.0:
