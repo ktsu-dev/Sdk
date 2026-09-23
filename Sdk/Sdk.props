@@ -557,6 +557,14 @@
     <TargetFrameworks>net10.0;net9.0;net8.0;netstandard2.0;netstandard2.1</TargetFrameworks>
     <TargetFrameworks Condition="$(IsTestProject) == 'true'">net10.0</TargetFrameworks>
 
+    <!-- Remembered so Sdk.targets can tell "the project accepted our default" from "the project
+         asked for something else". Sdk.targets runs after the project body and blanks
+         TargetFrameworks for test projects, so that a test project single-targets through
+         TargetFramework above rather than running a one-leg cross-targeting build. Without this
+         marker that blanking cannot be conditional, and an explicit TargetFrameworks in a test
+         project is silently discarded instead of honoured. -->
+    <_KtsuSdkDefaultTestTargetFrameworks Condition="$(IsTestProject) == 'true'">$(TargetFrameworks)</_KtsuSdkDefaultTestTargetFrameworks>
+
     <!-- Package properties -->
     <!-- Conditional for the same reason as AssemblyName above: a consumer that set this before the
          SDK was imported meant it. -->

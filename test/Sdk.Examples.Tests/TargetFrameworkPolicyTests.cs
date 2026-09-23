@@ -65,4 +65,88 @@ public sealed class TargetFrameworkPolicyTests
 
         Assert.AreEqual(TargetFrameworks.Library, props["TargetFrameworks"], "TargetFrameworks");
     }
+
+    /// <summary>
+    /// A test project that says nothing about frameworks single-targets the pinned one. The
+    /// matching plural default is cleared so the project builds one leg directly rather than
+    /// dispatching a one-leg cross-targeting build.
+    /// </summary>
+    [TestMethod]
+    public void TestProject_SingleTargetsByDefault()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Test"));
+
+        SetTestProjectFrameworks(workspace, string.Empty);
+
+        IReadOnlyDictionary<string, string> props = workspace.Evaluate(
+            "Calculator.Test/Calculator.Test.csproj", "TargetFramework", "TargetFrameworks");
+
+        Assert.AreEqual(TargetFrameworks.Latest, props["TargetFramework"], "TargetFramework");
+        Assert.AreEqual(string.Empty, props["TargetFrameworks"], "TargetFrameworks");
+    }
+
+    /// <summary>
+    /// A test project that asks for a framework matrix keeps it.
+    /// </summary>
+    /// <remarks>
+    /// Sdk.targets is imported after the project body, and it clears TargetFrameworks for test
+    /// projects to produce the single-target default above. Unconditionally, that also erased a
+    /// list the project had set for itself: the project's own configuration was discarded with no
+    /// opt-out and no diagnostic, and the collapse was invisible because a suite that still runs
+    /// one leg still reports green.
+    /// <para>
+    /// The case is concrete rather than hypothetical. A library that multi-targets needs its tests
+    /// to run on each framework's own shared framework to exercise that framework's in-box
+    /// dependencies; compiled against many and run on one tests only compile compatibility. See
+    /// ktsu-dev/JsonRequiredConditionally#25, whose matrix this made unrestorable.
+    /// </para>
+    /// </remarks>
+    [TestMethod]
+    public void TestProject_KeepsAnExplicitMultiTargetList()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Test"));
+
+        const string matrix = "net10.0;net9.0";
+        SetTestProjectFrameworks(workspace, matrix);
+
+        IReadOnlyDictionary<string, string> props = workspace.Evaluate(
+            "Calculator.Test/Calculator.Test.csproj", "TargetFrameworks");
+
+        Assert.AreEqual(
+            matrix,
+            props["TargetFrameworks"],
+            "A test project's explicit TargetFrameworks was discarded by the SDK.");
+    }
+
+    /// <summary>
+    /// Replaces the framework properties in the Test demo's test project.
+    /// </summary>
+    /// <param name="workspace">The workspace holding the copied demo.</param>
+    /// <param name="frameworks">
+    /// The plural list to set, or empty to leave the project saying nothing about frameworks so
+    /// the SDK's own defaults are observable.
+    /// </param>
+    private static void SetTestProjectFrameworks(ExampleWorkspace workspace, string frameworks)
+    {
+        string projectPath = Path.Combine(workspace.Root, "Calculator.Test", "Calculator.Test.csproj");
+        string original = File.ReadAllText(projectPath);
+
+        // The project body is evaluated after the SDK props, so both elements have to go before
+        // either the SDK's default or a replacement of our own is what is being observed.
+        string rewritten = original
+            .Replace($"<TargetFramework>{TargetFrameworks.Latest}</TargetFramework>", string.Empty, StringComparison.Ordinal)
+            .Replace("<TargetFrameworks></TargetFrameworks>", string.Empty, StringComparison.Ordinal);
+
+        Assert.AreNotEqual(original, rewritten, "The Test demo no longer has the expected framework properties.");
+
+        if (frameworks.Length > 0)
+        {
+            rewritten = rewritten.Replace(
+                "<IsTestProject>true</IsTestProject>",
+                $"<IsTestProject>true</IsTestProject>\n    <TargetFramework></TargetFramework>\n    <TargetFrameworks>{frameworks}</TargetFrameworks>",
+                StringComparison.Ordinal);
+        }
+
+        File.WriteAllText(projectPath, rewritten);
+    }
 }
