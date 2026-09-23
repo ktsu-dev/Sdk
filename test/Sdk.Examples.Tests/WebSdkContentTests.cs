@@ -58,7 +58,7 @@ public sealed class WebSdkContentTests
 
         Assert.IsTrue(result.Succeeded, $"Expected the plain-SDK web project to build.{Environment.NewLine}{result.Output}");
 
-        string outputDir = Path.Combine(workspace.Root, "Web", "bin", "Release", TargetFrameworks.Latest);
+        string outputDir = Path.Join(workspace.Root, "Web", "bin", "Release", TargetFrameworks.Latest);
         AssertCopied(outputDir, "appsettings.json", result);
         AssertCopied(outputDir, "appsettings.Development.json", result);
     }
@@ -86,11 +86,11 @@ public sealed class WebSdkContentTests
         CliResult result = workspace.Build("Web/Web.csproj");
 
         Assert.IsTrue(result.Succeeded, $"Expected the Web SDK demo to build.{Environment.NewLine}{result.Output}");
-        AssertCopied(Path.Combine(workspace.Root, "Web", "bin", "Release", TargetFrameworks.Latest), "appsettings.json", result);
+        AssertCopied(Path.Join(workspace.Root, "Web", "bin", "Release", TargetFrameworks.Latest), "appsettings.json", result);
     }
 
     private static void AssertCopied(string outputDir, string fileName, CliResult result) =>
         Assert.IsTrue(
-            File.Exists(Path.Combine(outputDir, fileName)),
+            File.Exists(Path.Join(outputDir, fileName)),
             $"Expected '{fileName}' in '{outputDir}'.{Environment.NewLine}{result.Output}");
 }
