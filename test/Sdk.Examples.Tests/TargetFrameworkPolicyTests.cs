@@ -128,7 +128,7 @@ public sealed class TargetFrameworkPolicyTests
     /// </param>
     private static void SetTestProjectFrameworks(ExampleWorkspace workspace, string frameworks)
     {
-        string projectPath = Path.Combine(workspace.Root, "Calculator.Test", "Calculator.Test.csproj");
+        string projectPath = Path.Join(workspace.Root, "Calculator.Test", "Calculator.Test.csproj");
         string original = File.ReadAllText(projectPath);
 
         // The project body is evaluated after the SDK props, so both elements have to go before
