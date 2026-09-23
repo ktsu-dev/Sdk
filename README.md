@@ -107,7 +107,9 @@ it, so `ktsu.Sdk.Web` cannot supply the ASP.NET Core framework reference itself.
 `Microsoft.NET.Sdk.Web` as above, or keep `Microsoft.NET.Sdk` and add
 `<FrameworkReference Include="Microsoft.AspNetCore.App" />` for a service that wants the runtime
 without the Web SDK's static asset and Razor machinery. That second form does not bring the Web
-SDK's implicit global usings, so write them yourself. Getting neither is **KTSU1005**.
+SDK's implicit global usings, so write them yourself. It does still get `appsettings.json` and
+`appsettings.*.json` copied to the output, because `ktsu.Sdk.Web` contributes those itself.
+Getting neither SDK nor framework reference is **KTSU1005**.
 
 For a platform-specific application (e.g. Linux), reference the matching SDK:
 
@@ -257,6 +259,11 @@ Extension SDK for ASP.NET Core web applications and services. Adds:
   as a package.
 - `IsWebProject=true`, matching the `IsWindowsProject` / `IsLinuxProject` family so CI and
   tooling can tell a service from a library without parsing the project file.
+- `appsettings.json` and `appsettings.*.json` copied to the output and publish directories, but
+  only on the plain `Microsoft.NET.Sdk` path. `Microsoft.NET.Sdk.Web` contributes its own content
+  glob, and a second one here would list the same file twice. Without this the plain-SDK form
+  builds clean and with no warning, and the service then starts with none of its configuration,
+  because the default host reads those files from the content root and finds nothing.
 
 `RuntimeIdentifiers` is deliberately left as the core SDK's desktop list. A service is
 published with an explicit RID about as often as without one, the list permits values rather

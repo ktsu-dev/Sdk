@@ -47,6 +47,29 @@
     <IsWebProject>true</IsWebProject>
   </PropertyGroup>
 
+  <!-- KTSU1005 blesses two ways to reach ASP.NET Core: Microsoft.NET.Sdk.Web as the outer SDK, or
+       plain Microsoft.NET.Sdk plus an explicit FrameworkReference. Only the first brings the Web
+       SDK's content globs, so on the second nothing copies appsettings.json to the output. The
+       build succeeds with no warning and the service then starts with none of its configuration,
+       because WebApplicationBuilder reads those files from the content root and simply finds
+       nothing - the worst shape of failure, and one KTSU1005's own message steers people toward.
+
+       Scoped to the files the default host actually reads rather than the Web SDK's whole
+       **\*.json glob: this SDK's job is the service's configuration, not every JSON file in the
+       tree. Skipped when the Web SDK is the outer SDK, since it contributes its own glob and a
+       second one here would list the same file twice. EnableDefaultItems and
+       EnableDefaultContentItems are honoured so a consumer who takes over item inclusion is not
+       handed items back. -->
+  <ItemGroup Condition="'$(UsingMicrosoftNETSdkWeb)' != 'true'
+                        And '$(EnableDefaultItems)' != 'false'
+                        And '$(EnableDefaultContentItems)' != 'false'">
+    <Content Include="appsettings.json;appsettings.*.json"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest"
+             Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <None Remove="appsettings.json;appsettings.*.json" />
+  </ItemGroup>
+
   <!-- RuntimeIdentifiers is deliberately left as the core SDK's desktop list rather than narrowed
        to linux-x64. A web application is commonly published with an explicit RID for a container
        image and equally commonly published without one, and nothing here can tell which. The list
