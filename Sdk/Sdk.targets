@@ -39,7 +39,16 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="$(IsTestProject) == 'true'">
-    <TargetFrameworks></TargetFrameworks>
+    <!-- A test project single-targets through the TargetFramework Sdk.props sets, so the matching
+         TargetFrameworks default is cleared here rather than left to produce a one-leg
+         cross-targeting build.
+
+         Conditional, because this file is imported after the project body: unconditional, it also
+         erased a TargetFrameworks the project had set for itself, with no way to opt out and no
+         diagnostic. A test project that multi-targets on purpose is a real case rather than a
+         hypothetical one: it is how a library that ships for several frameworks exercises each
+         one against its own in-box dependencies instead of merely compiling against them. -->
+    <TargetFrameworks Condition="'$(TargetFrameworks)' == '$(_KtsuSdkDefaultTestTargetFrameworks)'"></TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591;CA2225;IDE0022;IDE0058;CA1305;CA5394;CA1707;</NoWarn>
     <!-- CS1591: Missing XML comment for publicly visible type or member -->
     <!-- CA2225: Operator overloads have named alternates -->
