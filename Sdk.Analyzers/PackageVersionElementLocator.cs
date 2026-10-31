@@ -61,42 +61,14 @@ internal static class PackageVersionElementLocator
 
 			while (reader.Read())
 			{
-				if (reader.NodeType == XmlNodeType.Element
-					&& matchStart < 0
-					&& string.Equals(reader.LocalName, PackageVersionElementName, StringComparison.OrdinalIgnoreCase)
-					&& IncludeNames(reader, packageId))
-				{
-					// Line info for an element points at the first character of its name.
-					int start = ToOffset(lineStarts, lineInfo.LineNumber, lineInfo.LinePosition) - 1;
-					int openTagEnd = FindTagEnd(text, start);
-					if (start < 0 || openTagEnd < 0)
-					{
-						return false;
-					}
+				bool located = matchStart < 0
+					? TryStartMatch(reader, lineInfo, text, lineStarts, packageId, found, ref matchStart, ref matchDepth)
+					: TryEndMatch(reader, lineInfo, text, lineStarts, matchDepth, found, ref matchStart);
 
-					if (reader.IsEmptyElement)
-					{
-						found.Add((start, openTagEnd - start));
-					}
-					else
-					{
-						matchStart = start;
-						matchDepth = reader.Depth;
-					}
-				}
-				else if (reader.NodeType == XmlNodeType.EndElement && matchStart >= 0 && reader.Depth == matchDepth)
+				if (!located)
 				{
-					// Line info for an end element points at the first character of its name, after "</".
-					int endTagStart = ToOffset(lineStarts, lineInfo.LineNumber, lineInfo.LinePosition) - 2;
-					int endTagEnd = FindTagEnd(text, endTagStart);
-					if (endTagStart < 0 || endTagEnd < 0)
-					{
-						return false;
-					}
-
-					found.Add((matchStart, endTagEnd - matchStart));
-					matchStart = -1;
-					matchDepth = -1;
+					found.Clear();
+					return false;
 				}
 			}
 		}
@@ -134,16 +106,23 @@ internal static class PackageVersionElementLocator
 			return false;
 		}
 
-		int removeStart = elements[0].Start;
-		int removeEnd = elements[0].Start + elements[0].Length;
+		(start, length) = ExtendToWholeLines(text, elements[0].Start, elements[0].Start + elements[0].Length);
+		return true;
+	}
 
-		int lineStart = removeStart;
+	/// <summary>
+	/// Widens <c>[start, end)</c> to whole lines, including the indentation before it and the line
+	/// break after it, when nothing else shares those lines. Otherwise returns it unchanged.
+	/// </summary>
+	private static (int Start, int Length) ExtendToWholeLines(string text, int start, int end)
+	{
+		int lineStart = start;
 		while (lineStart > 0 && IsInlineWhitespace(text[lineStart - 1]))
 		{
 			lineStart--;
 		}
 
-		int lineEnd = removeEnd;
+		int lineEnd = end;
 		while (lineEnd < text.Length && IsInlineWhitespace(text[lineEnd]))
 		{
 			lineEnd++;
@@ -151,25 +130,95 @@ internal static class PackageVersionElementLocator
 
 		bool aloneAtStart = lineStart == 0 || text[lineStart - 1] is '\n' or '\r';
 		bool aloneAtEnd = lineEnd == text.Length || text[lineEnd] is '\n' or '\r';
-
-		if (aloneAtStart && aloneAtEnd)
+		if (!aloneAtStart || !aloneAtEnd)
 		{
-			removeStart = lineStart;
-			removeEnd = lineEnd;
-
-			if (removeEnd < text.Length && text[removeEnd] == '\r')
-			{
-				removeEnd++;
-			}
-
-			if (removeEnd < text.Length && text[removeEnd] == '\n')
-			{
-				removeEnd++;
-			}
+			return (start, end - start);
 		}
 
-		start = removeStart;
-		length = removeEnd - removeStart;
+		if (lineEnd < text.Length && text[lineEnd] == '\r')
+		{
+			lineEnd++;
+		}
+
+		if (lineEnd < text.Length && text[lineEnd] == '\n')
+		{
+			lineEnd++;
+		}
+
+		return (lineStart, lineEnd - lineStart);
+	}
+
+	/// <summary>
+	/// Handles a node while no element is open. A matching empty element is recorded at once; a
+	/// matching element with a body is held open until its end tag.
+	/// </summary>
+	/// <returns><see langword="false"/> when a matching element's tag cannot be delimited.</returns>
+	private static bool TryStartMatch(
+		XmlReader reader,
+		IXmlLineInfo lineInfo,
+		string text,
+		int[] lineStarts,
+		string packageId,
+		List<(int Start, int Length)> found,
+		ref int matchStart,
+		ref int matchDepth)
+	{
+		if (reader.NodeType != XmlNodeType.Element
+			|| !string.Equals(reader.LocalName, PackageVersionElementName, StringComparison.OrdinalIgnoreCase)
+			|| !IncludeNames(reader, packageId))
+		{
+			return true;
+		}
+
+		// Line info for an element points at the first character of its name.
+		int start = ToOffset(lineStarts, lineInfo.LineNumber, lineInfo.LinePosition) - 1;
+		int openTagEnd = FindTagEnd(text, start);
+		if (openTagEnd < 0)
+		{
+			return false;
+		}
+
+		if (reader.IsEmptyElement)
+		{
+			found.Add((start, openTagEnd - start));
+		}
+		else
+		{
+			matchStart = start;
+			matchDepth = reader.Depth;
+		}
+
+		return true;
+	}
+
+	/// <summary>
+	/// Handles a node while a matching element is open, recording it when its end tag is reached.
+	/// </summary>
+	/// <returns><see langword="false"/> when the end tag cannot be delimited.</returns>
+	private static bool TryEndMatch(
+		XmlReader reader,
+		IXmlLineInfo lineInfo,
+		string text,
+		int[] lineStarts,
+		int matchDepth,
+		List<(int Start, int Length)> found,
+		ref int matchStart)
+	{
+		if (reader.NodeType != XmlNodeType.EndElement || reader.Depth != matchDepth)
+		{
+			return true;
+		}
+
+		// Line info for an end element points at the first character of its name, after "</".
+		int endTagStart = ToOffset(lineStarts, lineInfo.LineNumber, lineInfo.LinePosition) - 2;
+		int endTagEnd = FindTagEnd(text, endTagStart);
+		if (endTagEnd < 0)
+		{
+			return false;
+		}
+
+		found.Add((matchStart, endTagEnd - matchStart));
+		matchStart = -1;
 		return true;
 	}
 
@@ -231,21 +280,20 @@ internal static class PackageVersionElementLocator
 	private static int[] ComputeLineStarts(string text)
 	{
 		List<int> starts = [0];
-		for (int i = 0; i < text.Length; i++)
+		int i = 0;
+		while (i < text.Length)
 		{
 			char c = text[i];
-			if (c == '\r')
-			{
-				if (i + 1 < text.Length && text[i + 1] == '\n')
-				{
-					i++;
-				}
+			i++;
 
-				starts.Add(i + 1);
-			}
-			else if (c == '\n')
+			if (c == '\r' && i < text.Length && text[i] == '\n')
 			{
-				starts.Add(i + 1);
+				i++;
+			}
+
+			if (c is '\r' or '\n')
+			{
+				starts.Add(i);
 			}
 		}
 
