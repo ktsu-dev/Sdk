@@ -40,8 +40,8 @@ public class OrphanedPackageVersionCodeFixProvider : CodeFixProvider
 		}
 
 		Diagnostic diagnostic = context.Diagnostics.First();
-		if (!diagnostic.Properties.TryGetValue(OrphanedPackageVersionAnalyzer.PackageIdProperty, out string? packageId) ||
-			string.IsNullOrEmpty(packageId))
+		if (!diagnostic.Properties.TryGetValue(OrphanedPackageVersionAnalyzer.PackageIdProperty, out string? value) ||
+			value is not { Length: > 0 } packageId)
 		{
 			return;
 		}
@@ -51,7 +51,7 @@ public class OrphanedPackageVersionCodeFixProvider : CodeFixProvider
 		// Offer no fix unless the whole element can be located unambiguously. Deleting part of a
 		// multi-line element leaves Directory.Packages.props malformed, and every project in the
 		// solution then fails to load, which is far worse than the diagnostic it set out to fix.
-		if (text is null || !PackageVersionElementLocator.TryFindRemovalSpan(text.ToString(), packageId!, out _, out _))
+		if (text is null || !PackageVersionElementLocator.TryFindRemovalSpan(text.ToString(), packageId, out _, out _))
 		{
 			return;
 		}
@@ -59,7 +59,7 @@ public class OrphanedPackageVersionCodeFixProvider : CodeFixProvider
 		context.RegisterCodeFix(
 			CodeAction.Create(
 				title: $"Remove orphaned PackageVersion '{packageId}'",
-				createChangedSolution: ct => RemovePackageVersionAsync(document, packageId!, ct),
+				createChangedSolution: ct => RemovePackageVersionAsync(document, packageId, ct),
 				equivalenceKey: nameof(OrphanedPackageVersionCodeFixProvider)),
 			diagnostic);
 	}

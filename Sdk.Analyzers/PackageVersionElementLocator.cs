@@ -54,18 +54,11 @@ internal static class PackageVersionElementLocator
 		{
 			using StringReader stringReader = new(text);
 			using XmlReader reader = XmlReader.Create(stringReader, settings);
-			IXmlLineInfo lineInfo = (IXmlLineInfo)reader;
-
-			int matchStart = -1;
-			int matchDepth = -1;
+			ElementScan scan = new(reader, text, lineStarts, packageId, found);
 
 			while (reader.Read())
 			{
-				bool located = matchStart < 0
-					? TryStartMatch(reader, lineInfo, text, lineStarts, packageId, found, ref matchStart, ref matchDepth)
-					: TryEndMatch(reader, lineInfo, text, lineStarts, matchDepth, found, ref matchStart);
-
-				if (!located)
+				if (!scan.Visit())
 				{
 					found.Clear();
 					return false;
@@ -146,80 +139,6 @@ internal static class PackageVersionElementLocator
 		}
 
 		return (lineStart, lineEnd - lineStart);
-	}
-
-	/// <summary>
-	/// Handles a node while no element is open. A matching empty element is recorded at once; a
-	/// matching element with a body is held open until its end tag.
-	/// </summary>
-	/// <returns><see langword="false"/> when a matching element's tag cannot be delimited.</returns>
-	private static bool TryStartMatch(
-		XmlReader reader,
-		IXmlLineInfo lineInfo,
-		string text,
-		int[] lineStarts,
-		string packageId,
-		List<(int Start, int Length)> found,
-		ref int matchStart,
-		ref int matchDepth)
-	{
-		if (reader.NodeType != XmlNodeType.Element
-			|| !string.Equals(reader.LocalName, PackageVersionElementName, StringComparison.OrdinalIgnoreCase)
-			|| !IncludeNames(reader, packageId))
-		{
-			return true;
-		}
-
-		// Line info for an element points at the first character of its name.
-		int start = ToOffset(lineStarts, lineInfo.LineNumber, lineInfo.LinePosition) - 1;
-		int openTagEnd = FindTagEnd(text, start);
-		if (openTagEnd < 0)
-		{
-			return false;
-		}
-
-		if (reader.IsEmptyElement)
-		{
-			found.Add((start, openTagEnd - start));
-		}
-		else
-		{
-			matchStart = start;
-			matchDepth = reader.Depth;
-		}
-
-		return true;
-	}
-
-	/// <summary>
-	/// Handles a node while a matching element is open, recording it when its end tag is reached.
-	/// </summary>
-	/// <returns><see langword="false"/> when the end tag cannot be delimited.</returns>
-	private static bool TryEndMatch(
-		XmlReader reader,
-		IXmlLineInfo lineInfo,
-		string text,
-		int[] lineStarts,
-		int matchDepth,
-		List<(int Start, int Length)> found,
-		ref int matchStart)
-	{
-		if (reader.NodeType != XmlNodeType.EndElement || reader.Depth != matchDepth)
-		{
-			return true;
-		}
-
-		// Line info for an end element points at the first character of its name, after "</".
-		int endTagStart = ToOffset(lineStarts, lineInfo.LineNumber, lineInfo.LinePosition) - 2;
-		int endTagEnd = FindTagEnd(text, endTagStart);
-		if (endTagEnd < 0)
-		{
-			return false;
-		}
-
-		found.Add((matchStart, endTagEnd - matchStart));
-		matchStart = -1;
-		return true;
 	}
 
 	private static bool IncludeNames(XmlReader reader, string packageId)
@@ -306,4 +225,74 @@ internal static class PackageVersionElementLocator
 			: lineStarts[lineNumber - 1] + linePosition - 1;
 
 	private static bool IsInlineWhitespace(char c) => c is ' ' or '\t';
+
+	/// <summary>
+	/// The state of one pass over the document: the element currently open, if any, and the
+	/// matches recorded so far.
+	/// </summary>
+	private sealed class ElementScan(XmlReader reader, string text, int[] lineStarts, string packageId, List<(int Start, int Length)> found)
+	{
+		private readonly IXmlLineInfo lineInfo = (IXmlLineInfo)reader;
+		private int matchStart = -1;
+		private int matchDepth = -1;
+
+		/// <summary>Handles the reader's current node.</summary>
+		/// <returns><see langword="false"/> when a matching element's tags cannot be delimited.</returns>
+		public bool Visit() => matchStart < 0 ? TryStartMatch() : TryEndMatch();
+
+		/// <summary>
+		/// Handles a node while no element is open. A matching empty element is recorded at once; a
+		/// matching element with a body is held open until its end tag.
+		/// </summary>
+		private bool TryStartMatch()
+		{
+			if (reader.NodeType != XmlNodeType.Element
+				|| !string.Equals(reader.LocalName, PackageVersionElementName, StringComparison.OrdinalIgnoreCase)
+				|| !IncludeNames(reader, packageId))
+			{
+				return true;
+			}
+
+			// Line info for an element points at the first character of its name.
+			int start = ToOffset(lineStarts, lineInfo.LineNumber, lineInfo.LinePosition) - 1;
+			int openTagEnd = FindTagEnd(text, start);
+			if (openTagEnd < 0)
+			{
+				return false;
+			}
+
+			if (reader.IsEmptyElement)
+			{
+				found.Add((start, openTagEnd - start));
+			}
+			else
+			{
+				matchStart = start;
+				matchDepth = reader.Depth;
+			}
+
+			return true;
+		}
+
+		/// <summary>Handles a node while a matching element is open, recording it at its end tag.</summary>
+		private bool TryEndMatch()
+		{
+			if (reader.NodeType != XmlNodeType.EndElement || reader.Depth != matchDepth)
+			{
+				return true;
+			}
+
+			// Line info for an end element points at the first character of its name, after "</".
+			int endTagStart = ToOffset(lineStarts, lineInfo.LineNumber, lineInfo.LinePosition) - 2;
+			int endTagEnd = FindTagEnd(text, endTagStart);
+			if (endTagEnd < 0)
+			{
+				return false;
+			}
+
+			found.Add((matchStart, endTagEnd - matchStart));
+			matchStart = -1;
+			return true;
+		}
+	}
 }
