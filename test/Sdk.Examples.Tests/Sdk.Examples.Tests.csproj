@@ -36,6 +36,11 @@
       MSBuild assemblies the task itself derives from are never loaded here.
     -->
     <ProjectReference Include="..\..\Sdk.Tasks\Sdk.Tasks.csproj" />
+    <!--
+      The analyzer assembly, for the same reason: its BCL-only helpers (PackageVersionElementLocator)
+      are tested directly. Roslyn is a private reference there, so no Roslyn type is touched here.
+    -->
+    <ProjectReference Include="..\..\Sdk.Analyzers\Sdk.Analyzers.csproj" />
   </ItemGroup>
 
 </Project>

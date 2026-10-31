@@ -29,21 +29,31 @@ public class OrphanedPackageVersionCodeFixProvider : CodeFixProvider
 	public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
 	/// <inheritdoc/>
-	public override Task RegisterCodeFixesAsync(CodeFixContext context)
+	public override async Task RegisterCodeFixesAsync(CodeFixContext context)
 	{
 		// The diagnostic is reported against Directory.Packages.props, which is supplied to the
 		// compiler as an additional file, so the fix targets the additional text document.
 		TextDocument? document = context.TextDocument;
 		if (document is null)
 		{
-			return Task.CompletedTask;
+			return;
 		}
 
 		Diagnostic diagnostic = context.Diagnostics.First();
 		if (!diagnostic.Properties.TryGetValue(OrphanedPackageVersionAnalyzer.PackageIdProperty, out string? packageId) ||
 			string.IsNullOrEmpty(packageId))
 		{
-			return Task.CompletedTask;
+			return;
+		}
+
+		SourceText? text = await document.GetTextAsync(context.CancellationToken).ConfigureAwait(false);
+
+		// Offer no fix unless the whole element can be located unambiguously. Deleting part of a
+		// multi-line element leaves Directory.Packages.props malformed, and every project in the
+		// solution then fails to load, which is far worse than the diagnostic it set out to fix.
+		if (text is null || !PackageVersionElementLocator.TryFindRemovalSpan(text.ToString(), packageId!, out _, out _))
+		{
+			return;
 		}
 
 		context.RegisterCodeFix(
@@ -52,8 +62,6 @@ public class OrphanedPackageVersionCodeFixProvider : CodeFixProvider
 				createChangedSolution: ct => RemovePackageVersionAsync(document, packageId!, ct),
 				equivalenceKey: nameof(OrphanedPackageVersionCodeFixProvider)),
 			diagnostic);
-
-		return Task.CompletedTask;
 	}
 
 	private static async Task<Solution> RemovePackageVersionAsync(
@@ -62,23 +70,13 @@ public class OrphanedPackageVersionCodeFixProvider : CodeFixProvider
 		CancellationToken cancellationToken)
 	{
 		SourceText? text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-		if (text is null)
+		if (text is null || !PackageVersionElementLocator.TryFindRemovalSpan(text.ToString(), packageId, out int start, out int length))
 		{
 			return document.Project.Solution;
 		}
 
-		foreach (TextLine line in text.Lines)
-		{
-			if (!OrphanedPackageVersionAnalyzer.IsPackageVersionLineFor(line.ToString(), packageId))
-			{
-				continue;
-			}
-
-			// Remove the entire line, including its line break, so no blank line is left behind.
-			SourceText newText = text.Replace(line.SpanIncludingLineBreak, string.Empty);
-			return document.Project.Solution.WithAdditionalDocumentText(document.Id, newText);
-		}
-
-		return document.Project.Solution;
+		// Remove the whole element, and its lines when it is alone on them, so no blank line is left behind.
+		SourceText newText = text.Replace(new TextSpan(start, length), string.Empty);
+		return document.Project.Solution.WithAdditionalDocumentText(document.Id, newText);
 	}
 }
