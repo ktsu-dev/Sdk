@@ -164,9 +164,44 @@ public sealed class StyleConfigSyncTests
         File.WriteAllText(Path.Combine(solutionDir, ".runsettings"), "stale runsettings");
     }
 
+    /// <summary>
+    /// A consumer with no COPYRIGHT.md must not be handed ktsu.dev's header template: with code
+    /// style enforced as errors, every file without "Copyright (c) ktsu.dev" would fail IDE0073.
+    /// </summary>
+    [TestMethod]
+    public void Build_UnsetsEditorConfigHeader_WhenThereIsNoCopyrightFile()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Library"));
+        string solutionDir = workspace.Evaluate(Project, "SolutionDir")["SolutionDir"];
+
+        Assert.IsFalse(File.Exists(Path.Combine(solutionDir, "COPYRIGHT.md")), "The demo is expected to have no COPYRIGHT.md.");
+        Assert.AreEqual(string.Empty, workspace.Evaluate(Project, "Copyright")["Copyright"]);
+
+        SeedConsumerStyleFiles(solutionDir);
+        File.WriteAllText(
+            Path.Combine(solutionDir, "Library", "ConsumerOwned.cs"),
+            "// Copyright (c) Contoso\n\nnamespace Library;\n\ninternal static class ConsumerOwned\n{\n}\n");
+
+        // Code style stays enforced so IDE0073 would surface as an error. The demo's own sources
+        // carry unrelated formatting diagnostics, so the build result itself is not asserted.
+        CliResult result = workspace.Build(Project);
+        Assert.IsFalse(
+            result.Output.Contains("IDE0073", StringComparison.Ordinal),
+            $"Expected no file-header diagnostics for a consumer with no COPYRIGHT.md.{Environment.NewLine}{result.Output}");
+
+        string synced = File.ReadAllText(Path.Combine(solutionDir, ".editorconfig"));
+        StringAssert.Contains(synced, "file_header_template = unset");
+        Assert.IsFalse(synced.Contains("ktsu.dev", StringComparison.Ordinal), "The synced .editorconfig still names ktsu.dev.");
+    }
+
     private static void AssertStyleConfigFilesMatchSdkDefaults(string solutionDir)
     {
-        string expectedEditorConfig = File.ReadAllText(Path.Combine(RepoLayout.Root, ".editorconfig"));
+        // The demo has no COPYRIGHT.md, so the packaged header template is unset rather than kept.
+        string expectedEditorConfig = File.ReadAllText(Path.Combine(RepoLayout.Root, ".editorconfig"))
+            .Replace(
+                "file_header_template = Copyright (c) ktsu.dev\\nAll rights reserved.\\nLicensed under the MIT license.",
+                "file_header_template = unset",
+                StringComparison.Ordinal);
         string expectedGitAttributes = File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitattributes"));
         string expectedGitIgnore = File.ReadAllText(Path.Combine(RepoLayout.Root, ".gitignore"));
         string expectedRunSettings = File.ReadAllText(Path.Combine(RepoLayout.Root, ".runsettings"));

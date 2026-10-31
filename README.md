@@ -428,6 +428,10 @@ The sync updates files that already exist in the solution root.
 When `COPYRIGHT.md` exists in the consumer solution root, `.editorconfig` is still synced but its
 `file_header_template` line is rewritten from the full contents of `COPYRIGHT.md`.
 
+When there is no `COPYRIGHT.md` (and no `Copyright` property), the line is written as
+`file_header_template = unset`. No header is required, so IDE0073 stays silent, and the synced
+`.editorconfig` names no copyright holder. Add a `COPYRIGHT.md` to have your own header enforced.
+
 To opt out:
 
 ```xml
