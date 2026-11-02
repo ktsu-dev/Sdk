@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Folder and project names both contain a space. Regression fixture for ktsu-dev/Sdk#73: the
+       space must be stripped from the path-derived namespace as it is from the project name, and
+       Microsoft.NET.Sdk's underscored RootNamespace default ("My_Lib") must not be mistaken for a
+       consumer override. Pinned to net10.0 to keep evaluation single-valued. -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Standard packages required by KTSU0001 for non-test projects. -->
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
