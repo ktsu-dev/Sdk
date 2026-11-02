@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Sits directly in a scaffolding "src" folder (a flat src/<Project>.csproj layout), one level
+       below the solution. Regression fixture for ktsu-dev/Sdk#61: the relative path is the bare
+       segment "src" with no trailing dot, and it must still not leak into the derived namespace,
+       assembly name, or package ID. Pinned to net10.0 to keep evaluation single-valued. -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Standard packages required by KTSU0001 for non-test projects. -->
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
