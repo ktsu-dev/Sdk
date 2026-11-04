@@ -29,6 +29,24 @@ public sealed class ProjectNamespaceTests
     }
 
     /// <summary>
+    /// A project file sitting directly in a scaffolding folder (a flat <c>src/Flat.csproj</c>
+    /// layout) has the bare segment <c>src</c> as its whole relative path, with no trailing dot.
+    /// It must be stripped all the same: before the fix this project resolved to <c>src.Flat</c>.
+    /// See ktsu-dev/Sdk#61.
+    /// </summary>
+    [TestMethod]
+    public void Project_DirectlyInScaffoldingFolder_DropsTheFolderFromItsNamespace()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Namespaces"));
+
+        IReadOnlyDictionary<string, string> props = workspace.Evaluate(
+            "src/Flat.csproj", "AssemblyName", "PackageId");
+
+        Assert.AreEqual("Flat", props["AssemblyName"], "AssemblyName");
+        Assert.AreEqual("Flat", props["PackageId"], "PackageId");
+    }
+
+    /// <summary>
     /// A folder that merely contains one of the scaffolding words as a substring (<c>Testing</c>
     /// contains <c>test</c>) must not be stripped: the match has to be a whole path segment.
     /// </summary>

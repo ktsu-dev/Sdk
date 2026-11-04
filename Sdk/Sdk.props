@@ -479,8 +479,10 @@
          one of these wrapper directories is meant to inherit the identity of the directory below
          it, not the wrapper's own lowercase name. Only leading segments are stripped - one that
          appears deeper in the path (e.g. examples/demos/Foo) is left alone, since nothing else in
-         this file treats it as scaffolding at that position. -->
-    <_ProjectPathNamespace Condition="'$(_ProjectPathNamespace)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_ProjectPathNamespace), '^(?:(?:src|source|tests|test|examples|samples)\.)+', ''))</_ProjectPathNamespace>
+         this file treats it as scaffolding at that position. A segment may also end the path
+         (a project file sitting directly in src/, tests/ and so on), so the match takes either a
+         following dot or the end of the string. -->
+    <_ProjectPathNamespace Condition="'$(_ProjectPathNamespace)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_ProjectPathNamespace), '^(?:(?:src|source|tests|test|examples|samples)(?:\.|$))+', ''))</_ProjectPathNamespace>
 
     <_CleanProjectName Condition="'$(MSBuildProjectName)' != ''">$(MSBuildProjectName.Replace(" ", ""))</_CleanProjectName>
 
