@@ -608,9 +608,13 @@
       limit to leave room for the truncation marker.
     -->
     <PackageReleaseNotes Condition="'$(PackageReleaseNotes)' != '' And $(PackageReleaseNotes.Length) > 34000">$(PackageReleaseNotes.Substring(0, 34000))... (truncated due to NuGet length limits)</PackageReleaseNotes>
-    <PackageDescription>$(Description)</PackageDescription>
-    <PackageTags>$(Tags)</PackageTags>
-    <PackageProjectUrl>$(ProjectUrl)</PackageProjectUrl>
+    <!-- Assigned only from a value: Directory.Build.props is evaluated before this file, so an
+         unconditional assignment threw away a consumer's own PackageDescription, PackageTags and
+         PackageProjectUrl whenever the matching metadata file was absent, and the package shipped
+         with the placeholder description and no tags or project URL (ktsu-dev/Sdk#91). -->
+    <PackageDescription Condition="'$(Description)' != ''">$(Description)</PackageDescription>
+    <PackageTags Condition="'$(Tags)' != ''">$(Tags)</PackageTags>
+    <PackageProjectUrl Condition="'$(ProjectUrl)' != ''">$(ProjectUrl)</PackageProjectUrl>
     <IncludeSource>true</IncludeSource>
     <IncludeContentInPack>true</IncludeContentInPack>
     <PackRelease>true</PackRelease>
@@ -704,8 +708,12 @@
 
   <PropertyGroup>
     <!-- Build-related properties -->
-    <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
-    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true' Or '$(TF_BUILD)' == 'true'">true</ContinuousIntegrationBuild>
+    <!-- A default only. On CI other than GitHub Actions or Azure Pipelines (GitLab, Jenkins,
+         TeamCity), setting ContinuousIntegrationBuild=true is the documented way to get
+         deterministic, SourceLink-normalised builds, and an unconditional false here discarded it
+         (ktsu-dev/Sdk#91). -->
+    <ContinuousIntegrationBuild Condition="'$(ContinuousIntegrationBuild)' == '' And ('$(GITHUB_ACTIONS)' == 'true' Or '$(TF_BUILD)' == 'true')">true</ContinuousIntegrationBuild>
+    <ContinuousIntegrationBuild Condition="'$(ContinuousIntegrationBuild)' == ''">false</ContinuousIntegrationBuild>
     <CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>
     <CopyDocumentationFilesFromPackages>true</CopyDocumentationFilesFromPackages>
     <DisableImplicitFrameworkDefines>false</DisableImplicitFrameworkDefines>
