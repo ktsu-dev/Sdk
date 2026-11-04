@@ -5,6 +5,7 @@
 namespace ktsu.Sdk.Analyzers;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -96,21 +97,46 @@ public class OrphanedPackageVersionAnalyzer : KtsuAnalyzerBase
 
 	private static void ReportOrphan(CompilationAnalysisContext context, string propsPath, SourceText propsText, string packageId)
 	{
+		TextSpan? span = FindElementSpan(propsText, packageId);
+		if (span is null)
+		{
+			return;
+		}
+
+		LinePositionSpan lineSpan = propsText.Lines.GetLinePositionSpan(span.Value);
+		Location location = Location.Create(propsPath, span.Value, lineSpan);
+
+		ImmutableDictionary<string, string?> properties = ImmutableDictionary<string, string?>.Empty
+			.Add(PackageIdProperty, packageId);
+
+		context.ReportDiagnostic(Diagnostic.Create(Rule, location, properties, packageId));
+	}
+
+	/// <summary>
+	/// Anchors the diagnostic to the first live <c>PackageVersion</c> element for the package, the
+	/// same element the code fix removes. A commented-out copy is skipped, and a layout with
+	/// <c>PackageVersion</c> and <c>Include</c> on different lines is still found.
+	/// </summary>
+	/// <remarks>
+	/// If the file is not well-formed XML the single-line test is used instead, so the orphan is
+	/// still reported where possible.
+	/// </remarks>
+	private static TextSpan? FindElementSpan(SourceText propsText, string packageId)
+	{
+		if (PackageVersionElementLocator.TryFindElements(propsText.ToString(), packageId, out IReadOnlyList<(int Start, int Length)> elements))
+		{
+			return elements.Count > 0 ? new TextSpan(elements[0].Start, elements[0].Length) : null;
+		}
+
 		foreach (TextLine line in propsText.Lines)
 		{
-			string lineText = line.ToString();
-			if (IsPackageVersionLineFor(lineText, packageId))
+			if (IsPackageVersionLineFor(line.ToString(), packageId))
 			{
-				LinePositionSpan lineSpan = propsText.Lines.GetLinePositionSpan(line.Span);
-				Location location = Location.Create(propsPath, line.Span, lineSpan);
-
-				ImmutableDictionary<string, string?> properties = ImmutableDictionary<string, string?>.Empty
-					.Add(PackageIdProperty, packageId);
-
-				context.ReportDiagnostic(Diagnostic.Create(Rule, location, properties, packageId));
-				return;
+				return line.Span;
 			}
 		}
+
+		return null;
 	}
 
 	/// <summary>

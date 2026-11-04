@@ -46,4 +46,9 @@
 
   <!-- Import modular shared targets (only package content, not SDK content) -->
   <Import Project="..\Sdk.Common.PackageContent.targets" />
+  <ItemGroup>
+    <!-- PackageVersionElementLocator is unit tested directly; it uses only the BCL. -->
+    <InternalsVisibleTo Include="Sdk.Examples.Tests" />
+  </ItemGroup>
+
 </Project>
