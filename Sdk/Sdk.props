@@ -464,21 +464,25 @@
 
     <SolutionNamespace Condition="'$(SolutionName)' != ''">$(SolutionName.Replace(" ", ""))</SolutionNamespace>
 
-    <!-- Build ProjectNamespace from subdirectories between solution and project -->
+    <!-- Build ProjectNamespace from subdirectories between solution and project. Spaces are
+         stripped from the path as they are from the project name (_CleanProjectName below), so
+         the two can be compared and "My Lib/My Lib.csproj" doesn't get its name appended twice. -->
     <!-- Examples:
          Solution: /MySln/, Project: /MySln/src/Core/MyLib/ → ProjectNamespace: Core.MyLib (src stripped, see below)
          Solution: /MySln/, Project: /MySln/libs/Utils/Utils.csproj → ProjectNamespace: libs.Utils (Utils already included)
          Solution: /MySln/, Project: /MySln/MyApp/ → ProjectNamespace: MyApp -->
     <_ProjectRelativePath Condition="'$(SolutionDir)' != '' And '$(MSBuildProjectDirectory)' != ''">$([MSBuild]::MakeRelative($(SolutionDir), $(MSBuildProjectDirectory)))</_ProjectRelativePath>
-    <_ProjectPathNamespace Condition="'$(_ProjectRelativePath)' != ''">$(_ProjectRelativePath.Replace('\', '.').Replace('/', '.').TrimEnd('.'))</_ProjectPathNamespace>
+    <_ProjectPathNamespace Condition="'$(_ProjectRelativePath)' != ''">$(_ProjectRelativePath.Replace('\', '.').Replace('/', '.').Replace(' ', '').TrimEnd('.'))</_ProjectPathNamespace>
 
     <!-- Strip leading scaffolding segments (src, source, tests, test, examples, samples) before
          they can leak into the derived namespace, assembly name, and package ID: a project under
          one of these wrapper directories is meant to inherit the identity of the directory below
          it, not the wrapper's own lowercase name. Only leading segments are stripped - one that
          appears deeper in the path (e.g. examples/demos/Foo) is left alone, since nothing else in
-         this file treats it as scaffolding at that position. -->
-    <_ProjectPathNamespace Condition="'$(_ProjectPathNamespace)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_ProjectPathNamespace), '^(?:(?:src|source|tests|test|examples|samples)\.)+', ''))</_ProjectPathNamespace>
+         this file treats it as scaffolding at that position. A segment may also end the path
+         (a project file sitting directly in src/, tests/ and so on), so the match takes either a
+         following dot or the end of the string. -->
+    <_ProjectPathNamespace Condition="'$(_ProjectPathNamespace)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_ProjectPathNamespace), '^(?:(?:src|source|tests|test|examples|samples)(?:\.|$))+', ''))</_ProjectPathNamespace>
 
     <_CleanProjectName Condition="'$(MSBuildProjectName)' != ''">$(MSBuildProjectName.Replace(" ", ""))</_CleanProjectName>
 
@@ -508,8 +512,13 @@
       name, because that is indistinguishable from the SDK default. That was already true - this
       file overwrote it unconditionally before - and an empty AuthorsNamespace is the supported way
       to drop the organisation prefix.
+
+      Microsoft.NET.Sdk defaults RootNamespace to the project name with spaces replaced by
+      underscores, and AssemblyName to the project name as it is, so both spellings count as the
+      default for RootNamespace. Without that, "My Lib.csproj" reads as a consumer override.
     -->
-    <_KtsuRootNamespaceWasSet Condition="'$(RootNamespace)' != '' And '$(RootNamespace)' != '$(MSBuildProjectName)'">true</_KtsuRootNamespaceWasSet>
+    <_KtsuDefaultRootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</_KtsuDefaultRootNamespace>
+    <_KtsuRootNamespaceWasSet Condition="'$(RootNamespace)' != '' And '$(RootNamespace)' != '$(MSBuildProjectName)' And '$(RootNamespace)' != '$(_KtsuDefaultRootNamespace)'">true</_KtsuRootNamespaceWasSet>
     <_KtsuAssemblyNameWasSet Condition="'$(AssemblyName)' != '' And '$(AssemblyName)' != '$(MSBuildProjectName)'">true</_KtsuAssemblyNameWasSet>
 
     <!-- Build RootNamespace safely -->
@@ -783,7 +792,7 @@
 
     <!-- C# Compiler Options to report errors and warnings -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>CA1724;CA1034;CA1000;CA2260;CA1515;IDE0370;</NoWarn>
+    <NoWarn>$(NoWarn);CA1724;CA1034;CA1000;CA2260;CA1515;IDE0370;</NoWarn>
     <!-- CA1724: Type names should not match namespaces -->
     <!-- CA1034: Nested types should not be visible -->
     <!-- CA1000: Do not declare static members on generic types -->

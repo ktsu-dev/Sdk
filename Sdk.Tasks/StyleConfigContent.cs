@@ -28,17 +28,28 @@ internal static class StyleConfigContent
 	private const int MaxScopeKeyLength = 180;
 
 	/// <summary>
+	/// The header line written when the consumer supplies no copyright text. Roslyn reads
+	/// <c>unset</c> as "no template", so IDE0073 stays silent.
+	/// </summary>
+	internal const string UnsetHeaderLine = HeaderKey + " = unset";
+
+	/// <summary>
 	/// Builds the <c>file_header_template</c> line for a consumer's copyright text.
 	/// </summary>
 	/// <param name="copyrightText">The contents of the consumer's COPYRIGHT.md, or null/blank.</param>
-	/// <returns>The full key/value line, or <see langword="null"/> when there is no copyright text.</returns>
+	/// <returns>
+	/// The full key/value line, or <see cref="UnsetHeaderLine"/> when there is no copyright text.
+	/// </returns>
 	/// <remarks>
 	/// .editorconfig has no multi-line values, so real newlines are encoded as the two characters
 	/// <c>\n</c>. Line endings are normalized first so a CRLF file does not produce <c>\r\n</c>.
+	/// With no copyright text the packaged template must not survive: it names ktsu.dev and the MIT
+	/// license, and with code style enforced as errors every consumer file would fail IDE0073, whose
+	/// fix would then stamp ktsu.dev's header onto the consumer's own code.
 	/// </remarks>
-	public static string? BuildHeaderLine(string? copyrightText) =>
+	public static string BuildHeaderLine(string? copyrightText) =>
 		string.IsNullOrWhiteSpace(copyrightText)
-			? null
+			? UnsetHeaderLine
 			: HeaderKey + " = " + copyrightText!
 				.Replace("\r\n", "\n")
 				.Replace("\r", "\n")
