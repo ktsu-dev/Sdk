@@ -372,7 +372,7 @@ in the Unity project's own `.gitignore`, as the demo shows.
 ```
 
 1. **Metadata Files**: Create these optional markdown files at your solution root (they will be automatically included in NuGet packages):
-   - `AUTHORS.md` - Used for namespace generation and package authors
+   - `AUTHORS.md` - Used for namespace generation and package authors. Heading lines, list markers and `<email>` suffixes are dropped from the published authors and company, so a contributor list publishes names only
    - `VERSION.md` - Version number (can be managed by build scripts)
    - `DESCRIPTION.md` - Package description (checked in project directory first, then solution directory for multi-package support)
    - `CHANGELOG.md` - Release notes
