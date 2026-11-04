@@ -279,7 +279,11 @@ KTSU0008's two inputs come from MSBuild state that only exists after `ResolveRef
 ### Metadata File Integration
 
 The SDK reads markdown files from the solution root and uses them to populate package metadata:
-- `AUTHORS.md` → Authors, AuthorsNamespace
+- `AUTHORS.md` → Authors, Company, AuthorsNamespace. `Authors` is the file with markdown heading
+  lines, list markers and `<email>` suffixes dropped, one name per line joined with `;`, so a
+  heading over a contributor list publishes `Jane Doe;John Smith` rather than the markdown and the
+  addresses (#90). `Company` defaults to the same names joined with `, `. A single-line file comes
+  through as written. `AuthorsNamespace` still reads the raw text. `AuthorsMetadataTests` covers it.
 - `VERSION.md` → Version, PackageVersion
 - `DESCRIPTION.md` → Description, PackageDescription (checked in project directory first, then solution directory)
 - `CHANGELOG.md` → PackageReleaseNotes (see below)
