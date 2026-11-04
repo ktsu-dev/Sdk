@@ -39,8 +39,22 @@ public sealed class StyleConfigContentTests
     [DataRow(null, DisplayName = "null")]
     [DataRow("", DisplayName = "empty")]
     [DataRow("   \r\n  ", DisplayName = "whitespace")]
-    public void BuildHeaderLine_ReturnsNull_WhenThereIsNoCopyrightText(string? copyright) =>
-        Assert.IsNull(StyleConfigContent.BuildHeaderLine(copyright));
+    public void BuildHeaderLine_UnsetsTheTemplate_WhenThereIsNoCopyrightText(string? copyright) =>
+        Assert.AreEqual("file_header_template = unset", StyleConfigContent.BuildHeaderLine(copyright));
+
+    /// <summary>
+    /// A consumer with no copyright text must not inherit the packaged header, which names
+    /// ktsu.dev and the MIT license and would fail every consumer file with IDE0073.
+    /// </summary>
+    [TestMethod]
+    public void ApplyHeader_RemovesThePackagedHeader_WhenThereIsNoCopyrightText()
+    {
+        const string content = "[*.cs]\nfile_header_template = Copyright (c) ktsu.dev\\nAll rights reserved.\nindent_style = tab\n";
+
+        string result = StyleConfigContent.ApplyHeader(content, StyleConfigContent.BuildHeaderLine(null));
+
+        Assert.AreEqual("[*.cs]\nfile_header_template = unset\nindent_style = tab\n", result);
+    }
 
     [TestMethod]
     public void ApplyHeader_ReplacesTheAssignment_PreservingIndentAndLineEnding()
