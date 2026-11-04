@@ -64,7 +64,42 @@
     <_SolutionFilesSln>$([System.IO.Directory]::GetFiles("$(SolutionDir)", "*.sln"))</_SolutionFilesSln>
     <_SolutionFiles>$(_SolutionFilesSlnx)</_SolutionFiles>
     <_SolutionFiles Condition="'$(_SolutionFilesSlnx)' == '' Or $(_SolutionFilesSlnx.StartsWith('System.String[]'))">$(_SolutionFilesSln)</_SolutionFiles>
-    <SolutionPath Condition="'$(SolutionPath)' == '' And '$(_SolutionFiles)' != '' And !$(_SolutionFiles.StartsWith('System.String[]'))">$([MSBuild]::NormalizePath($([System.IO.Path]::GetFullPath($(_SolutionFiles.Split(';')[0])))))</SolutionPath>
+    <!-- Pick one solution deterministically when the directory holds several. Directory.GetFiles
+         guarantees no order (NTFS lists alphabetically, ext4 by hash), so taking its first entry
+         made SolutionName, and everything keyed on it, depend on the machine. The solution named
+         after its directory wins; otherwise the ordinally smallest path does. MSBuild property
+         functions cannot sort, so the minimum is unrolled over the first ten candidates, which is
+         far more solution files than one directory holds in practice. KTSU1006 in Sdk.targets
+         warns whenever the pick was not the directory-named solution. See ktsu-dev/Sdk#92. -->
+    <_KtsuSolutionCandidateCount>0</_KtsuSolutionCandidateCount>
+    <_KtsuSolutionCandidateCount Condition="'$(_SolutionFiles)' != '' And !$(_SolutionFiles.StartsWith('System.String[]'))">$(_SolutionFiles.Split(';').Length)</_KtsuSolutionCandidateCount>
+    <_KtsuSolutionExtension>.sln</_KtsuSolutionExtension>
+    <_KtsuSolutionExtension Condition="'$(_SolutionFiles)' == '$(_SolutionFilesSlnx)'">.slnx</_KtsuSolutionExtension>
+    <_KtsuSolutionDirName>$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName($([MSBuild]::NormalizeDirectory($(SolutionDir)))))))</_KtsuSolutionDirName>
+    <_KtsuNamedSolution>$([MSBuild]::NormalizePath($(SolutionDir), $(_KtsuSolutionDirName)$(_KtsuSolutionExtension)))</_KtsuNamedSolution>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 0">$(_SolutionFiles.Split(';')[0])</_KtsuPickedSolution>
+    <_KtsuSolutionCandidate Condition="$(_KtsuSolutionCandidateCount) &gt; 1">$(_SolutionFiles.Split(';')[1])</_KtsuSolutionCandidate>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 1 And '$([System.Math]::Sign($([System.String]::CompareOrdinal($(_KtsuSolutionCandidate), $(_KtsuPickedSolution)))))' == '-1'">$(_KtsuSolutionCandidate)</_KtsuPickedSolution>
+    <_KtsuSolutionCandidate Condition="$(_KtsuSolutionCandidateCount) &gt; 2">$(_SolutionFiles.Split(';')[2])</_KtsuSolutionCandidate>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 2 And '$([System.Math]::Sign($([System.String]::CompareOrdinal($(_KtsuSolutionCandidate), $(_KtsuPickedSolution)))))' == '-1'">$(_KtsuSolutionCandidate)</_KtsuPickedSolution>
+    <_KtsuSolutionCandidate Condition="$(_KtsuSolutionCandidateCount) &gt; 3">$(_SolutionFiles.Split(';')[3])</_KtsuSolutionCandidate>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 3 And '$([System.Math]::Sign($([System.String]::CompareOrdinal($(_KtsuSolutionCandidate), $(_KtsuPickedSolution)))))' == '-1'">$(_KtsuSolutionCandidate)</_KtsuPickedSolution>
+    <_KtsuSolutionCandidate Condition="$(_KtsuSolutionCandidateCount) &gt; 4">$(_SolutionFiles.Split(';')[4])</_KtsuSolutionCandidate>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 4 And '$([System.Math]::Sign($([System.String]::CompareOrdinal($(_KtsuSolutionCandidate), $(_KtsuPickedSolution)))))' == '-1'">$(_KtsuSolutionCandidate)</_KtsuPickedSolution>
+    <_KtsuSolutionCandidate Condition="$(_KtsuSolutionCandidateCount) &gt; 5">$(_SolutionFiles.Split(';')[5])</_KtsuSolutionCandidate>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 5 And '$([System.Math]::Sign($([System.String]::CompareOrdinal($(_KtsuSolutionCandidate), $(_KtsuPickedSolution)))))' == '-1'">$(_KtsuSolutionCandidate)</_KtsuPickedSolution>
+    <_KtsuSolutionCandidate Condition="$(_KtsuSolutionCandidateCount) &gt; 6">$(_SolutionFiles.Split(';')[6])</_KtsuSolutionCandidate>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 6 And '$([System.Math]::Sign($([System.String]::CompareOrdinal($(_KtsuSolutionCandidate), $(_KtsuPickedSolution)))))' == '-1'">$(_KtsuSolutionCandidate)</_KtsuPickedSolution>
+    <_KtsuSolutionCandidate Condition="$(_KtsuSolutionCandidateCount) &gt; 7">$(_SolutionFiles.Split(';')[7])</_KtsuSolutionCandidate>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 7 And '$([System.Math]::Sign($([System.String]::CompareOrdinal($(_KtsuSolutionCandidate), $(_KtsuPickedSolution)))))' == '-1'">$(_KtsuSolutionCandidate)</_KtsuPickedSolution>
+    <_KtsuSolutionCandidate Condition="$(_KtsuSolutionCandidateCount) &gt; 8">$(_SolutionFiles.Split(';')[8])</_KtsuSolutionCandidate>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 8 And '$([System.Math]::Sign($([System.String]::CompareOrdinal($(_KtsuSolutionCandidate), $(_KtsuPickedSolution)))))' == '-1'">$(_KtsuSolutionCandidate)</_KtsuPickedSolution>
+    <_KtsuSolutionCandidate Condition="$(_KtsuSolutionCandidateCount) &gt; 9">$(_SolutionFiles.Split(';')[9])</_KtsuSolutionCandidate>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 9 And '$([System.Math]::Sign($([System.String]::CompareOrdinal($(_KtsuSolutionCandidate), $(_KtsuPickedSolution)))))' == '-1'">$(_KtsuSolutionCandidate)</_KtsuPickedSolution>
+    <_KtsuPickedSolution Condition="$(_KtsuSolutionCandidateCount) &gt; 1 And Exists('$(_KtsuNamedSolution)')">$(_KtsuNamedSolution)</_KtsuPickedSolution>
+    <_KtsuAmbiguousSolution>false</_KtsuAmbiguousSolution>
+    <_KtsuAmbiguousSolution Condition="'$(SolutionPath)' == '' And '$(SolutionName)' == '' And $(_KtsuSolutionCandidateCount) &gt; 1 And !Exists('$(_KtsuNamedSolution)')">true</_KtsuAmbiguousSolution>
+    <SolutionPath Condition="'$(SolutionPath)' == '' And $(_KtsuSolutionCandidateCount) &gt; 0">$([MSBuild]::NormalizePath($([System.IO.Path]::GetFullPath($(_KtsuPickedSolution)))))</SolutionPath>
     <SolutionFileName Condition="'$(SolutionFileName)' == ''">$([System.IO.Path]::GetFileName($(SolutionPath)))</SolutionFileName>
     <SolutionName Condition="'$(SolutionName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(SolutionPath)))</SolutionName>
 

@@ -582,6 +582,13 @@ MyProject/                     ← Level 3: Check here
 
 This enables the SDK to work with any nested project structure without configuration.
 
+When the solution directory holds more than one solution file (a `.slnx` is preferred over a
+`.sln`), the one named after the directory wins: `MyProject/MyProject.sln` over
+`MyProject/MyProject.Samples.sln`. With none named after the directory, the ordinally first path is
+used and the build warns **KTSU1006**. Set `SolutionName` in `Directory.Build.props` to choose
+explicitly; that also silences the warning. Building through a solution (`dotnet build Foo.sln`)
+uses that solution, as before.
+
 ## Advanced Configuration Features
 
 ### Analyzer-Enforced Requirements

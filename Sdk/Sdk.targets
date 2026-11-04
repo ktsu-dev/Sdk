@@ -419,4 +419,18 @@
       <PkgMicrosoft_SourceLink_Common />
     </PropertyGroup>
   </Target>
+
+  <!-- KTSU1006: the solution directory holds several solution files and none is named after the
+       directory, so Sdk.props picked the ordinally first one (ktsu-dev/Sdk#92). The pick is
+       deterministic, but SolutionName drives project-type detection, ToolCommandName and package
+       identity, so the user should choose. Not raised when SolutionName is already set (in
+       Directory.Build.props, say) or a solution set SolutionPath (building through a .sln/.slnx),
+       since the choice was then made explicitly. Fires once per project:
+       in the outer build of a multi-targeted project, not again in each inner build. -->
+  <Target Name="_KtsuWarnAmbiguousSolution"
+          BeforeTargets="Build;Pack"
+          Condition="'$(_KtsuAmbiguousSolution)' == 'true' And ('$(TargetFrameworks)' == '' Or '$(TargetFramework)' == '')">
+    <Warning Code="KTSU1006"
+             Text="'$(SolutionDir)' holds $(_KtsuSolutionCandidateCount) solution files and none is named '$(_KtsuSolutionDirName)$(_KtsuSolutionExtension)', so ktsu.Sdk picked '$(SolutionFileName)' (ordinally first) and set SolutionName to '$(SolutionName)'. Set SolutionName in Directory.Build.props, or rename the main solution after its directory." />
+  </Target>
 </Project>
