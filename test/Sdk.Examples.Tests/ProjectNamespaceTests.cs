@@ -6,8 +6,8 @@ using Sdk.Examples.Tests.Infrastructure;
 /// <summary>
 /// Guards the namespace/assembly-name/package-ID derivation in <c>Sdk.props</c> against
 /// scaffolding folder segments (<c>src</c>, <c>source</c>, <c>tests</c>, <c>test</c>,
-/// <c>examples</c>, <c>samples</c>) leaking into the identity of a project nested beneath one.
-/// See ktsu-dev/Sdk#37.
+/// <c>examples</c>, <c>samples</c>, <c>benchmarks</c>, <c>benchmark</c>) leaking into the identity
+/// of a project nested beneath one. See ktsu-dev/Sdk#37 and ktsu-dev/Sdk#104.
 /// </summary>
 [TestClass]
 public sealed class ProjectNamespaceTests
@@ -26,6 +26,24 @@ public sealed class ProjectNamespaceTests
 
         Assert.AreEqual("Widget", props["AssemblyName"], "AssemblyName");
         Assert.AreEqual("Widget", props["PackageId"], "PackageId");
+    }
+
+    /// <summary>
+    /// A project under <c>benchmarks/</c>, where the org's conventions put benchmark projects, loses
+    /// that folder's name the way one under <c>examples/</c> does: before the fix these projects
+    /// resolved to <c>benchmarks.Bench</c> and <c>benchmark.SingleBench</c>. See ktsu-dev/Sdk#104.
+    /// </summary>
+    [TestMethod]
+    [DataRow("benchmarks/Bench/Bench.csproj", "Bench")]
+    [DataRow("benchmark/SingleBench/SingleBench.csproj", "SingleBench")]
+    public void Project_UnderBenchmarksFolder_DropsTheFolderFromItsNamespace(string project, string expected)
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Demo("Namespaces"));
+
+        IReadOnlyDictionary<string, string> props = workspace.Evaluate(project, "AssemblyName", "PackageId");
+
+        Assert.AreEqual(expected, props["AssemblyName"], "AssemblyName");
+        Assert.AreEqual(expected, props["PackageId"], "PackageId");
     }
 
     /// <summary>
