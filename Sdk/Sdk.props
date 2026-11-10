@@ -474,15 +474,15 @@
     <_ProjectRelativePath Condition="'$(SolutionDir)' != '' And '$(MSBuildProjectDirectory)' != ''">$([MSBuild]::MakeRelative($(SolutionDir), $(MSBuildProjectDirectory)))</_ProjectRelativePath>
     <_ProjectPathNamespace Condition="'$(_ProjectRelativePath)' != ''">$(_ProjectRelativePath.Replace('\', '.').Replace('/', '.').Replace(' ', '').TrimEnd('.'))</_ProjectPathNamespace>
 
-    <!-- Strip leading scaffolding segments (src, source, tests, test, examples, samples) before
-         they can leak into the derived namespace, assembly name, and package ID: a project under
-         one of these wrapper directories is meant to inherit the identity of the directory below
+    <!-- Strip leading scaffolding segments (src, source, tests, test, examples, samples,
+         benchmarks, benchmark) before they can leak into the derived namespace, assembly name,
+         and package ID: a project under one of these wrapper directories is meant to inherit the identity of the directory below
          it, not the wrapper's own lowercase name. Only leading segments are stripped - one that
          appears deeper in the path (e.g. examples/demos/Foo) is left alone, since nothing else in
          this file treats it as scaffolding at that position. A segment may also end the path
          (a project file sitting directly in src/, tests/ and so on), so the match takes either a
          following dot or the end of the string. -->
-    <_ProjectPathNamespace Condition="'$(_ProjectPathNamespace)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_ProjectPathNamespace), '^(?:(?:src|source|tests|test|examples|samples)(?:\.|$))+', ''))</_ProjectPathNamespace>
+    <_ProjectPathNamespace Condition="'$(_ProjectPathNamespace)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_ProjectPathNamespace), '^(?:(?:src|source|tests|test|examples|samples|benchmarks|benchmark)(?:\.|$))+', ''))</_ProjectPathNamespace>
 
     <_CleanProjectName Condition="'$(MSBuildProjectName)' != ''">$(MSBuildProjectName.Replace(" ", ""))</_CleanProjectName>
 
