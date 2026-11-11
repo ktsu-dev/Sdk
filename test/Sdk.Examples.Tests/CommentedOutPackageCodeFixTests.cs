@@ -79,8 +79,7 @@ public sealed class CommentedOutPackageCodeFixTests
 
         TextLine? line = BuildFileLookup.DeclaringLine(text, "PackageReference", "Polyfill");
 
-        Assert.IsNotNull(line);
-        Assert.AreEqual(3, line.Value.LineNumber);
+        Assert.AreEqual<int?>(3, line?.LineNumber);
     }
 
     [TestMethod]
@@ -101,7 +100,6 @@ public sealed class CommentedOutPackageCodeFixTests
 
         TextLine? line = BuildFileLookup.DeclaringLine(text, "PackageReference", "Polyfill");
 
-        Assert.IsNotNull(line);
-        Assert.AreEqual(2, line.Value.LineNumber);
+        Assert.AreEqual<int?>(2, line?.LineNumber);
     }
 }
