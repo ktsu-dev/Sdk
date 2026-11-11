@@ -215,6 +215,14 @@ The SDK consists of multiple sub-SDKs:
 
 The SDK searches up to 5 directory levels from the project directory to find solution files. This enables nested project structures without manual configuration.
 
+When the directory found holds several solution files, `Sdk.props` takes the one named after the
+directory, otherwise the ordinally first. `Directory.GetFiles` guarantees no order (NTFS lists
+alphabetically, ext4 by hash), and `SolutionName` drives project-type detection, `ToolCommandName`
+and package identity, so taking its first entry built the same commit differently on Linux and
+Windows (#92). MSBuild property functions cannot sort, so the ordinal minimum is unrolled over the
+first ten candidates. **KTSU1006** (warning, `Sdk.targets`) fires when the pick was not the
+directory-named solution and `SolutionName` was not already set. `SolutionDiscoveryTests` covers it.
+
 ### Path-Based Namespace Generation
 
 Namespaces are automatically generated from directory structure:
