@@ -8,6 +8,7 @@ Changes since v2.31.2:
 - Bump the microsoft group with 1 update ([@dependabot[bot]](https://github.com/dependabot[bot]))
 - fix: append the core SDK's NoWarn instead of replacing it [patch] (#93) ([@matt-edmondson](https://github.com/matt-edmondson))
 - Remove the whole PackageVersion element in the KTSU0005 code fix [patch] (#88) ([@matt-edmondson](https://github.com/matt-edmondson))
+- Strip a leading benchmarks folder from a project's identity [patch] (#106) ([@matt-edmondson](https://github.com/matt-edmondson))
 - Unset the synced .editorconfig header when there is no COPYRIGHT.md [patch] (#87) ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.31.3-pre.1 (prerelease)
 
