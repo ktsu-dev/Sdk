@@ -462,6 +462,27 @@
     <_AuthorsCandidate Condition="'$(_AuthorsCandidate)' != '' And !$([System.Text.RegularExpressions.Regex]::IsMatch($(_AuthorsCandidate), '^[A-Za-z_]'))"></_AuthorsCandidate>
     <AuthorsNamespace Condition="'$(AuthorsNamespace)' == ''">$(_AuthorsCandidate)</AuthorsNamespace>
 
+    <!--
+      Authors as published: nuget.org's author line and, through Company, AssemblyCompanyAttribute.
+      Read whole, a conventional AUTHORS.md - a heading over a contributor list - put the markdown
+      heading, the bullets and every contributor's email address into the package, where it can't be
+      taken back (ktsu-dev/Sdk#90). Only a value read from AUTHORS.md is cleaned: one a consumer set
+      in Directory.Build.props, with no AUTHORS.md, is theirs and is left alone. AuthorsNamespace
+      above still reads the raw text, so the prefix it derives is unchanged.
+        1. Drop markdown heading lines.
+        2. Drop a list marker (-, *, + or 1. / 1)) at the start of a line.
+        3. Drop an <email> and the whitespace before it.
+        4. Join what is left, one name per non-blank line, with ';' - NuGet's author separator.
+      A single-line AUTHORS.md comes through exactly as written.
+    -->
+    <_KtsuAuthorsCleaned Condition="Exists($(AuthorsFilePath)) And '$(Authors)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(Authors), '(?m)^[ \t]*\#.*$', ''))</_KtsuAuthorsCleaned>
+    <_KtsuAuthorsCleaned Condition="'$(_KtsuAuthorsCleaned)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_KtsuAuthorsCleaned), '(?m)^[ \t]*(?:[-*+]|[0-9]+[.)])[ \t]+', ''))</_KtsuAuthorsCleaned>
+    <_KtsuAuthorsCleaned Condition="'$(_KtsuAuthorsCleaned)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_KtsuAuthorsCleaned), '[ \t]*&lt;[^&lt;&gt;\r\n]*&gt;', ''))</_KtsuAuthorsCleaned>
+    <_KtsuAuthorsCleaned Condition="'$(_KtsuAuthorsCleaned)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(_KtsuAuthorsCleaned.Trim()), '[ \t]*[\r\n]\s*', ';'))</_KtsuAuthorsCleaned>
+    <!-- Unescape: a property function's result is escaped, so the ';' would otherwise reach NuGet as
+         %3B, one author named "Jane Doe;John Smith" rather than two. -->
+    <Authors Condition="Exists($(AuthorsFilePath)) And '$(Authors)' != ''">$([MSBuild]::Unescape($(_KtsuAuthorsCleaned)))</Authors>
+
     <SolutionNamespace Condition="'$(SolutionName)' != ''">$(SolutionName.Replace(" ", ""))</SolutionNamespace>
 
     <!-- Build ProjectNamespace from subdirectories between solution and project. Spaces are
@@ -531,7 +552,8 @@
          and PackageId are genuinely empty at this point, so a plain empty check is right for them. -->
     <AssemblyName Condition="'$(_KtsuAssemblyNameWasSet)' != 'true'">$(RootNamespace)</AssemblyName>
     <Title Condition="'$(Title)' == ''">$(AssemblyName)</Title>
-    <Company Condition="'$(Company)' == ''">$(Authors)</Company>
+    <!-- Company is a display string, not a list, so the ';' NuGet wants between authors reads as ', '. -->
+    <Company Condition="'$(Company)' == ''">$(Authors.Replace(';', ', '))</Company>
     <Product Condition="'$(Product)' == ''">$(AssemblyName)</Product>
 
     <!-- Build TestProjectNamespace safely -->
