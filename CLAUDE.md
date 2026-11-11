@@ -296,6 +296,12 @@ The SDK reads markdown files from the solution root and uses them to populate pa
 
 All metadata files are automatically included in NuGet packages.
 
+A metadata file only sets its package property when it yields a value. With no `DESCRIPTION.md`,
+`TAGS.md` or `PROJECT.url`, a `PackageDescription`, `PackageTags` or `PackageProjectUrl` set in
+`Directory.Build.props` survives. `ContinuousIntegrationBuild` is likewise only defaulted (true on
+GitHub Actions or Azure Pipelines, false elsewhere) when the consumer left it empty (#91).
+`ConsumerMetadataOverrideTests` covers both.
+
 ### Release Notes
 
 `PackageReleaseNotes` is resolved in this order, in `Sdk/Sdk.props` for consuming projects and in
