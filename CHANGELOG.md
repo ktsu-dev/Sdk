@@ -1,3 +1,10 @@
+## v2.31.4 (patch)
+
+Changes since v2.31.3:
+
+- Keep a consumer's package metadata and ContinuousIntegrationBuild [patch] (#98) ([@matt-edmondson](https://github.com/matt-edmondson))
+- Pick the solution named after its directory, else the ordinally first [patch] (#96) ([@matt-edmondson](https://github.com/matt-edmondson))
+- Publish only the names from AUTHORS.md as Authors and Company [patch] (#97) ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.31.3 (patch)
 
 Changes since v2.31.2:
@@ -12,9 +19,7 @@ Changes since v2.31.2:
 - Unset the synced .editorconfig header when there is no COPYRIGHT.md [patch] (#87) ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.31.3-pre.1 (prerelease)
 
-Changes since v2.31.2:
-
-- Bump the microsoft group with 1 update ([@dependabot[bot]](https://github.com/dependabot[bot]))
+Incremental prerelease update.
 ## v2.31.2 (patch)
 
 Changes since v2.31.1:
