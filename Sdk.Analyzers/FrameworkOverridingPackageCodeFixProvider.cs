@@ -161,7 +161,8 @@ public class FrameworkOverridingPackageCodeFixProvider : CodeFixProvider
 		RewriteDeclaringLine(text, "PackageReference", packageId, lineText => AddNoWarnToLine(lineText, warning));
 
 	/// <summary>
-	/// Rewrites the first line that declares a package, splicing the result back into the file.
+	/// Rewrites the first line that declares a package in a live element, splicing the result back
+	/// into the file. A commented-out copy of the element is skipped.
 	/// </summary>
 	/// <param name="text">The build file's text.</param>
 	/// <param name="elementName">The item name to match.</param>
@@ -179,28 +180,21 @@ public class FrameworkOverridingPackageCodeFixProvider : CodeFixProvider
 		string packageId,
 		Func<string, string> rewrite)
 	{
-		string content = text.ToString();
-
-		foreach (TextLine line in text.Lines)
+		if (BuildFileLookup.DeclaringLine(text, elementName, packageId) is not { } line)
 		{
-			string lineText = line.ToString();
-
-			if (!BuildFileLookup.DeclaresPackage(lineText, elementName, packageId))
-			{
-				continue;
-			}
-
-			string rewritten = rewrite(lineText);
-
-			return string.Equals(rewritten, lineText, StringComparison.Ordinal)
-				? text
-				: SourceText.From(
-					content.Substring(0, line.Span.Start)
-					+ rewritten
-					+ content.Substring(line.Span.End));
+			return text;
 		}
 
-		return text;
+		string content = text.ToString();
+		string lineText = line.ToString();
+		string rewritten = rewrite(lineText);
+
+		return string.Equals(rewritten, lineText, StringComparison.Ordinal)
+			? text
+			: SourceText.From(
+				content.Substring(0, line.Span.Start)
+				+ rewritten
+				+ content.Substring(line.Span.End));
 	}
 
 	/// <summary>

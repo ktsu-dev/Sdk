@@ -26,6 +26,11 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.4" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
+    <!--
+      The Roslyn version the analyzer builds against, so the code fixes' text edits can be tested on a
+      SourceText directly. The analyzer references it privately, so it is not copied here otherwise.
+    -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.9.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,8 +42,8 @@
     -->
     <ProjectReference Include="..\..\Sdk.Tasks\Sdk.Tasks.csproj" />
     <!--
-      The analyzer assembly, for the same reason: its BCL-only helpers (PackageVersionElementLocator)
-      are tested directly. Roslyn is a private reference there, so no Roslyn type is touched here.
+      The analyzer assembly, for the same reason: its helpers (PackageVersionElementLocator) and the
+      code fixes' text edits are tested directly.
     -->
     <ProjectReference Include="..\..\Sdk.Analyzers\Sdk.Analyzers.csproj" />
   </ItemGroup>

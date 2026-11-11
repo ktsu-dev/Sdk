@@ -5,6 +5,7 @@
 namespace ktsu.Sdk.Analyzers;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -99,14 +100,56 @@ internal static class BuildFileLookup
 			return Location.None;
 		}
 
+		TextLine? line = DeclaringLine(text, elementName, packageId);
+
+		return line is { } found
+			? Location.Create(file.Path, found.Span, text.Lines.GetLinePositionSpan(found.Span))
+			: Location.None;
+	}
+
+	/// <summary>
+	/// Finds the first line that declares a package in a live (not commented-out) element.
+	/// </summary>
+	/// <param name="text">The build file's text.</param>
+	/// <param name="elementName">The item name to match.</param>
+	/// <param name="packageId">The package identifier to match.</param>
+	/// <returns>The declaring line, or <see langword="null"/> when there is none.</returns>
+	/// <remarks>
+	/// A plain line search takes the first line naming the package, and that line can sit inside an
+	/// XML comment, such as an old reference left commented out above the live one. A code fix
+	/// would then edit the comment and the diagnostic would never clear. The file is read as XML
+	/// instead, so only lines where a live element starts are considered. When the file is not
+	/// well-formed XML there is no way to tell comments apart, so the first matching line is used.
+	/// </remarks>
+	public static TextLine? DeclaringLine(SourceText text, string elementName, string packageId)
+	{
+		if (PackageVersionElementLocator.TryFindElements(
+			text.ToString(),
+			elementName,
+			packageId,
+			out IReadOnlyList<(int Start, int Length)> elements))
+		{
+			foreach ((int start, int _) in elements)
+			{
+				TextLine line = text.Lines.GetLineFromPosition(start);
+
+				if (DeclaresPackage(line.ToString(), elementName, packageId))
+				{
+					return line;
+				}
+			}
+
+			return null;
+		}
+
 		foreach (TextLine line in text.Lines)
 		{
 			if (DeclaresPackage(line.ToString(), elementName, packageId))
 			{
-				return Location.Create(file.Path, line.Span, text.Lines.GetLinePositionSpan(line.Span));
+				return line;
 			}
 		}
 
-		return Location.None;
+		return null;
 	}
 }

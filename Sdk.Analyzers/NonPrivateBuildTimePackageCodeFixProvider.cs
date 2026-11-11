@@ -5,6 +5,7 @@
 namespace ktsu.Sdk.Analyzers;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
@@ -97,7 +98,7 @@ public class NonPrivateBuildTimePackageCodeFixProvider : CodeFixProvider
 	/// <param name="text">The project file text.</param>
 	/// <param name="packageId">The package identifier to update.</param>
 	/// <returns>The updated text, or <see langword="null"/> when the reference was not found.</returns>
-	private static SourceText? MakeReferencePrivate(SourceText text, string packageId)
+	internal static SourceText? MakeReferencePrivate(SourceText text, string packageId)
 	{
 		string content = text.ToString();
 
@@ -157,10 +158,37 @@ public class NonPrivateBuildTimePackageCodeFixProvider : CodeFixProvider
 	/// <param name="tagStart">The index of the opening angle bracket.</param>
 	/// <param name="tagEnd">The index of the closing angle bracket.</param>
 	/// <returns><see langword="true"/> when a matching tag was found.</returns>
+	/// <remarks>
+	/// The project file is read as XML first, so a commented-out copy of the reference is skipped.
+	/// Only when it is not well-formed XML does this fall back to a text search.
+	/// </remarks>
 	private static bool TryFindOpenTag(string content, string packageId, out int tagStart, out int tagEnd)
 	{
 		tagStart = -1;
 		tagEnd = -1;
+
+		if (PackageVersionElementLocator.TryFindElements(
+			content,
+			"PackageReference",
+			packageId,
+			out IReadOnlyList<(int Start, int Length)> elements))
+		{
+			if (elements.Count == 0)
+			{
+				return false;
+			}
+
+			int end = content.IndexOf('>', elements[0].Start);
+
+			if (end < 0)
+			{
+				return false;
+			}
+
+			tagStart = elements[0].Start;
+			tagEnd = end;
+			return true;
+		}
 
 		int searchFrom = 0;
 

@@ -10,7 +10,8 @@ using System.IO;
 using System.Xml;
 
 /// <summary>
-/// Locates <c>PackageVersion</c> elements in the text of a <c>Directory.Packages.props</c> file.
+/// Locates <c>PackageVersion</c> elements in the text of a <c>Directory.Packages.props</c> file, and
+/// other package items such as <c>PackageReference</c> in any build file.
 /// </summary>
 /// <remarks>
 /// The orphan list is produced by <c>XmlPeek</c> over the parsed XML, so any valid layout of the
@@ -36,7 +37,22 @@ internal static class PackageVersionElementLocator
 	/// <c>&gt;</c>, in document order.
 	/// </param>
 	/// <returns><see langword="false"/> when the text is not well-formed XML.</returns>
-	public static bool TryFindElements(string text, string packageId, out IReadOnlyList<(int Start, int Length)> elements)
+	public static bool TryFindElements(string text, string packageId, out IReadOnlyList<(int Start, int Length)> elements) =>
+		TryFindElements(text, PackageVersionElementName, packageId, out elements);
+
+	/// <summary>
+	/// Finds every live (not commented-out) element named <paramref name="elementName"/> whose
+	/// <c>Include</c> names <paramref name="packageId"/>.
+	/// </summary>
+	/// <param name="text">The file content.</param>
+	/// <param name="elementName">The item name, for example <c>PackageReference</c> or <c>PackageVersion</c>.</param>
+	/// <param name="packageId">The package identifier, compared case-insensitively as NuGet does.</param>
+	/// <param name="elements">
+	/// The matching elements as (start, length) spans from the opening <c>&lt;</c> to the closing
+	/// <c>&gt;</c>, in document order.
+	/// </param>
+	/// <returns><see langword="false"/> when the text is not well-formed XML.</returns>
+	public static bool TryFindElements(string text, string elementName, string packageId, out IReadOnlyList<(int Start, int Length)> elements)
 	{
 		List<(int Start, int Length)> found = [];
 		elements = found;
@@ -54,7 +70,7 @@ internal static class PackageVersionElementLocator
 		{
 			using StringReader stringReader = new(text);
 			using XmlReader reader = XmlReader.Create(stringReader, settings);
-			ElementScan scan = new(reader, text, lineStarts, packageId, found);
+			ElementScan scan = new(reader, text, lineStarts, elementName, packageId, found);
 
 			while (reader.Read())
 			{
@@ -230,7 +246,7 @@ internal static class PackageVersionElementLocator
 	/// The state of one pass over the document: the element currently open, if any, and the
 	/// matches recorded so far.
 	/// </summary>
-	private sealed class ElementScan(XmlReader reader, string text, int[] lineStarts, string packageId, List<(int Start, int Length)> found)
+	private sealed class ElementScan(XmlReader reader, string text, int[] lineStarts, string elementName, string packageId, List<(int Start, int Length)> found)
 	{
 		private readonly IXmlLineInfo lineInfo = (IXmlLineInfo)reader;
 		private int matchStart = -1;
@@ -247,7 +263,7 @@ internal static class PackageVersionElementLocator
 		private bool TryStartMatch()
 		{
 			if (reader.NodeType != XmlNodeType.Element
-				|| !string.Equals(reader.LocalName, PackageVersionElementName, StringComparison.OrdinalIgnoreCase)
+				|| !string.Equals(reader.LocalName, elementName, StringComparison.OrdinalIgnoreCase)
 				|| !IncludeNames(reader, packageId))
 			{
 				return true;
