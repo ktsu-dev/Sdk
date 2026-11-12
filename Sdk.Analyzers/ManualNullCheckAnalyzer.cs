@@ -71,6 +71,14 @@ public class ManualNullCheckAnalyzer : KtsuAnalyzerBase
 			return;
 		}
 
+		// Ensure.NotNull tests `is null`, a reference check. A type with its own operator ==, such as
+		// UnityEngine.Object, can compare equal to null while the reference is not null, so its guard
+		// is not a manual null check and the fix would stop rejecting those values.
+		if (BindsToUserDefinedOperator(ifStatement.Condition, context.SemanticModel))
+		{
+			return;
+		}
+
 		// Check if the statement throws ArgumentNullException
 		if (!ThrowsArgumentNullException(ifStatement.Statement, context.SemanticModel))
 		{
@@ -153,6 +161,10 @@ public class ManualNullCheckAnalyzer : KtsuAnalyzerBase
 
 		return null;
 	}
+
+	private static bool BindsToUserDefinedOperator(ExpressionSyntax condition, SemanticModel semanticModel) =>
+		condition is BinaryExpressionSyntax binaryExpr &&
+		semanticModel.GetSymbolInfo(binaryExpr).Symbol is IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator };
 
 	private static bool ThrowsArgumentNullException(StatementSyntax statement, SemanticModel semanticModel)
 	{

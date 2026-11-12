@@ -79,6 +79,30 @@ public sealed class AnalyzerTriggerTests
     }
 
     /// <summary>
+    /// KTSU0004 must not fire for a <c>== null</c> guard that binds to a user-defined operator ==.
+    /// </summary>
+    /// <remarks>
+    /// Such a type, like UnityEngine.Object once destroyed, can compare equal to null while the
+    /// reference is not null. Ensure.NotNull tests <c>is null</c>, so the code fix silently stopped
+    /// rejecting those values (ktsu-dev/Sdk#113). The example guards a handle that compares equal to
+    /// null once released, with the null literal on either side.
+    /// </remarks>
+    [TestMethod]
+    public void Analyzer_KTSU0004_DoesNotTrigger_ForUserDefinedEquality()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(
+            RepoLayout.Analyzer("KTSU0004-ManualNullCheck-UserDefinedEquality"));
+
+        CliResult result = workspace.Build("UserDefinedEquality/UserDefinedEquality.csproj");
+
+        CollectionAssert.DoesNotContain(
+            result.KtsuDiagnostics().ToList(),
+            "KTSU0004",
+            $"KTSU0004 must not fire for a guard that binds to a user-defined operator ==.{Environment.NewLine}{result.Output}");
+        Assert.IsTrue(result.Succeeded, $"Expected a clean build.{Environment.NewLine}{result.Output}");
+    }
+
+    /// <summary>
     /// KTSU0001 must still fire for a standard package that is missing while Polyfill is present.
     /// </summary>
     /// <remarks>
