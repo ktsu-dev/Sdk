@@ -95,7 +95,7 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 			// code is discarded under GeneratedCodeAnalysisFlags.None - which would silently drop
 			// the System.Memory / System.Threading.Tasks.Extensions checks on exactly the target
 			// frameworks that need them. See ProjectSourceLocation.
-			Location location = ProjectSourceLocation.Find(context.Compilation, options);
+			Location location = ProjectSourceLocation.Find(context.Compilation, context.Options.AnalyzerConfigOptionsProvider);
 
 			Diagnostic diagnostic = Diagnostic.Create(
 				Rule,

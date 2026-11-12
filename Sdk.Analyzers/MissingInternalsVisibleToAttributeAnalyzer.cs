@@ -90,7 +90,7 @@ public class MissingInternalsVisibleToAttributeAnalyzer : KtsuAnalyzerBase
 		{
 			Diagnostic diagnostic = Diagnostic.Create(
 				Rule,
-				ProjectSourceLocation.Find(context.Compilation, options),
+				ProjectSourceLocation.Find(context.Compilation, context.Options.AnalyzerConfigOptionsProvider),
 				testNamespace);
 
 			context.ReportDiagnostic(diagnostic);

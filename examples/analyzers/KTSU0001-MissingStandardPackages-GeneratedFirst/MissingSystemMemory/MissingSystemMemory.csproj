@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- KTSU0001 with a generated file listed first among the project's own files.
+
+       The target framework is netstandard2.0, which requires System.Memory and
+       System.Threading.Tasks.Extensions, and neither is referenced. The project also has a
+       generated Properties/Resources.Designer.cs, which MSBuild lists before Widget.cs. While the
+       diagnostic was anchored to the first project-owned file, it landed in that generated file and
+       was dropped under GeneratedCodeAnalysisFlags.None, so this project built clean
+       (ktsu-dev/Sdk#111). -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
