@@ -39,13 +39,6 @@ internal static class CodeFixHarness
                 .Select(path => MetadataReference.CreateFromFile(path)),
         ];
 
-    /// <summary>Diagnostics the analyzer reports for <paramref name="source"/>.</summary>
-    internal static async Task<ImmutableArray<Diagnostic>> AnalyzeAsync(DiagnosticAnalyzer analyzer, string source)
-    {
-        Document document = CreateDocument(source);
-        return await AnalyzeAsync(analyzer, document).ConfigureAwait(false);
-    }
-
     /// <summary>
     /// Applies the first fix offered for the first diagnostic, and returns the fixed source with the
     /// compiler errors it has.
@@ -55,7 +48,8 @@ internal static class CodeFixHarness
         CodeFixProvider codeFix,
         string source)
     {
-        Document document = CreateDocument(source);
+        using AdhocWorkspace workspace = new();
+        Document document = CreateDocument(workspace, source);
         ImmutableArray<Diagnostic> diagnostics = await AnalyzeAsync(analyzer, document).ConfigureAwait(false);
         Diagnostic diagnostic = diagnostics.Single();
 
@@ -73,9 +67,8 @@ internal static class CodeFixHarness
         return (fixedSource, errors);
     }
 
-    private static Document CreateDocument(string source)
+    private static Document CreateDocument(AdhocWorkspace workspace, string source)
     {
-        AdhocWorkspace workspace = new();
         Project project = workspace.AddProject("Subject", LanguageNames.CSharp)
             .WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable))
             .WithParseOptions(new CSharpParseOptions(LanguageVersion.Latest))
