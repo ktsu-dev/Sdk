@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- KTSU0002: a non-test project whose sibling test project (Service.Test) exists,
+       but which does NOT expose internals to it. Standard packages are referenced so
+       KTSU0001 is satisfied and KTSU0002 is the intended diagnostic.
+
+       Unlike the plain KTSU0002 example, this one has a generated Properties/Resources.Designer.cs,
+       which MSBuild lists before Worker.cs. While the diagnostic was anchored to the first
+       project-owned file, it landed in that generated file and was dropped (ktsu-dev/Sdk#111). -->
+  <Sdk Name="ktsu.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

@@ -107,6 +107,35 @@ public sealed class AnalyzerTriggerTests
     }
 
     /// <summary>
+    /// KTSU0001 and KTSU0002 must still fire when the project's first source file is generated code.
+    /// </summary>
+    /// <remarks>
+    /// Both diagnostics were anchored to the first syntax tree under the project directory. MSBuild
+    /// lists subfolder files before root files, so in a project with a resx designer at
+    /// <c>Properties/Resources.Designer.cs</c> that tree is generated code, and a diagnostic located
+    /// there is dropped under GeneratedCodeAnalysisFlags.None (ktsu-dev/Sdk#111). Each example is its
+    /// sibling example plus an <c>auto-generated</c> designer file.
+    /// </remarks>
+    /// <param name="folder">The analyzer example directory under examples/analyzers.</param>
+    /// <param name="project">The project to build, relative to the example directory.</param>
+    /// <param name="diagnostic">The KTSU id expected to fire.</param>
+    [TestMethod]
+    [DataRow("KTSU0001-MissingStandardPackages-GeneratedFirst", "MissingSystemMemory/MissingSystemMemory.csproj", "KTSU0001", DisplayName = "KTSU0001 with a generated file first")]
+    [DataRow("KTSU0002-MissingInternalsVisibleTo-GeneratedFirst", "Service/Service.csproj", "KTSU0002", DisplayName = "KTSU0002 with a generated file first")]
+    public void Analyzer_Triggers_WhenGeneratedFileIsFirst(string folder, string project, string diagnostic)
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Analyzer(folder));
+
+        CliResult result = workspace.Build(project);
+
+        CollectionAssert.Contains(
+            result.KtsuDiagnostics().ToList(),
+            diagnostic,
+            $"Expected {diagnostic} in the build output.{Environment.NewLine}{result.Output}");
+        Assert.IsFalse(result.Succeeded, $"Expected {diagnostic} to fail the build.{Environment.NewLine}{result.Output}");
+    }
+
+    /// <summary>
     /// KTSU0008 must not fire once the reference is pinned to the version the framework ships.
     /// </summary>
     /// <remarks>
