@@ -72,8 +72,7 @@ public class PreferEnsureNotNullCodeFixProvider : CodeFixProvider
 			return document;
 		}
 
-		// Get the arguments from the original invocation
-		ArgumentListSyntax originalArgs = invocation.ArgumentList;
+		ArgumentListSyntax originalArgs = ToPositionalArguments(invocation.ArgumentList);
 
 		// Create the new invocation: Ensure.NotNull(...)
 		MemberAccessExpressionSyntax ensureNotNull = SyntaxFactory.MemberAccessExpression(
@@ -89,5 +88,51 @@ public class PreferEnsureNotNullCodeFixProvider : CodeFixProvider
 		SyntaxNode newRoot = root.ReplaceNode(invocation, newInvocation);
 
 		return document.WithSyntaxRoot(newRoot);
+	}
+
+	/// <summary>
+	/// Rewrites ThrowIfNull's arguments as positional arguments in parameter order.
+	/// </summary>
+	/// <remarks>
+	/// ThrowIfNull names its parameters <c>argument</c> and <c>paramName</c>, while Polyfill's
+	/// Ensure.NotNull names them <c>argument</c> and <c>name</c>. A copied <c>paramName:</c> label
+	/// would not bind (CS1739), so the labels are dropped, and named arguments written out of order
+	/// are put back in parameter order first.
+	/// </remarks>
+	private static ArgumentListSyntax ToPositionalArguments(ArgumentListSyntax argumentList)
+	{
+		SeparatedSyntaxList<ArgumentSyntax> arguments = argumentList.Arguments;
+		if (!arguments.Any(argument => argument.NameColon is not null))
+		{
+			return argumentList;
+		}
+
+		ArgumentSyntax?[] ordered = new ArgumentSyntax?[arguments.Count];
+		for (int i = 0; i < arguments.Count; i++)
+		{
+			ArgumentSyntax argument = arguments[i];
+			int index = argument.NameColon?.Name.Identifier.ValueText switch
+			{
+				"argument" => 0,
+				"paramName" => 1,
+				_ => i,
+			};
+
+			if (index >= ordered.Length || ordered[index] is not null)
+			{
+				// Not a shape ThrowIfNull accepts; leave the labels alone rather than guess.
+				return argumentList;
+			}
+
+			ordered[index] = argument.WithNameColon(null).WithLeadingTrivia(argument.GetLeadingTrivia());
+		}
+
+		if (ordered.Any(argument => argument is null))
+		{
+			return argumentList;
+		}
+
+		return argumentList.WithArguments(
+			SyntaxFactory.SeparatedList(ordered.Select(argument => argument!), arguments.GetSeparators()));
 	}
 }
