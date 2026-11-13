@@ -1,3 +1,8 @@
+## v2.31.5-pre.1 (prerelease)
+
+Changes since v2.31.4:
+
+- Bump the microsoft group with 1 update ([@dependabot[bot]](https://github.com/dependabot[bot]))
 ## v2.31.4 (patch)
 
 Changes since v2.31.3:

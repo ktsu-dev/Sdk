@@ -27,8 +27,10 @@
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.4" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
     <!--
-      The Roslyn version the analyzer builds against, so the code fixes' text edits can be tested on a
-      SourceText directly. The analyzer references it privately, so it is not copied here otherwise.
+      Roslyn, at the version the analyzer is built against, so analyzers and code fixes can be run
+      in-process by CodeFixHarness, and the code fixes' text edits can be tested on a SourceText
+      directly. Building an example only shows that a diagnostic fires; it never applies a fix, so a
+      fix that produces code which doesn't compile went unnoticed.
     -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.9.0" />
   </ItemGroup>
@@ -42,8 +44,9 @@
     -->
     <ProjectReference Include="..\..\Sdk.Tasks\Sdk.Tasks.csproj" />
     <!--
-      The analyzer assembly, for the same reason: its helpers (PackageVersionElementLocator) and the
-      code fixes' text edits are tested directly.
+      The analyzer assembly, for the same reason: its BCL-only helpers (PackageVersionElementLocator)
+      and the code fixes' text edits are tested directly, and CodeFixHarness runs its analyzers and
+      code fixes in-process.
     -->
     <ProjectReference Include="..\..\Sdk.Analyzers\Sdk.Analyzers.csproj" />
   </ItemGroup>

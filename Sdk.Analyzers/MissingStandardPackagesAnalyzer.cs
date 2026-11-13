@@ -58,27 +58,26 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 
 		if (isTestProject != "true")
 		{
-			CheckPackageProperty(context, options, "Polyfill", hasPolyfill);
+			CheckPackageProperty(context, "Polyfill", hasPolyfill);
 		}
 
 		// Check for System.Memory (conditional on target framework)
 
 		if (RequiresSystemMemory(targetFramework, targetFrameworkIdentifier))
 		{
-			CheckPackageProperty(context, options, "System.Memory", hasSystemMemory);
+			CheckPackageProperty(context, "System.Memory", hasSystemMemory);
 		}
 
 		// Check for System.Threading.Tasks.Extensions (conditional on target framework)
 
 		if (RequiresTaskExtensions(targetFramework, targetFrameworkIdentifier))
 		{
-			CheckPackageProperty(context, options, "System.Threading.Tasks.Extensions", hasSystemThreadingTasksExtensions);
+			CheckPackageProperty(context, "System.Threading.Tasks.Extensions", hasSystemThreadingTasksExtensions);
 		}
 	}
 
 	private static void CheckPackageProperty(
 		CompilationAnalysisContext context,
-		AnalyzerConfigOptions options,
 		string packageName,
 		string? hasPackageProperty)
 	{
@@ -95,7 +94,7 @@ public class MissingStandardPackagesAnalyzer : KtsuAnalyzerBase
 			// code is discarded under GeneratedCodeAnalysisFlags.None - which would silently drop
 			// the System.Memory / System.Threading.Tasks.Extensions checks on exactly the target
 			// frameworks that need them. See ProjectSourceLocation.
-			Location location = ProjectSourceLocation.Find(context.Compilation, options);
+			Location location = ProjectSourceLocation.Find(context.Compilation, context.Options.AnalyzerConfigOptionsProvider);
 
 			Diagnostic diagnostic = Diagnostic.Create(
 				Rule,

@@ -79,6 +79,30 @@ public sealed class AnalyzerTriggerTests
     }
 
     /// <summary>
+    /// KTSU0004 must not fire for a <c>== null</c> guard that binds to a user-defined operator ==.
+    /// </summary>
+    /// <remarks>
+    /// Such a type, like UnityEngine.Object once destroyed, can compare equal to null while the
+    /// reference is not null. Ensure.NotNull tests <c>is null</c>, so the code fix silently stopped
+    /// rejecting those values (ktsu-dev/Sdk#113). The example guards a handle that compares equal to
+    /// null once released, with the null literal on either side.
+    /// </remarks>
+    [TestMethod]
+    public void Analyzer_KTSU0004_DoesNotTrigger_ForUserDefinedEquality()
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(
+            RepoLayout.Analyzer("KTSU0004-ManualNullCheck-UserDefinedEquality"));
+
+        CliResult result = workspace.Build("UserDefinedEquality/UserDefinedEquality.csproj");
+
+        CollectionAssert.DoesNotContain(
+            result.KtsuDiagnostics().ToList(),
+            "KTSU0004",
+            $"KTSU0004 must not fire for a guard that binds to a user-defined operator ==.{Environment.NewLine}{result.Output}");
+        Assert.IsTrue(result.Succeeded, $"Expected a clean build.{Environment.NewLine}{result.Output}");
+    }
+
+    /// <summary>
     /// KTSU0001 must still fire for a standard package that is missing while Polyfill is present.
     /// </summary>
     /// <remarks>
@@ -104,6 +128,35 @@ public sealed class AnalyzerTriggerTests
             "KTSU0001",
             $"Expected KTSU0001 for the missing netstandard2.0 standard packages.{Environment.NewLine}{result.Output}");
         Assert.IsFalse(result.Succeeded, $"Expected KTSU0001 to fail the build.{Environment.NewLine}{result.Output}");
+    }
+
+    /// <summary>
+    /// KTSU0001 and KTSU0002 must still fire when the project's first source file is generated code.
+    /// </summary>
+    /// <remarks>
+    /// Both diagnostics were anchored to the first syntax tree under the project directory. MSBuild
+    /// lists subfolder files before root files, so in a project with a resx designer at
+    /// <c>Properties/Resources.Designer.cs</c> that tree is generated code, and a diagnostic located
+    /// there is dropped under GeneratedCodeAnalysisFlags.None (ktsu-dev/Sdk#111). Each example is its
+    /// sibling example plus an <c>auto-generated</c> designer file.
+    /// </remarks>
+    /// <param name="folder">The analyzer example directory under examples/analyzers.</param>
+    /// <param name="project">The project to build, relative to the example directory.</param>
+    /// <param name="diagnostic">The KTSU id expected to fire.</param>
+    [TestMethod]
+    [DataRow("KTSU0001-MissingStandardPackages-GeneratedFirst", "MissingSystemMemory/MissingSystemMemory.csproj", "KTSU0001", DisplayName = "KTSU0001 with a generated file first")]
+    [DataRow("KTSU0002-MissingInternalsVisibleTo-GeneratedFirst", "Service/Service.csproj", "KTSU0002", DisplayName = "KTSU0002 with a generated file first")]
+    public void Analyzer_Triggers_WhenGeneratedFileIsFirst(string folder, string project, string diagnostic)
+    {
+        using ExampleWorkspace workspace = ExampleWorkspace.Create(RepoLayout.Analyzer(folder));
+
+        CliResult result = workspace.Build(project);
+
+        CollectionAssert.Contains(
+            result.KtsuDiagnostics().ToList(),
+            diagnostic,
+            $"Expected {diagnostic} in the build output.{Environment.NewLine}{result.Output}");
+        Assert.IsFalse(result.Succeeded, $"Expected {diagnostic} to fail the build.{Environment.NewLine}{result.Output}");
     }
 
     /// <summary>
