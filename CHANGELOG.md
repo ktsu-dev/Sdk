@@ -1,3 +1,11 @@
+## v2.31.5 (patch)
+
+Changes since v2.31.4:
+
+- Bump the microsoft group with 1 update ([@dependabot[bot]](https://github.com/dependabot[bot]))
+- Drop ThrowIfNull's paramName label in the KTSU0003 fix [patch] (#114) ([@matt-edmondson](https://github.com/matt-edmondson))
+- Leave == null guards on a user-defined operator == to KTSU0004 [patch] (#115) ([@matt-edmondson](https://github.com/matt-edmondson))
+- Skip generated files when anchoring KTSU0001 and KTSU0002 [patch] (#116) ([@matt-edmondson](https://github.com/matt-edmondson))
 ## v2.31.5-pre.1 (prerelease)
 
 Changes since v2.31.4:
